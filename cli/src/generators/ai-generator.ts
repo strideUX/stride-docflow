@@ -258,7 +258,14 @@ async function generateWithOpenAI(
 		const eff = reasoningEffort || process.env.DOCFLOW_REASONING_EFFORT;
 		const verb = verbosity || process.env.DOCFLOW_VERBOSITY;
 		if (eff) requestParams.reasoning_effort = eff;
-		if (verb) requestParams.response_format = { type: 'text', verbosity: verb };
+		if (verb) {
+			requestParams.response_format = {
+				type: 'text',
+				text: {
+					verbosity: verb
+				}
+			};
+		}
 	}
 
 	// Debugging output for model params to help diagnose GPT-5 issues
