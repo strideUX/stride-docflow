@@ -10,7 +10,7 @@ export async function generateWithAI(
 	options: GenerationOptions & { reasoningEffort?: string; verbosity?: string }
 ): Promise<string> {
 	try {
-		// Extract DYNAMIC sections that need AI generation
+		// Extract DYNAMIC sections that need AI generation (comments and legacy placeholders)
 		const dynamicSections = extractDynamicSections(content);
 		if (dynamicSections.length === 0) {
 			return content;
@@ -20,66 +20,77 @@ export async function generateWithAI(
 
 		for (const section of dynamicSections) {
 			try {
+				p.log.info(`🧠 Generating AI content for: ${section.instruction.slice(0, 80)}...`);
 				const aiContent = await generateSectionWithAI(
 					section.instruction,
 					context,
 					filePath,
 					options,
-					section.inline,
 					options.reasoningEffort,
 					options.verbosity
 				);
-				// Replace the DYNAMIC comment with generated content
+				// Replace the DYNAMIC marker/placeholder with generated content
 				processedContent = processedContent.replace(
 					section.fullMatch,
 					aiContent
 				);
-			} catch (e) {
+			} catch (e: any) {
 				p.log.warn(`⚠️  AI section failed in ${filePath} for instruction: ${section.instruction?.slice(0, 60)}...`);
-				const fallback = formatLocalContent(section.instruction, context, filePath, section.inline);
-				processedContent = processedContent.replace(section.fullMatch, fallback);
+				p.log.warn(e?.message || String(e));
+				processedContent = processedContent.replace(
+					section.fullMatch,
+					formatLocalContent(section.instruction, context, filePath)
+				);
 			}
 		}
 
 		return processedContent;
 
-	} catch (error) {
-		p.log.warn(`AI generation failed for ${filePath}, generating local content`);
-		// Fallback: replace DYNAMIC sections with local content
-		const sections = extractDynamicSections(content);
-		let processed = content;
-		for (const s of sections) {
-			processed = processed.replace(
-				s.fullMatch,
-				formatLocalContent(s.instruction, context, filePath, s.inline)
-			);
+	} catch (error: any) {
+		p.log.warn(`AI generation failed for ${filePath}, falling back to local generation`);
+		try {
+			const sections = extractDynamicSections(content);
+			let processed = content;
+			for (const s of sections) {
+				processed = processed.replace(
+					s.fullMatch,
+					formatLocalContent(s.instruction, context, filePath)
+				);
+			}
+			return processed;
+		} catch (e: any) {
+			p.log.warn(`Local fallback also failed: ${e?.message || String(e)}`);
+			// Final safety: leave placeholders as-is
+			return content;
 		}
-		return processed;
 	}
 }
 
 interface DynamicSection {
 	fullMatch: string;
 	instruction: string;
-	inline: boolean;
 }
 
 function extractDynamicSections(content: string): DynamicSection[] {
 	const sections: DynamicSection[] = [];
-	const regex = /<!-- DYNAMIC: \[(.*?)\] -->/g;
-	let match: RegExpExecArray | null;
+	// Primary pattern: HTML DYNAMIC comment
+	const dynamicCommentRegex = /<!-- DYNAMIC: \[(.*?)\] -->/g;
+	let match;
 
-	while ((match = regex.exec(content)) !== null) {
-		const fullMatch = match[0];
-		const instruction = match[1] || '';
-		const matchIndex = match.index ?? 0;
-		// Determine if inline (the match is not the only content on its line)
-		const lineStart = content.lastIndexOf('\n', matchIndex - 1) + 1;
-		const lineEndIdx = content.indexOf('\n', regex.lastIndex);
-		const lineEnd = lineEndIdx === -1 ? content.length : lineEndIdx;
-		const line = content.slice(lineStart, lineEnd);
-		const isInline = line.trim() !== fullMatch.trim();
-		sections.push({ fullMatch, instruction, inline: isInline });
+	while ((match = dynamicCommentRegex.exec(content)) !== null) {
+		sections.push({
+			fullMatch: match[0],
+			instruction: match[1] || ''
+		});
+	}
+
+	// Legacy/fallback pattern: bracket placeholder e.g. [AI Content: ... - To be generated]
+	const bracketPlaceholderRegex = /\[AI Content:\s*(.*?)\s*-\s*To be generated\]/g;
+	while ((match = bracketPlaceholderRegex.exec(content)) !== null) {
+		sections.push({
+			fullMatch: match[0],
+			instruction: match[1] || ''
+		});
 	}
 
 	return sections;
@@ -90,23 +101,22 @@ async function generateSectionWithAI(
 	context: any,
 	filePath: string,
 	options: GenerationOptions,
-	inline: boolean,
 	reasoningEffort?: string,
 	verbosity?: string
 ): Promise<string> {
 	// Local provider returns deterministic content for testing and offline use
 	if (options.aiProvider === 'local') {
-		return formatLocalContent(instruction, context, filePath, inline);
+		return formatLocalContent(instruction, context, filePath);
 	}
 
-	// If required API keys are missing, transparently fallback to local
+	// Provider preflight checks for API keys
 	if (options.aiProvider === 'openai' && !process.env.OPENAI_API_KEY) {
-		p.log.warn('OPENAI_API_KEY not set, falling back to local content');
-		return formatLocalContent(instruction, context, filePath, inline);
+		p.log.warn('OPENAI_API_KEY is not set. Falling back to local content.');
+		return formatLocalContent(instruction, context, filePath);
 	}
 	if (options.aiProvider === 'anthropic' && !process.env.ANTHROPIC_API_KEY) {
-		p.log.warn('ANTHROPIC_API_KEY not set, falling back to local content');
-		return formatLocalContent(instruction, context, filePath, inline);
+		p.log.warn('ANTHROPIC_API_KEY is not set. Falling back to local content.');
+		return formatLocalContent(instruction, context, filePath);
 	}
 
 	const systemPrompt = `You are a technical documentation expert. Generate detailed, accurate, and current content for project documentation.
@@ -115,6 +125,9 @@ Context:
 - Project: ${context.projectName}
 - Description: ${context.description}
 - Technology Stack: ${context.technologies}
+- Stack: ${context.stack}
+- Stack Description: ${context.stackDescription}
+- Stack Features: ${Array.isArray(context.stackFeatures) ? context.stackFeatures.join(', ') : context.stackFeatures}
 - File: ${filePath}
 - Objectives: ${context.objectives}
 - Target Users: ${context.targetUsers}
@@ -124,15 +137,21 @@ ${context.design ? `- Design Vibe: ${context.design.vibe}` : ''}
 ${context.design ? `- Look & Feel: ${context.design.lookAndFeel}` : ''}
 ${context.design?.userFlows ? `- User Flows: ${context.design.userFlows}` : ''}
 ${context.design?.screens ? `- Screens: ${context.design.screens}` : ''}
+${Array.isArray(context.research) && context.research.length > 0 ? `- Research Inputs: ${context.research.length} items` : ''}
 
-Output style:
-${inline ? 'Respond with a single concise phrase suitable for inline insertion (no newlines, no punctuation at the end, <= 60 characters).' : 'Respond with a well-structured Markdown section, multiple paragraphs allowed.'}
+Generate content that is:
+1. Specific to the project and technology stack
+2. Current with latest best practices (${context.today})
+3. Detailed and actionable
+4. Properly formatted in Markdown
+5. Professional and comprehensive
 
 Do not include the instruction comment in your response.`;
 
 	const userPrompt = `Generate content for this section: ${instruction}
 
-If instruction seems vague, infer specifics consistent with the stack and objectives. Prefer React Native + Convex examples when relevant.`;
+If instruction seems vague, infer specifics consistent with the stack and objectives. Prefer React Native + Convex examples when relevant.
+`;
 
 	if (options.aiProvider === 'anthropic') {
 		return await generateWithAnthropic(systemPrompt, userPrompt, options.model);
@@ -141,14 +160,7 @@ If instruction seems vague, infer specifics consistent with the stack and object
 	}
 }
 
-function formatLocalContent(instruction: string, context: any, filePath: string, inline = false): string {
-	if (inline) {
-		// Simple heuristics for common inline instructions
-		const lower = instruction.toLowerCase();
-		if (lower.includes('project name')) return context.projectName;
-		if (lower.includes('stack') && lower.includes('reference')) return context.stack;
-		return `${context.projectName}`;
-	}
+function formatLocalContent(instruction: string, context: any, filePath: string): string {
 	const header = `<!-- Generated locally: ${new Date().toISOString()} -->`;
 	const summary = `Instruction: ${instruction}`;
 	const project = `Project: ${context.projectName} | Stack: ${context.technologies}`;

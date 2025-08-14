@@ -211,12 +211,14 @@ async function processTemplate(
 	const template = Handlebars.compile(content);
 	content = template(context);
 
+	// Count potential AI sections (comments and bracket placeholders)
+	const dynamicCommentCount = (content.match(/<!-- DYNAMIC: \[.*?\] -->/g) || []).length;
+	const dynamicBracketCount = (content.match(/\[AI Content:\s*.*?\s*-\s*To be generated\]/g) || []).length;
+	const totalDynamic = dynamicCommentCount + dynamicBracketCount;
+
 	// Process DYNAMIC sections with AI if they exist
-	if (content.includes('<!-- DYNAMIC:')) {
-		const count = (content.match(/<!-- DYNAMIC: \[.*?\] -->/g) || []).length;
-		if (count > 0) {
-			p.log.info(`🤖 Processing ${count} AI section(s) in ${templateFile.outputPath}`);
-		}
+	if (totalDynamic > 0) {
+		p.log.info(`🤖 Processing ${totalDynamic} AI section(s) in ${templateFile.outputPath}`);
 		content = await generateWithAI(content, context, templateFile.outputPath, options);
 	}
 
@@ -240,7 +242,9 @@ async function performDryRun(
 		
 		if (templateFile.isTemplate) {
 			const content = await fs.readFile(templateFile.templatePath, 'utf-8');
-			const dynamicSections = (content.match(/<!-- DYNAMIC: \[.*?\] -->/g) || []).length;
+			const dynamicComments = (content.match(/<!-- DYNAMIC: \[.*?\] -->/g) || []).length;
+			const dynamicBrackets = (content.match(/\[AI Content:\s*.*?\s*-\s*To be generated\]/g) || []).length;
+			const dynamicSections = dynamicComments + dynamicBrackets;
 			dynamicSectionsTotal += dynamicSections;
 			
 			p.log.info(`📄 ${chalk.gray(outputFile)} ${dynamicSections > 0 ? chalk.yellow(`(${dynamicSections} AI sections)`) : ''}`);
