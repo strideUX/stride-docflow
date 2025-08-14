@@ -29,14 +29,21 @@ class ProjectPrompts {
       s.start('🤖 Analyzing your project idea...');
       const parsedIdea = await parseIdeaWithAI(options.idea, options.aiProvider);
       s.stop('✨ Idea analyzed successfully');
-      data = { ...data, ...parsedIdea };
+      // Merge parsed idea data, filtering out undefined values
+      if (parsedIdea.name) data.name = parsedIdea.name;
+      if (parsedIdea.description) data.description = parsedIdea.description;
+      if (parsedIdea.objectives) data.objectives = parsedIdea.objectives;
+      if (parsedIdea.targetUsers) data.targetUsers = parsedIdea.targetUsers;
+      if (parsedIdea.features) data.features = parsedIdea.features;
+      if (parsedIdea.constraints) data.constraints = parsedIdea.constraints;
+      if (parsedIdea.suggestedStack) data.stack = parsedIdea.suggestedStack;
     }
 
     // Get available stacks
     const stacks = await getAvailableStacks();
     const stackOptions = stacks.map(s => ({
       label: `${s.name} - ${s.description}`,
-      value: s.name,
+      value: s.name as any,
       hint: s.technologies.join(', ')
     }));
 
@@ -47,6 +54,7 @@ class ProjectPrompts {
         placeholder: 'My Awesome Project',
         validate: (value) => {
           if (!value || value.length === 0) return 'Project name is required';
+          return undefined;
         }
       }),
       
@@ -55,6 +63,7 @@ class ProjectPrompts {
         placeholder: 'A platform that helps users...',
         validate: (value) => {
           if (!value || value.length < 10) return 'Description should be at least 10 characters';
+          return undefined;
         }
       }),
 
@@ -66,29 +75,29 @@ class ProjectPrompts {
       objectives: () => data.objectives?.length ? Promise.resolve(data.objectives) : p.text({
         message: 'What are your main objectives? (comma-separated)',
         placeholder: 'Increase user engagement, Reduce manual work, Improve efficiency',
-      }).then(text => text.split(',').map(s => s.trim()).filter(Boolean)),
+      }).then(text => typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
       targetUsers: () => data.targetUsers?.length ? Promise.resolve(data.targetUsers) : p.text({
         message: 'Who are your target users? (comma-separated)',
         placeholder: 'Small business owners, Project managers, Remote teams',
-      }).then(text => text.split(',').map(s => s.trim()).filter(Boolean)),
+      }).then(text => typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
       features: () => data.features?.length ? Promise.resolve(data.features) : p.text({
         message: 'What are the key features? (comma-separated)',
         placeholder: 'User authentication, Real-time collaboration, Dashboard',
-      }).then(text => text.split(',').map(s => s.trim()).filter(Boolean)),
+      }).then(text => typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
       constraints: () => data.constraints?.length ? Promise.resolve(data.constraints) : p.text({
         message: 'Any constraints or limitations? (optional)',
         placeholder: 'Mobile-first design, GDPR compliance, Budget under $50k',
-      }).then(text => text ? text.split(',').map(s => s.trim()).filter(Boolean) : []),
+      }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
       aiProvider: () => options.aiProvider ? Promise.resolve(options.aiProvider) : p.select({
         message: 'Which AI provider would you like to use?',
         options: [
-          { label: 'OpenAI (GPT-5-mini, GPT-4o)', value: 'openai', hint: 'Recommended - includes latest models' },
-          { label: 'Anthropic (Claude)', value: 'anthropic', hint: 'Great for technical content' },
-          { label: 'Local/Custom', value: 'local', hint: 'Use your own AI setup' }
+          { label: 'OpenAI (GPT-5-mini, GPT-4o)', value: 'openai' as any, hint: 'Recommended - includes latest models' },
+          { label: 'Anthropic (Claude)', value: 'anthropic' as any, hint: 'Great for technical content' },
+          { label: 'Local/Custom', value: 'local' as any, hint: 'Use your own AI setup' }
         ],
       }),
     }, {

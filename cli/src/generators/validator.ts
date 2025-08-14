@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { glob } from 'fast-glob';
+import glob from 'fast-glob';
 import * as p from '@clack/prompts';
 
 export interface ValidationResult {
@@ -59,7 +59,8 @@ export async function validateProject(projectPath: string): Promise<ValidationRe
 
   } catch (error) {
     s.stop('❌ Validation failed');
-    issues.push(`Validation error: ${error.message}`);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    issues.push(`Validation error: ${message}`);
     return { isValid: false, issues, suggestions };
   }
 }
@@ -93,7 +94,7 @@ async function validateIndexFile(filePath: string, issues: string[], suggestions
 
   // Check for outdated timestamps
   const timestampMatch = content.match(/Last updated: ([\d-]+)/);
-  if (timestampMatch) {
+  if (timestampMatch && timestampMatch[1]) {
     const lastUpdate = new Date(timestampMatch[1]);
     const daysSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
     if (daysSinceUpdate > 7) {
@@ -155,6 +156,7 @@ async function validateLinks(projectPath: string, issues: string[], suggestions:
     
     while ((match = linkRegex.exec(content)) !== null) {
       const linkPath = match[2];
+      if (!linkPath) continue;
       
       // Skip external links
       if (linkPath.startsWith('http')) continue;

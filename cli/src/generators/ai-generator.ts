@@ -60,7 +60,7 @@ function extractDynamicSections(content: string): DynamicSection[] {
   while ((match = regex.exec(content)) !== null) {
     sections.push({
       fullMatch: match[0],
-      instruction: match[1]
+      instruction: match[1] || ''
     });
   }
 
@@ -117,49 +117,27 @@ async function generateWithOpenAI(
   verbosity?: string
 ): Promise<string> {
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY!
   });
 
-  const selectedModel = model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-5-mini';
+  const selectedModel = model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o';
 
-  // GPT-5 models work best with Responses API
-  const isGPT5Model = selectedModel.startsWith('gpt-5');
+  // For now, use Chat Completions API for all models until GPT-5 is released
   const isO1Model = selectedModel.startsWith('o1-');
   
-  if (isGPT5Model) {
-    // Use Responses API for GPT-5 models with optimized parameters
-    const finalReasoningEffort = reasoningEffort || process.env.DOCFLOW_REASONING_EFFORT || 'minimal';
-    const finalVerbosity = verbosity || process.env.DOCFLOW_VERBOSITY || 'medium';
-    
-    const response = await openai.responses.create({
-      model: selectedModel,
-      input: `${systemPrompt}\n\n${userPrompt}`,
-      reasoning: {
-        effort: finalReasoningEffort as 'minimal' | 'low' | 'medium' | 'high'
-      },
-      text: {
-        verbosity: finalVerbosity as 'low' | 'medium' | 'high'
-      },
-      max_tokens: 2000
-    });
-    
-    return response.text || '[Content generation failed]';
-  } else {
-    // Fallback to Chat Completions for older models
-    const response = await openai.chat.completions.create({
-      model: selectedModel,
-      messages: isO1Model 
-        ? [{ role: 'user', content: `${systemPrompt}\n\n${userPrompt}` }]
-        : [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-      ...(isO1Model ? {} : { temperature: 0.3 }),
-      max_tokens: 2000
-    });
+  const response = await openai.chat.completions.create({
+    model: selectedModel,
+    messages: isO1Model 
+      ? [{ role: 'user', content: `${systemPrompt}\n\n${userPrompt}` }]
+      : [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+    ...(isO1Model ? {} : { temperature: 0.3 }),
+    max_tokens: 2000
+  });
 
-    return response.choices[0]?.message?.content || '[Content generation failed]';
-  }
+  return response.choices[0]?.message?.content || '[Content generation failed]';
 }
 
 async function generateWithAnthropic(
@@ -168,7 +146,7 @@ async function generateWithAnthropic(
   model?: string
 ): Promise<string> {
   const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY
+    apiKey: process.env.ANTHROPIC_API_KEY!
   });
 
   const response = await anthropic.messages.create({
@@ -181,6 +159,7 @@ async function generateWithAnthropic(
   });
 
   const content = response.content[0];
+  if (!content) return '[Content generation failed]';
   return content.type === 'text' ? content.text : '[Content generation failed]';
 }
 

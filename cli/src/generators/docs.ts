@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import Handlebars from 'handlebars';
-import { glob } from 'fast-glob';
+import glob from 'fast-glob';
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { ProjectData } from '../prompts/project.js';
@@ -61,6 +61,8 @@ export async function generateDocs(
     
     for (let i = 0; i < templateFiles.length; i++) {
       const templateFile = templateFiles[i];
+      if (!templateFile) continue;
+      
       const fileName = path.basename(templateFile.outputPath);
       
       s.start(`📄 Generating ${fileName} (${i + 1}/${templateFiles.length})`);

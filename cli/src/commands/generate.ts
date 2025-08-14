@@ -52,7 +52,8 @@ export const generateCommand = new Command('generate')
       );
 
     } catch (error) {
-      styledPrompts.error(`Generation failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      styledPrompts.error(`Generation failed: ${message}`);
       p.cancel('Process terminated');
       process.exit(1);
     }

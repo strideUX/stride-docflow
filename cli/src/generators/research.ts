@@ -32,14 +32,15 @@ export async function webSearch(query: string): Promise<ResearchResult> {
           title: `Current best practices for ${query}`,
           url: `https://docs.example.com/${query.replace(/\s+/g, '-')}`,
           snippet: `Latest patterns and recommendations for ${query}`,
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0]!
         }
       ],
       summary: `Research completed for ${query}. Found current best practices and patterns.`
     };
     
   } catch (error) {
-    console.warn(`Research failed for "${query}":`, error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.warn(`Research failed for "${query}":`, message);
     return {
       query,
       sources: [],

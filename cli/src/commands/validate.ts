@@ -31,7 +31,8 @@ export const validateCommand = new Command('validate')
       }
       
     } catch (error) {
-      p.log.error(chalk.red('Validation failed: ' + error.message));
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      p.log.error(chalk.red('Validation failed: ' + message));
       p.cancel('Process terminated');
       process.exit(1);
     }

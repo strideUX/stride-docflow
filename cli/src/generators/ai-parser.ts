@@ -38,7 +38,7 @@ Return JSON only, no other text.`;
 
     if (provider === 'anthropic') {
       const anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY
+        apiKey: process.env.ANTHROPIC_API_KEY!
       });
 
       const result = await anthropic.messages.create({
@@ -47,40 +47,23 @@ Return JSON only, no other text.`;
         messages: [{ role: 'user', content: prompt }]
       });
 
-      response = result.content[0].type === 'text' ? result.content[0].text : '';
+      const content = result.content[0];
+      response = content && content.type === 'text' ? content.text : '';
     } else {
       const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
+        apiKey: process.env.OPENAI_API_KEY!
       });
 
-      const model = process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-5-mini';
-      const isGPT5Model = model.startsWith('gpt-5');
+      const model = process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o';
       const isO1Model = model.startsWith('o1-');
 
-      if (isGPT5Model) {
-        // Use Responses API for GPT-5 models
-        const result = await openai.responses.create({
-          model,
-          input: prompt,
-          reasoning: {
-            effort: 'minimal'  // Fast parsing of project ideas
-          },
-          text: {
-            verbosity: 'low'   // Concise JSON output
-          }
-        });
-        
-        response = result.text || '';
-      } else {
-        // Fallback to Chat Completions for older models
-        const result = await openai.chat.completions.create({
-          model,
-          messages: [{ role: 'user', content: prompt }],
-          ...(isO1Model ? {} : { temperature: 0.3 })
-        });
+      const result = await openai.chat.completions.create({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        ...(isO1Model ? {} : { temperature: 0.3 })
+      });
 
-        response = result.choices[0]?.message?.content || '';
-      }
+      response = result.choices[0]?.message?.content || '';
     }
 
     // Extract JSON from response
@@ -104,7 +87,7 @@ function parseIdeaHeuristic(idea: string): ParsedProject {
   const result: ParsedProject = {};
 
   // Try to extract project name from first line
-  if (lines.length > 0) {
+  if (lines.length > 0 && lines[0]) {
     result.name = lines[0].replace(/^#+\s*/, '').trim();
   }
 
@@ -121,7 +104,7 @@ function parseIdeaHeuristic(idea: string): ParsedProject {
 
   // Extract description from first paragraph
   const paragraphs = idea.split('\n\n').map(p => p.trim()).filter(Boolean);
-  if (paragraphs.length > 1) {
+  if (paragraphs.length > 1 && paragraphs[1]) {
     result.description = paragraphs[1].replace(/\n/g, ' ').trim();
   }
 
