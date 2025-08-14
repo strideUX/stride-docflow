@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config';
 import { Command } from 'commander';
 import { outro } from '@clack/prompts';
 import chalk from 'chalk';
