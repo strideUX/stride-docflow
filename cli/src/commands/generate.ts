@@ -50,14 +50,13 @@ export const generateCommand = new Command('generate')
         verbosity: options.verbosity,
       });
 
-      styledPrompts.outro(`${symbols.success} Project documentation generated successfully!`);
-      
-      styledPrompts.note(
-        `📁 Output: ${chalk.cyan(result.outputPath)}
-🎯 Start here: ${chalk.yellow(result.outputPath + '/docs/releases/current/index.md')}
-📊 Files created: ${result.filesGenerated.length}`,
-        `${symbols.neon} Generation Complete`
-      );
+      console.log(`\n🎉 ${chalk.green('Project Generated Successfully!')}`);
+      console.log(`📁 Location: ${chalk.cyan(result.outputPath)}`);
+      console.log(`📋 Primary Reference: ${chalk.yellow('docs/releases/current/index.md')}`);
+      console.log(`📊 ${result.filesGenerated.length} documentation files created`);
+      if (result.warnings && result.warnings.length > 0) {
+        console.log(`⚠️  ${result.warnings.length} warnings - check logs above`);
+      }
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

@@ -18,9 +18,17 @@ export async function generateWithAI(
 
 		let processedContent = content;
 
-		for (const section of dynamicSections) {
+		const updateAIProgress = (sectionIndex: number, total: number, instruction: string) => {
+			const percentage = Math.round((sectionIndex / total) * 100);
+			const truncated = instruction.slice(0, 60) + (instruction.length > 60 ? '...' : '');
+			process.stdout.write('\r\x1b[K');
+			process.stdout.write(`🧠 AI Generation: ${percentage}% (${sectionIndex}/${total}) | ${truncated}`);
+		};
+
+		for (let i = 0; i < dynamicSections.length; i++) {
+			const section = dynamicSections[i]!;
 			try {
-				p.log.info(`🧠 Generating AI content for: ${section.instruction.slice(0, 80)}...`);
+				updateAIProgress(i + 1, dynamicSections.length, section.instruction);
 				const aiContent = await generateSectionWithAI(
 					section.instruction,
 					context,
@@ -35,14 +43,17 @@ export async function generateWithAI(
 					aiContent
 				);
 			} catch (e: any) {
-				p.log.warn(`⚠️  AI section failed in ${filePath} for instruction: ${section.instruction?.slice(0, 60)}...`);
-				p.log.warn(e?.message || String(e));
+				process.stdout.write('\r\x1b[K');
+				console.log(`⚠️  AI section failed in ${filePath}: ${e?.message || String(e)}`);
 				processedContent = processedContent.replace(
 					section.fullMatch,
 					formatLocalContent(section.instruction, context, filePath)
 				);
 			}
 		}
+
+		// Clear AI progress line
+		process.stdout.write('\r\x1b[K');
 
 		return processedContent;
 

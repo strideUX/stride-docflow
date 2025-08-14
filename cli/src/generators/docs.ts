@@ -25,6 +25,7 @@ export interface GenerationResult {
 	outputPath: string;
 	filesGenerated: string[];
 	researchResults?: any[];
+	warnings?: string[];
 }
 
 export async function generateDocs(
@@ -60,27 +61,70 @@ export async function generateDocs(
 			return performDryRun(templateFiles, context, options.output);
 		}
 
-		// Generate files with progress tracking
+		// Generate files with compact progress display
 		const filesGenerated: string[] = [];
-		
+		const warnings: string[] = [];
+		let successCount = 0;
+		let warningCount = 0;
+		let errorCount = 0;
+
+		console.log(`\n📝 ${chalk.cyan('Generating Documentation')} (${templateFiles.length} files)`);
+
+		const updateProgress = (current: number, total: number, fileName: string, status: string = '') => {
+			const percentage = Math.round((current / total) * 100);
+			const filled = Math.floor(percentage / 10);
+			const progressBar = '█'.repeat(filled) + '░'.repeat(10 - filled);
+			const statusText = status ? ` | ${status}` : '';
+			process.stdout.write('\r\x1b[K');
+			process.stdout.write(`Progress: ${chalk.cyan(progressBar)} ${percentage}% (${current}/${total}) | Current: ${chalk.yellow(fileName)}${statusText}`);
+		};
+
 		for (let i = 0; i < templateFiles.length; i++) {
 			const templateFile = templateFiles[i];
 			if (!templateFile) continue;
-			
+
 			const fileName = path.basename(templateFile.outputPath);
-			
-			s.start(`📄 Generating ${fileName} (${i + 1}/${templateFiles.length})`);
-			
-			const generatedFile = await processTemplate(templateFile, context, options);
-			filesGenerated.push(generatedFile);
-			
-			s.stop(`✅ Generated ${fileName}`);
+			updateProgress(i, templateFiles.length, fileName, 'Processing...');
+
+			try {
+				const generatedFile = await processTemplate(templateFile, context, options);
+				filesGenerated.push(generatedFile);
+				successCount++;
+
+				// Soft warning: content indicates local fallback used while provider wasn't local
+				try {
+					if (options.aiProvider !== 'local') {
+						const content = await fs.readFile(generatedFile, 'utf-8');
+						if (content.includes('<!-- Generated locally:')) {
+							warningCount++;
+							warnings.push(generatedFile);
+						}
+					}
+				} catch {}
+
+				updateProgress(i + 1, templateFiles.length, fileName, '✅');
+			} catch (error) {
+				errorCount++;
+				updateProgress(i + 1, templateFiles.length, fileName, '❌ Error');
+				console.log(`\n⚠️  Failed to generate ${fileName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			}
+
+			// Small delay to make progress visible
+			await new Promise(resolve => setTimeout(resolve, 60));
 		}
+
+		// Clear progress line and show summary
+		process.stdout.write('\r\x1b[K');
+		console.log(`\n✨ ${chalk.green('Documentation Complete!')}`);
+		console.log(`📊 ${chalk.green(successCount)} files generated successfully`);
+		if (warningCount > 0) console.log(`⚠️  ${chalk.yellow(warningCount)} files had warnings`);
+		if (errorCount > 0) console.log(`❌ ${chalk.red(errorCount)} files failed`);
 
 		return {
 			outputPath: options.output,
 			filesGenerated,
-			researchResults
+			researchResults,
+			warnings,
 		};
 
 	} catch (error) {
