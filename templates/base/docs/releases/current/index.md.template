@@ -12,8 +12,14 @@
 <!-- STATIC -->
 ### Features <!-- DYNAMIC: [X/Y complete] -->
 <!-- DYNAMIC: [List of features with checkboxes and current status - populated during generation] -->
-- [ ] Feature 1 - [Name] (Status)
-- [ ] Feature 2 - [Name] (Status)
+- [x] Project documentation and structure - Complete
+- [ ] **Convex Backend Setup** - Ready (Priority: High)
+  - Run: `cd <!-- DYNAMIC: [project slug or directory name] --> && npx convex dev --once`
+  - Configure authentication providers
+  - Set up database schema
+  - Configure environment variables
+  - Verify development server
+<!-- DYNAMIC: [Other project features added during generation] -->
 
 <!-- STATIC -->
 ### Enhancements <!-- DYNAMIC: [X/Y complete] -->

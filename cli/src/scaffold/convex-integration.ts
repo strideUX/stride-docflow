@@ -10,52 +10,20 @@ export interface ConvexSetupOptions {
 export class ConvexIntegration extends BaseScaffold {
 	async run(options: ScaffoldOptions): Promise<ScaffoldResult> {
 		const projectPath = path.resolve(options.destination, options.projectName);
-		try {
-			await this.setup({ projectPath });
-			return this.ok(projectPath);
-		} catch (error) {
-			this.fail('Convex integration failed');
-			return this.err(projectPath, error);
-		}
+        // Decoupled: Do not run Convex setup during project creation.
+        // Only ensure minimal structure so docs/tasks can reference it.
+        try {
+            await this.ensureConvexStructure(projectPath);
+            return this.ok(projectPath);
+        } catch (error) {
+            this.fail('Convex minimal structure setup failed');
+            return this.err(projectPath, error);
+        }
 	}
 
-	async setup(options: ConvexSetupOptions): Promise<void> {
-		this.start('Adding Convex dependencies');
-		try {
-			await execa('npm', ['install', 'convex', 'react', 'react-native'], { 
-				cwd: options.projectPath, 
-				stdio: 'pipe',
-				timeout: 120000 // 2 minutes
-			});
-			this.succeed('Convex dependencies installed');
-		} catch (error) {
-			this.fail('Failed to install Convex dependencies');
-			throw error;
-		}
-
-		console.log('\n🔄 Initializing Convex - this may require your input...');
-		console.log('   Please respond to any Convex setup prompts that appear below:\n');
-		
-		this.start('Setting up Convex project');
-		try {
-			await execa('npx', ['--yes', 'convex', 'dev', '--once'], { 
-				cwd: options.projectPath, 
-				stdio: 'inherit',
-				timeout: 180000 // 3 minutes
-			});
-			this.succeed('Convex initialized');
-		} catch (error) {
-			this.fail('Convex initialization failed or timed out');
-			console.log('\n⚠️  Convex setup incomplete. You can finish setup later with:');
-			console.log(`   cd ${options.projectPath}`);
-			console.log('   npx convex dev --once\n');
-			// Don't throw - continue with project creation
-		}
-
-		this.start('Configuring Convex schema');
-		await this.ensureConvexStructure(options.projectPath);
-		this.succeed('Convex configured');
-	}
+    async setup(_options: ConvexSetupOptions): Promise<void> {
+        // Deprecated in favor of post-generation task. Intentionally no-op.
+    }
 
 	private async ensureConvexStructure(projectPath: string): Promise<void> {
 		const convexDir = path.join(projectPath, 'convex');

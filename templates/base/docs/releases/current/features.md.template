@@ -42,6 +42,38 @@ This document contains detailed specifications for all features in the current r
 
 <!-- DYNAMIC: [Individual feature definitions - populated during generation based on project scope] -->
 
+---
+
+## Feature: Convex Backend Setup
+**Status:** Ready
+**Complexity:** S
+**Priority:** High
+**Dependencies:** None
+
+### Description
+Set up Convex real-time backend with authentication and database schema.
+
+### Acceptance Criteria
+- [ ] Convex project initialized successfully
+- [ ] Authentication providers configured
+- [ ] Database schema defined and deployed
+- [ ] Environment variables configured
+- [ ] Development server running
+
+### Implementation Steps
+1. Navigate to project directory: `cd <!-- DYNAMIC: [project slug or directory name] -->`
+2. Initialize Convex: `npx convex dev --once`
+3. Configure authentication providers (Convex Auth)
+4. Define schema in `convex/schema.ts` and deploy
+5. Start development server: `npx convex dev`
+
+### Commands
+```bash
+cd <!-- DYNAMIC: [project slug or directory name] -->
+npx convex dev --once
+npx convex dev
+```
+
 <!-- STATIC -->
 ## Feature N: [Example Feature Name]
 **Status:** Planning

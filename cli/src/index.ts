@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Load .env file from CLI package directory, not user's working directory
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 import { Command } from 'commander';
 import { outro } from '@clack/prompts';
 import chalk from 'chalk';

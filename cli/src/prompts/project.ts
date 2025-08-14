@@ -58,8 +58,6 @@ class ProjectPrompts {
         const parsedIdea = await parseIdeaWithAI(options.idea, options.aiProvider);
         s.stop('✨ Idea analyzed successfully');
         
-        // Debug: log what was parsed
-        console.log('DEBUG - Parsed idea:', JSON.stringify(parsedIdea, null, 2));
         
         // Merge parsed idea data, filtering out undefined values
         // Special handling: if AI put description in "name" field, use it as description

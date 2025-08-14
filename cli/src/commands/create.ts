@@ -7,7 +7,6 @@ import chalk from 'chalk';
 import { styledPrompts, symbols } from '../ui/styled-prompts.js';
 import { projectPrompts } from '../prompts/project.js';
 import { ReactNativeExpoScaffold } from '../scaffold/react-native-expo.js';
-import { ConvexIntegration } from '../scaffold/convex-integration.js';
 import { DocInjector } from '../scaffold/injector.js';
 import { generateDocs } from '../generators/docs.js';
 import { userConfig } from '../config/user-config.js';
@@ -46,9 +45,7 @@ export const createCommand = new Command('create')
       const result = await expo.run({ projectName: projectDirName, destination: outputDir });
       projectPath = result.projectPath;
 
-      // Convex setup
-      const convex = new ConvexIntegration();
-      await convex.setup({ projectPath });
+      // Convex setup moved to post-generation task (non-blocking)
 
       // Generate docs to a temp folder
       const tempDocs = await fs.mkdtemp(path.join(os.tmpdir(), 'docflow-docs-'));
@@ -68,7 +65,7 @@ export const createCommand = new Command('create')
 
       styledPrompts.outro(`${symbols.success} Project created at ${chalk.green(projectPath)}`);
       styledPrompts.note(
-        `Next steps:\n- cd ${projectPath}\n- npm start\n- Open docs in ${chalk.yellow(path.join(projectPath, 'docs'))}`,
+        `Next steps:\n- cd ${projectPath}\n- Open docs in ${chalk.yellow(path.join(projectPath, 'docs'))}\n- Complete Convex setup: npx convex dev --once\n- Start development: npm start`,
         'Ready to develop'
       );
     } catch (error) {

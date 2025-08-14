@@ -79,10 +79,11 @@ class ClipboardImageManager {
         // File path - copy the file
         const trimmedPath = clipboardContent.trim();
         
-        // Expand ~ to home directory if needed
-        const expandedPath = trimmedPath.startsWith('~') 
-          ? path.join(os.homedir(), trimmedPath.slice(1))
-          : trimmedPath;
+        // Clean up escaped characters and expand ~ to home directory if needed
+        const cleanPath = trimmedPath.replace(/\\ /g, ' ').replace(/\\\(/g, '(').replace(/\\\)/g, ')');
+        const expandedPath = cleanPath.startsWith('~') 
+          ? path.join(os.homedir(), cleanPath.slice(1))
+          : cleanPath;
           
         if (await fs.pathExists(expandedPath)) {
           imageBuffer = await fs.readFile(expandedPath);
