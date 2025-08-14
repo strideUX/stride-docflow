@@ -111,7 +111,11 @@ async function validateSpecsFile(filePath: string, issues: string[], suggestions
   const content = await fs.readFile(filePath, 'utf-8');
   
   // Check for placeholder content
-  if (content.includes('[Content to be filled]') || content.includes('<!-- DYNAMIC:')) {
+  if (
+    content.includes('[Content to be filled]') ||
+    content.includes('<!-- DYNAMIC:') ||
+    content.match(/\[AI Content:\s*.*?\s*-\s*To be generated\]/)
+  ) {
     issues.push('specs.md contains unfilled template content');
   }
 

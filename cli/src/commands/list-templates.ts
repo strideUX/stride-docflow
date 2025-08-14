@@ -1,27 +1,34 @@
 import { Command } from 'commander';
-import * as p from '@clack/prompts';
+import path from 'path';
+import glob from 'fast-glob';
+import fs from 'fs-extra';
 import chalk from 'chalk';
-import { getAvailableStacks } from '../templates/stack-registry.js';
 
-export const listTemplatesCommand = new Command('list')
-  .description('List available technology stacks and templates')
+export const listTemplatesCommand = new Command('list-templates')
+  .description('List available documentation templates and stacks')
   .action(async () => {
-    p.intro('📚 Available Technology Stacks');
-    
-    const stacks = await getAvailableStacks();
-    
+    const templatesRoot = path.resolve(process.cwd(), 'templates');
+    const stacks = await fs.readdir(path.join(templatesRoot, 'stacks'));
+
+    console.log('\nAvailable stacks and templates:\n');
+
     for (const stack of stacks) {
-      p.note(
-        `${chalk.gray('Description:')} ${stack.description}
-${chalk.gray('Technologies:')} ${chalk.cyan(stack.technologies.join(', '))}
-${chalk.gray('Use case:')} ${stack.useCase}
-${chalk.gray('Features:')} ${Object.entries(stack.features)
-  .filter(([_, value]) => value === true || (Array.isArray(value) && value.length > 0))
-  .map(([key, value]) => Array.isArray(value) ? `${key} (${value.join(', ')})` : key)
-  .join(', ')}`,
-        chalk.cyan.bold(stack.name)
-      );
+      const stackPath = path.join(templatesRoot, 'stacks', stack);
+      const files = await glob('**/*', { cwd: stackPath, onlyFiles: true, dot: true });
+
+      console.log(chalk.cyan(`- ${stack}`));
+      for (const file of files) {
+        const full = path.join(stackPath, file);
+        const isTemplate = file.endsWith('.template');
+        const display = file.replace('.template', '');
+        let dyn = '';
+        if (isTemplate) {
+          const content = await fs.readFile(full, 'utf-8');
+          const count = (content.match(/<!-- DYNAMIC: \[.*?\] -->/g) || []).length;
+          if (count > 0) dyn = chalk.yellow(` (${count} AI sections)`);
+        }
+        console.log(`  · ${display}${dyn}`);
+      }
+      console.log();
     }
-    
-    p.outro(chalk.yellow('💡 Use with: docflow generate --stack <name>'));
   });

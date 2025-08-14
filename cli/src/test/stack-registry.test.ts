@@ -1,52 +1,41 @@
 import { describe, it, expect } from 'vitest';
-import { getAvailableStacks, getStackByName } from '../templates/stack-registry.js';
+import fs from 'fs-extra';
+import path from 'path';
+import os from 'os';
+import { generateDocs } from '../generators/docs.js';
 
-describe('Stack Registry', () => {
-  it('should return available stacks', async () => {
-    const stacks = await getAvailableStacks();
-    
-    expect(stacks).toHaveLength(3);
-    expect(stacks.map(s => s.name)).toEqual([
-      'nextjs-convex',
-      'nextjs-supabase', 
-      'react-native-convex'
-    ]);
-  });
+const sampleProject = {
+	name: 'Counter App',
+	projectSlug: 'counter-app',
+	description: 'A simple counter app that demonstrates React Native + Convex.',
+	stack: 'react-native-convex',
+	objectives: ['Increment/decrement counters', 'Persist state with Convex'],
+	targetUsers: ['Mobile users'],
+	features: ['Counter screen', 'Real-time sync'],
+	constraints: ['Mobile-first'],
+	designInput: { vibe: 'Playful' },
+	aiProvider: 'local',
+	model: undefined,
+} as any;
 
-  it('should return stack by name', async () => {
-    const stack = await getStackByName('nextjs-convex');
-    
-    expect(stack).toBeDefined();
-    expect(stack?.name).toBe('nextjs-convex');
-    expect(stack?.technologies).toContain('Next.js 15');
-    expect(stack?.technologies).toContain('Convex');
-  });
+describe('Doc generation (local provider)', () => {
+	it('replaces all DYNAMIC placeholders with content', async () => {
+		const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'docflow-test-'));
+		const res = await generateDocs(sampleProject, {
+			output: outDir,
+			aiProvider: 'local',
+			model: undefined,
+			research: false,
+			dryRun: false,
+		});
 
-  it('should return null for unknown stack', async () => {
-    const stack = await getStackByName('unknown-stack');
-    
-    expect(stack).toBeNull();
-  });
-
-  it('should have required properties for each stack', async () => {
-    const stacks = await getAvailableStacks();
-    
-    for (const stack of stacks) {
-      expect(stack.name).toBeDefined();
-      expect(stack.description).toBeDefined();
-      expect(stack.technologies).toBeInstanceOf(Array);
-      expect(stack.technologies.length).toBeGreaterThan(0);
-      expect(stack.templatePath).toBeDefined();
-      expect(stack.researchQueries).toBeInstanceOf(Array);
-      expect(stack.features).toBeDefined();
-    }
-  });
-
-  it('should have unique stack names', async () => {
-    const stacks = await getAvailableStacks();
-    const names = stacks.map(s => s.name);
-    const uniqueNames = [...new Set(names)];
-    
-    expect(names).toHaveLength(uniqueNames.length);
-  });
+		// Read all generated files
+		for (const file of res.filesGenerated) {
+			const content = await fs.readFile(file, 'utf-8');
+			// No DYNAMIC markers should remain
+			expect(content).not.toMatch(/<!-- DYNAMIC: \[.*?\] -->/);
+			// No original placeholder string should remain
+			expect(content).not.toContain('[AI Content:');
+		}
+	});
 });

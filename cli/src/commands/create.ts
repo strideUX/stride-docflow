@@ -21,6 +21,8 @@ export const createCommand = new Command('create')
   .option('--ai-provider <provider>', 'AI provider (openai, anthropic, local)', 'openai')
   .option('--model <model>', 'AI model to use')
   .option('--no-research', 'Disable MCP/web research')
+  .option('--reasoning-effort <effort>', 'GPT-5 reasoning effort (minimal, low, medium, high)', 'minimal')
+  .option('--verbosity <level>', 'GPT-5 output verbosity (low, medium, high)', 'medium')
   .action(async (options) => {
     try {
       styledPrompts.intro(`${symbols.rocket} Creating project with ${chalk.cyan(options.stack)}`);
@@ -55,7 +57,9 @@ export const createCommand = new Command('create')
         aiProvider: options.aiProvider,
         model: options.model,
         research: options.research !== false,
-        dryRun: false
+        dryRun: false,
+        reasoningEffort: options.reasoningEffort,
+        verbosity: options.verbosity,
       });
 
       // Inject docs
