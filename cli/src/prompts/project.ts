@@ -196,10 +196,21 @@ class ProjectPrompts {
         placeholder: 'Home, Profile, Settings, Dashboard, Chat, Search...',
       }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
-      wireframes: () => clipboardImageManager.promptWithImageSupport({
-        message: 'Any wireframes, mockups, or design files? (optional)',
-        placeholder: 'Describe your designs or paste screenshots with Ctrl+V...',
-      }),
+      wireframes: async () => {
+        const result = await clipboardImageManager.promptWithImageSupport({
+          message: 'Any wireframes, mockups, or design files? (optional)',
+          placeholder: 'Describe your design vision, or paste/provide image file paths...'
+        });
+
+        if (result.images.length > 0) {
+          // Show a small summary note for user feedback
+          console.log(`\n📸 Added ${result.images.length} image${result.images.length > 1 ? 's' : ''}`);
+          console.log(result.images.map((img, i) => `   ${i + 1}. ${img.placeholder}`).join('\n'));
+          console.log();
+        }
+
+        return result;
+      },
 
       inspirations: () => p.text({
         message: 'Apps or sites that inspire you? (optional)',

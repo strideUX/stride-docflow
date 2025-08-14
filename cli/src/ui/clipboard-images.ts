@@ -138,35 +138,56 @@ class ClipboardImageManager {
     validate?: (value: string) => string | void;
   }): Promise<{ text: string; images: PastedImage[] }> {
     const images: PastedImage[] = [];
-    
-    // Custom prompt that handles Ctrl+V for images
+
+    // Enhanced multi-image flow
     p.log.info(`${promptConfig.message}`);
-    p.log.info(`${chalk.gray('Tip: Paste images with')} ${chalk.cyan('Ctrl+V')} ${chalk.gray('(screenshots will be saved and analyzed)')}`);
-    
-    // For now, we'll use a simpler approach - detect if clipboard has image
-    const clipboardType = await this.detectClipboardContent();
-    
-    if (clipboardType === 'image') {
-      const shouldUseImage = await p.confirm({
-        message: 'Detected image in clipboard. Would you like to include it?',
-        initialValue: true
-      });
-      
-      if (shouldUseImage && !p.isCancel(shouldUseImage)) {
-        const pastedImage = await this.handlePastedImage();
-        if (pastedImage) {
-          images.push(pastedImage);
-          p.log.success(`Added ${pastedImage.placeholder}`);
+    p.log.info(`${chalk.gray('Tip: Paste images with')} ${chalk.cyan('Ctrl+V')} ${chalk.gray('or provide file paths. You can add multiple images!')}`);
+
+    let addingImages = true;
+
+    while (addingImages) {
+      // Check for image in clipboard
+      const clipboardType = await this.detectClipboardContent();
+
+      if (clipboardType === 'image') {
+        const shouldUseImage = await p.confirm({
+          message: `Detected image in clipboard. Include it? ${images.length > 0 ? `(${images.length} images added so far)` : ''}`,
+          initialValue: true
+        });
+
+        if (shouldUseImage && !p.isCancel(shouldUseImage)) {
+          const pastedImage = await this.handlePastedImage();
+          if (pastedImage) {
+            images.push(pastedImage);
+            p.log.success(`Added ${pastedImage.placeholder}`);
+          }
         }
+      }
+
+      // Ask if they want to add more images
+      const addMore = await p.confirm({
+        message: images.length > 0
+          ? `Add another image? (${images.length} images added)`
+          : 'Do you have images to add? (screenshots, wireframes, mockups, etc.)',
+        initialValue: images.length === 0 // Default to true if no images yet
+      });
+
+      if (p.isCancel(addMore) || !addMore) {
+        addingImages = false;
+      } else if (images.length === 0) {
+        // If they want to add images but clipboard is empty, prompt for file paths via next text prompt
+        p.log.info(`${chalk.gray('Copy an image to clipboard or provide a file path in the next prompt')}`);
       }
     }
 
-    // Get text input
+    // Get text input with context about added images
     const textOptions: any = {
-      message: images.length > 0 ? 'Additional description (optional):' : promptConfig.message,
+      message: images.length > 0
+        ? `Additional description (${images.length} images added):`
+        : promptConfig.message,
       placeholder: promptConfig.placeholder || ''
     };
-    
+
     if (promptConfig.validate) {
       textOptions.validate = promptConfig.validate;
     }
@@ -178,35 +199,40 @@ class ClipboardImageManager {
       process.exit(0);
     }
 
-    // Check if the text input contains image file paths
-    if (textResponse && this.isImageFilePath(textResponse)) {
-      const shouldUseAsImage = await p.confirm({
-        message: `Detected image file path. Would you like to include "${path.basename(textResponse)}" as an image?`,
-        initialValue: true
-      });
-      
-      if (shouldUseAsImage && !p.isCancel(shouldUseAsImage)) {
-        // Temporarily put the path in clipboard to process it
-        const originalClipboard = await clipboardy.read();
-        await clipboardy.write(textResponse);
-        
-        const pastedImage = await this.handlePastedImage();
-        if (pastedImage) {
-          images.push(pastedImage);
-          console.log(`✅ Added ${pastedImage.placeholder}`);
-          
-          // Return the placeholder as text so it shows in the UI
-          return {
-            text: pastedImage.placeholder,
-            images
-          };
+    // Enhanced file path detection for multiple paths
+    if (textResponse && this.containsImagePaths(textResponse)) {
+      const imagePaths = this.extractImagePaths(textResponse);
+
+      for (const imagePath of imagePaths) {
+        const shouldUseAsImage = await p.confirm({
+          message: `Include "${path.basename(imagePath)}" as an image?`,
+          initialValue: true
+        });
+
+        if (shouldUseAsImage && !p.isCancel(shouldUseAsImage)) {
+          // Process each path as image
+          const originalClipboard = await clipboardy.read();
+          await clipboardy.write(imagePath);
+
+          const pastedImage = await this.handlePastedImage();
+          if (pastedImage) {
+            images.push(pastedImage);
+            p.log.success(`Added ${pastedImage.placeholder}`);
+          }
+
+          await clipboardy.write(originalClipboard);
         }
-        
-        // Restore original clipboard content
-        await clipboardy.write(originalClipboard);
-        
+      }
+
+      // If all paths were processed as images, clear them from text
+      if (imagePaths.length > 0) {
+        let remainingText = textResponse;
+        for (const pth of imagePaths) {
+          remainingText = remainingText.replace(pth, '').trim();
+        }
+
         return {
-          text: '', // Clear the text since we processed it as an image
+          text: remainingText || '',
           images
         };
       }
@@ -220,6 +246,23 @@ class ClipboardImageManager {
 
   getImages(): PastedImage[] {
     return Array.from(this.images.values());
+  }
+
+  private containsImagePaths(text: string): boolean {
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.tiff', '.svg'];
+    return imageExtensions.some(ext => text.toLowerCase().includes(ext));
+  }
+
+  private extractImagePaths(text: string): string[] {
+    const lines = text.split('\n');
+    const imagePaths: string[] = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (this.isImageFilePath(trimmed)) {
+        imagePaths.push(trimmed);
+      }
+    }
+    return imagePaths;
   }
 
   async cleanup(): Promise<void> {
