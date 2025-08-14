@@ -10,7 +10,7 @@ export const colors = {
   cyan: '#66FFFF',         // Brightened cyan
   // Accent colors
   ocean: '#1A1A2E',
-  chrome: '#E0E0E0',       // Brighter for better visibility
+  chrome: '#F0F0F0',       // Much brighter for better readability
   palm: '#66DD66'          // Brighter green
 };
 
@@ -22,6 +22,9 @@ export const theme = {
   electricBlue: chalk.hex(colors.electricBlue),
   cyan: chalk.hex(colors.cyan),
   chrome: chalk.hex(colors.chrome),
+  // Readable text colors
+  text: chalk.hex('#F0F0F0'),        // Bright readable text
+  textMuted: chalk.hex('#CCCCCC'),   // Slightly dimmer but still readable
   
   // Gradient function for banners
   neonGradient: (text: string) => {
@@ -62,11 +65,12 @@ export const banners = {
 ╚═════╝  ╚═════╝  ╚═════╝╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝`,
 
   compact: `
- ▄▄▄▄▄   ▄▄▄▄▄   ▄▄▄▄▄  ▄▄▄▄▄▄  ▄     ▄▄▄▄▄   ▄   ▄   ▄
- █   █ █ █     █ █      █       █     █     █ █   █ █ █ █
- █   █ █ █     █ █      █    ▄▄▄█     █     █ █ █ █ █ █ █
- █   █ █ █     █ █      █   █         █     █ █ █▄█ █ █ █
- █████▀  █████▀  █████▄ █████         █████▀  █▄█ █▄█ █▄█`,
+██████╗  ██████╗  ██████╗███████╗██╗      ██████╗ ██╗    ██╗
+██╔══██╗██╔═══██╗██╔════╝██╔════╝██║     ██╔═══██╗██║    ██║
+██║  ██║██║   ██║██║     █████╗  ██║     ██║   ██║██║ █╗ ██║
+██║  ██║██║   ██║██║     ██╔══╝  ██║     ██║   ██║██║███╗██║
+██████╔╝╚██████╔╝╚██████╗██║     ███████╗╚██████╔╝╚███╔███╔╝
+╚═════╝  ╚═════╝  ╚═════╝╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝`,
 
   minimal: `DocFlow v1.0.0`
 };
@@ -98,11 +102,13 @@ export function getTagline(): string {
 export function createQuickStartBox(): string {
   const { box } = theme;
   const commands = [
-    `${theme.cyan('docflow generate')} ${chalk.gray('— scaffold your project')}`,
-    `${theme.violet('docflow list')} ${chalk.gray('— explore tech stacks')}`, 
-    `${theme.electricBlue('docflow validate')} ${chalk.gray('— check your docs')}`,
+    `${theme.fuchsia('docflow create')} ${theme.textMuted('— complete project setup')}`,
+    `${theme.cyan('docflow generate')} ${theme.textMuted('— scaffold your project')}`,
+    `${theme.violet('docflow list')} ${theme.textMuted('— explore tech stacks')}`, 
+    `${theme.electricBlue('docflow validate')} ${theme.textMuted('— check your docs')}`,
+    `${theme.hotPink('docflow config')} ${theme.textMuted('— manage settings')}`,
     '',
-    `${chalk.gray('Tip:')} ${theme.chrome('--no-splash')} ${chalk.gray('to skip this banner')}`
+    `${theme.textMuted('Tip:')} ${theme.chrome('--no-splash')} ${theme.textMuted('to skip this banner')}`
   ];
   
   const maxWidth = Math.max(...commands.map(cmd => stripAnsi(cmd).length));

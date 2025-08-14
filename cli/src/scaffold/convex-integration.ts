@@ -21,14 +21,38 @@ export class ConvexIntegration extends BaseScaffold {
 
 	async setup(options: ConvexSetupOptions): Promise<void> {
 		this.start('Adding Convex dependencies');
-		await execa('npm', ['install', 'convex', 'react', 'react-native'], { cwd: options.projectPath, stdio: 'inherit' });
-		this.succeed('Convex dependencies installed');
+		try {
+			await execa('npm', ['install', 'convex', 'react', 'react-native'], { 
+				cwd: options.projectPath, 
+				stdio: 'pipe',
+				timeout: 120000 // 2 minutes
+			});
+			this.succeed('Convex dependencies installed');
+		} catch (error) {
+			this.fail('Failed to install Convex dependencies');
+			throw error;
+		}
 
-		this.start('Initializing Convex');
-		await execa('npx', ['--yes', 'convex', 'dev', '--once'], { cwd: options.projectPath, stdio: 'inherit' });
-		this.succeed('Convex initialized');
+		console.log('\n🔄 Initializing Convex - this may require your input...');
+		console.log('   Please respond to any Convex setup prompts that appear below:\n');
+		
+		this.start('Setting up Convex project');
+		try {
+			await execa('npx', ['--yes', 'convex', 'dev', '--once'], { 
+				cwd: options.projectPath, 
+				stdio: 'inherit',
+				timeout: 180000 // 3 minutes
+			});
+			this.succeed('Convex initialized');
+		} catch (error) {
+			this.fail('Convex initialization failed or timed out');
+			console.log('\n⚠️  Convex setup incomplete. You can finish setup later with:');
+			console.log(`   cd ${options.projectPath}`);
+			console.log('   npx convex dev --once\n');
+			// Don't throw - continue with project creation
+		}
 
-		this.start('Configuring Convex schema and auth');
+		this.start('Configuring Convex schema');
 		await this.ensureConvexStructure(options.projectPath);
 		this.succeed('Convex configured');
 	}

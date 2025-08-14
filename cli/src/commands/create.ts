@@ -10,19 +10,24 @@ import { ReactNativeExpoScaffold } from '../scaffold/react-native-expo.js';
 import { ConvexIntegration } from '../scaffold/convex-integration.js';
 import { DocInjector } from '../scaffold/injector.js';
 import { generateDocs } from '../generators/docs.js';
+import { userConfig } from '../config/user-config.js';
 
 export const createCommand = new Command('create')
   .description('Create a new project with scaffolding and documentation')
   .requiredOption('-s, --stack <name>', 'Technology stack (react-native-convex)')
   .option('-i, --idea <text>', 'Project idea to expand into docs')
   .option('-n, --name <name>', 'Project directory name')
-  .option('-o, --output <path>', 'Destination directory', process.cwd())
+  .option('-o, --output <path>', 'Destination directory (defaults to configured project directory)')
   .option('--ai-provider <provider>', 'AI provider (openai, anthropic, local)', 'openai')
   .option('--model <model>', 'AI model to use')
   .option('--no-research', 'Disable MCP/web research')
   .action(async (options) => {
     try {
       styledPrompts.intro(`${symbols.rocket} Creating project with ${chalk.cyan(options.stack)}`);
+
+      // Get destination directory from config or options
+      const outputDir = options.output || await userConfig.getDefaultProjectDirectory();
+      console.log(`📁 Projects will be created in: ${chalk.cyan(outputDir)}\n`);
 
       // Gather and confirm project settings
       const projectData = await projectPrompts.gatherProjectData({ ...options, stack: options.stack, idea: options.idea });
@@ -34,9 +39,9 @@ export const createCommand = new Command('create')
 
       // Scaffold project using URL-safe slug for directory
       const projectDirName = options.name || projectData.projectSlug;
-      let projectPath = path.resolve(options.output, projectDirName);
+      let projectPath = path.resolve(outputDir, projectDirName);
       const expo = new ReactNativeExpoScaffold();
-      const result = await expo.run({ projectName: projectDirName, destination: options.output });
+      const result = await expo.run({ projectName: projectDirName, destination: outputDir });
       projectPath = result.projectPath;
 
       // Convex setup

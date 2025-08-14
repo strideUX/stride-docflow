@@ -9,6 +9,19 @@ import { generateCommand } from './commands/generate.js';
 import { validateCommand } from './commands/validate.js';
 import { listTemplatesCommand } from './commands/list-templates.js';
 import { createCommand } from './commands/create.js';
+import { configCommand } from './commands/config.js';
+
+// Handle Ctrl+C gracefully like Claude Code - immediate exit on first Ctrl+C
+process.on('SIGINT', () => {
+  console.log('\n👋 Exiting Docflow...');
+  process.exit(0);
+});
+
+// Handle termination signals
+process.on('SIGTERM', () => {
+  console.log('\n👋 Docflow terminated');
+  process.exit(0);
+});
 
 const program = new Command();
 
@@ -28,6 +41,7 @@ program.addCommand(generateCommand);
 program.addCommand(validateCommand);
 program.addCommand(listTemplatesCommand);
 program.addCommand(createCommand);
+program.addCommand(configCommand);
 
 // Parse arguments
 program.parse();

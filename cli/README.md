@@ -1,6 +1,25 @@
 # Docflow CLI
 
-Beautiful TypeScript CLI for generating AI-powered project documentation.
+AI-powered project bootstrapping tool with intelligent documentation generation, image paste support, and complete project scaffolding.
+
+## 🎯 Quick Start
+
+```bash
+# Install and link globally
+npm install && npm run build && npm link
+
+# Create a complete React Native + Convex project
+docflow create --stack react-native-convex --idea "social fitness app"
+
+# When prompted for wireframes:
+# 1. Copy a screenshot to clipboard (Cmd+Shift+4 on Mac)
+# 2. Press Ctrl+V to paste during the prompt
+# 3. See: [Image 1] - screenshot-12345.png
+# 4. Continue with other design inputs
+# 5. Get complete scaffolded project with AI-generated docs!
+```
+
+**Result**: Complete project with Expo setup, Convex integration, comprehensive documentation, and ready-to-use development environment.
 
 ## Development
 
@@ -78,9 +97,49 @@ npm run test:watch
 <!-- DYNAMIC: [Current Next.js 15 setup patterns with TypeScript] -->
 ```
 
+## 🚀 Key Features
+
+### 📱 Complete Project Scaffolding
+- **React Native/Expo + Convex** integration
+- Automated project setup with dependencies
+- Smart directory structure creation
+- Development environment configuration
+
+### 🎨 Design Input & Image Paste
+- **Copy & paste screenshots** directly into prompts with `Ctrl+V`
+- Automatic image detection and temp file management
+- Design vibe, wireframe, and mockup support
+- Visual design context for AI generation
+
+### 🤖 MCP Integration
+- **Model Context Protocol** support for enhanced research
+- Real-time documentation and code pattern analysis
+- Web search integration for current best practices
+- Graceful fallbacks when MCP tools unavailable
+
+### 🎯 Intelligent Documentation
+- AI-powered content generation with context awareness
+- Template-based documentation with dynamic sections
+- Stack-specific architecture and setup guides
+
 ## Commands
 
-### Generate
+### Create (New!)
+Create complete projects with scaffolding and documentation:
+
+```bash
+docflow create --stack react-native-convex --idea "fitness tracking app"
+```
+
+**Interactive Flow:**
+1. **Describe your app idea**: "A fitness tracking app that helps users..."
+2. **App name**: "Fitness Tracker Pro" → auto-formats to `fitness-tracker-pro`
+3. **Design inputs**: Paste screenshots with `Ctrl+V`, describe vibe & UI
+4. **Complete setup**: Expo scaffold → Convex integration → AI docs → Ready to code
+
+### Generate (Enhanced)
+Generate documentation for existing projects:
+
 ```bash
 docflow generate [options]
 
@@ -106,6 +165,52 @@ docflow validate [options]
 Options:
   -p, --path <path>          Path to documentation
 ```
+
+### Config
+Manage Docflow settings and preferences:
+
+```bash
+docflow config
+```
+
+**Interactive menu options**:
+- View current configuration
+- Change default project directory
+- Reset to defaults
+
+## 🖼️ Image Paste Feature
+
+### How to Use Screenshots & Wireframes
+
+1. **Take a screenshot** (Cmd+Shift+4 on Mac, Win+Shift+S on Windows)
+2. **During wireframes prompt**, press `Ctrl+V` to paste
+3. **See confirmation**: `[Image 1] - screenshot-12345.png`
+4. **AI analyzes images** automatically during documentation generation
+
+### Supported Image Types
+- Screenshots (.png, .jpg, .jpeg)
+- Design files copied to clipboard
+- File paths to existing images
+- Base64 encoded images
+
+### Technical Details
+```typescript
+// Images are temporarily stored and passed to AI
+const pastedImages = clipboardImageManager.getImages();
+// AI receives: { images: [{ path: "/tmp/docflow-images/wireframe.png", ... }] }
+```
+
+### Troubleshooting Image Paste
+
+**Image not detected?**
+- Ensure you copied image to clipboard (not just text/path)
+- Use `Ctrl+V` specifically (not `Cmd+V` on Mac)
+- Try copying from different sources (screenshot vs file)
+
+**Different terminals:**
+- **macOS Terminal**: Use `Ctrl+V` for images
+- **iTerm2**: Full support for image paste
+- **Linux**: Depends on terminal - try Kitty or Gnome Terminal
 
 ## Adding New Stacks
 
@@ -150,6 +255,39 @@ try {
 }
 ```
 
+## 📁 Project Directory Configuration
+
+### Default Project Directory
+By default, new projects are created in `~/Documents/Work/Clients/DocFlow`. You can change this:
+
+```bash
+# Change via interactive config
+docflow config
+
+# Or edit config file directly
+~/.docflow/config.json
+```
+
+### Config File Structure
+```json
+{
+  "defaultProjectDirectory": "~/Documents/Work/Clients/DocFlow",
+  "mcpServers": [
+    {
+      "name": "context7",
+      "command": "context7-mcp-server",
+      "args": ["--port", "3001"]
+    }
+  ]
+}
+```
+
+### Override Per Command
+You can still override the default directory for individual commands:
+```bash
+docflow create --stack react-native-convex --idea "my app" --output /path/to/custom/location
+```
+
 ## Environment Variables
 
 ```bash
@@ -157,9 +295,55 @@ try {
 OPENAI_API_KEY=your-openai-key
 ANTHROPIC_API_KEY=your-anthropic-key
 
-# Optional: Research capabilities  
-CONTEXT7_API_KEY=your-context7-key
+# MCP (Model Context Protocol) Servers - Optional but recommended
+DOCFLOW_MCP_SERVERS='[{"name":"context7","command":"context7-mcp","args":["--port","3001"]},{"name":"grep","command":"mcp-grep"}]'
 ```
+
+## 🔧 MCP Configuration
+
+### Setting up MCP Tools (Optional)
+
+MCP integration enhances documentation with real-time research. Works with graceful fallbacks if not configured.
+
+#### 1. Install MCP Servers
+```bash
+# Example MCP tools (install based on your needs)
+npm install -g @context7/mcp-server
+npm install -g mcp-grep-server
+npm install -g mcp-web-search
+```
+
+#### 2. Configure MCP Servers
+Create `~/.docflow/config.json`:
+```json
+{
+  "mcpServers": [
+    {
+      "name": "context7",
+      "command": "context7-mcp-server",
+      "args": ["--port", "3001"],
+      "env": {
+        "CONTEXT7_API_KEY": "your-key"
+      }
+    },
+    {
+      "name": "grep",
+      "command": "mcp-grep-server"
+    }
+  ]
+}
+```
+
+#### 3. Alternative: Environment Variable
+```bash
+export DOCFLOW_MCP_SERVERS='[{"name":"context7","command":"context7-mcp"}]'
+```
+
+### How MCP Enhances Documentation
+- **Real-time research** for current best practices
+- **Code pattern search** across existing codebases  
+- **Documentation lookup** from current project context
+- **Web search** for latest framework updates
 
 ## Publishing
 
