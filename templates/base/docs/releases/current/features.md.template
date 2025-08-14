@@ -1,0 +1,97 @@
+# Features - <!-- DYNAMIC: [Release Version/Name] -->
+
+<!-- STATIC -->
+## Overview
+This document contains detailed specifications for all features in the current release. Each feature includes acceptance criteria, complexity assessment, and implementation status.
+
+---
+
+<!-- STATIC -->
+## Feature Template
+<!-- STATIC -->
+```markdown
+## Feature N: [Feature Name]
+**Status:** [Idea/Planning/Ready/In Progress/Feedback/Complete]
+**Complexity:** [XS/S/M/L/XL]
+**Priority:** [High/Medium/Low]
+**Dependencies:** [List any dependencies or blockers]
+
+### Description
+[What this feature does and why it's needed]
+
+### Acceptance Criteria
+- [ ] [Specific, testable requirement]
+- [ ] [Specific, testable requirement]
+- [ ] [Specific, testable requirement]
+
+### Implementation Notes
+[Technical considerations, approach, or constraints]
+
+### Testing Requirements
+[How this feature should be tested]
+
+### Definition of Done
+- [ ] Feature implemented according to acceptance criteria
+- [ ] Code reviewed and meets quality standards
+- [ ] Basic testing completed
+- [ ] Documentation updated if needed
+- [ ] Ready for feedback phase
+```
+
+---
+
+<!-- DYNAMIC: [Individual feature definitions - populated during generation based on project scope] -->
+
+<!-- STATIC -->
+## Feature N: [Example Feature Name]
+**Status:** Planning
+**Complexity:** M
+**Priority:** High
+**Dependencies:** None
+
+### Description
+[Detailed description of what this feature accomplishes]
+
+### Acceptance Criteria
+- [ ] [Specific requirement that can be tested]
+- [ ] [Another specific requirement]
+- [ ] [Third specific requirement]
+
+### Implementation Notes
+[Any technical considerations or approaches]
+
+### Testing Requirements
+[How to verify this feature works correctly]
+
+### Definition of Done
+- [ ] Feature implemented according to acceptance criteria
+- [ ] Code reviewed and meets quality standards
+- [ ] Basic testing completed
+- [ ] Documentation updated if needed
+- [ ] Ready for feedback phase
+
+---
+
+<!-- STATIC -->
+## Status Tracking
+
+<!-- STATIC -->
+### In Progress
+<!-- DYNAMIC: [Features currently being worked on] -->
+
+<!-- STATIC -->
+### Feedback
+<!-- DYNAMIC: [Features implemented but awaiting iteration] -->
+
+<!-- STATIC -->
+### Completed
+<!-- DYNAMIC: [Features that are finished and verified] -->
+
+<!-- STATIC -->
+### Blocked
+<!-- DYNAMIC: [Features that cannot proceed due to dependencies] -->
+
+---
+
+<!-- STATIC -->
+*Features should move through the workflow: Idea → Planning → Ready → In Progress → Feedback → Complete. Update status in both this file and index.md when changes occur.*

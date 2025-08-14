@@ -1,0 +1,468 @@
+# Convex Database Schema Design
+
+<!-- STATIC -->
+## Overview
+This document defines the database schema, data modeling patterns, and query optimization strategies for the <!-- DYNAMIC: [Project Name] --> Convex database.
+
+<!-- DYNAMIC: [Project-specific data model overview and domain entities] -->
+
+---
+
+<!-- STATIC -->
+## Schema Design Principles
+
+<!-- STATIC -->
+### Core Principles
+<!-- DYNAMIC: [Project-specific schema design decisions] -->
+
+**Design Philosophy:**
+- **Type Safety First**: Use Convex validators for runtime type checking
+- **Real-time Optimized**: Design for efficient subscriptions and updates
+- **Query Efficient**: Structure data to minimize query complexity
+- **Audit Trail**: Include creation and modification timestamps
+- **Future Flexible**: Design schema to accommodate feature growth
+
+**Naming Conventions:**
+- Tables: `camelCase` (e.g., `userProfiles`, `projectTasks`)
+- Fields: `camelCase` (e.g., `createdTime`, `isActive`)
+- Indexes: Descriptive names (e.g., `by_user_and_status`, `by_created_time`)
+- Relations: Clear foreign key references (e.g., `userId`, `projectId`)
+
+---
+
+<!-- STATIC -->
+## Core Schema Definition
+
+<!-- STATIC -->
+### Base Schema Structure
+<!-- DYNAMIC: [Complete Convex schema definition for the project] -->
+
+```typescript
+// convex/schema.ts
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  // User Management
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+    imageUrl: v.optional(v.string()),
+    role: v.union(v.literal("admin"), v.literal("user"), v.literal("viewer")),
+    isActive: v.boolean(),
+    lastLoginTime: v.optional(v.number()),
+    preferences: v.optional(v.object({
+      theme: v.union(v.literal("light"), v.literal("dark")),
+      notifications: v.boolean(),
+      timezone: v.string(),
+    })),
+  })
+    .index("by_email", ["email"])
+    .index("by_role", ["role"])
+    .index("by_active_status", ["isActive"]),
+
+  // <!-- DYNAMIC: [Project-specific table definitions] -->
+  
+  // Example: Project Management Tables
+  projects: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    ownerId: v.id("users"),
+    status: v.union(
+      v.literal("planning"),
+      v.literal("active"),
+      v.literal("completed"),
+      v.literal("archived")
+    ),
+    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+    tags: v.array(v.string()),
+    settings: v.object({
+      isPublic: v.boolean(),
+      allowComments: v.boolean(),
+      requireApproval: v.boolean(),
+    }),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_status", ["status"])
+    .index("by_priority", ["priority"])
+    .index("by_owner_and_status", ["ownerId", "status"]),
+
+  // Project Membership
+  projectMembers: defineTable({
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member")),
+    invitedBy: v.id("users"),
+    joinedTime: v.number(),
+    permissions: v.array(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_user", ["userId"])
+    .index("by_project_and_user", ["projectId", "userId"]),
+
+  // Activity Feed
+  activities: defineTable({
+    projectId: v.optional(v.id("projects")),
+    userId: v.id("users"),
+    type: v.string(), // "project_created", "task_completed", etc.
+    description: v.string(),
+    metadata: v.optional(v.any()), // Flexible data for different activity types
+    isRead: v.boolean(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_user", ["userId"])
+    .index("by_type", ["type"])
+    .index("by_project_and_time", ["projectId", "_creationTime"]),
+});
+```
+
+---
+
+<!-- STATIC -->
+## Data Modeling Patterns
+
+<!-- STATIC -->
+### Relationship Patterns
+<!-- DYNAMIC: [Specific relationship patterns used in the project] -->
+
+**One-to-Many Relationships:**
+```typescript
+// User -> Projects (one user owns many projects)
+const userProjects = await ctx.db
+  .query("projects")
+  .withIndex("by_owner", (q) => q.eq("ownerId", userId))
+  .collect();
+```
+
+**Many-to-Many Relationships:**
+```typescript
+// Users <-> Projects (via projectMembers junction table)
+const projectUsers = await ctx.db
+  .query("projectMembers")
+  .withIndex("by_project", (q) => q.eq("projectId", projectId))
+  .collect();
+
+const userIds = projectUsers.map(pm => pm.userId);
+const users = await Promise.all(
+  userIds.map(id => ctx.db.get(id))
+);
+```
+
+**Embedded Documents:**
+```typescript
+// User preferences embedded in user document
+const user = await ctx.db.insert("users", {
+  name: "John Doe",
+  email: "john@example.com",
+  preferences: {
+    theme: "dark",
+    notifications: true,
+    timezone: "America/New_York",
+  }
+});
+```
+
+<!-- STATIC -->
+### Query Optimization Patterns
+<!-- DYNAMIC: [Query patterns and performance considerations] -->
+
+**Efficient Indexing:**
+- Single field indexes for simple queries
+- Compound indexes for multi-field filters
+- Time-based indexes for chronological data
+- Status-based indexes for workflow management
+
+**Query Best Practices:**
+```typescript
+// Good: Use specific indexes
+const activeTasks = await ctx.db
+  .query("tasks")
+  .withIndex("by_status", (q) => q.eq("status", "active"))
+  .filter((q) => q.eq(q.field("assigneeId"), userId))
+  .collect();
+
+// Better: Compound index for common query pattern
+const userActiveTasks = await ctx.db
+  .query("tasks")
+  .withIndex("by_assignee_and_status", (q) => 
+    q.eq("assigneeId", userId).eq("status", "active")
+  )
+  .collect();
+```
+
+---
+
+<!-- STATIC -->
+## Validation & Type Safety
+
+<!-- STATIC -->
+### Input Validation
+<!-- DYNAMIC: [Validation patterns and business rules] -->
+
+**Convex Validators:**
+```typescript
+// convex/validators.ts
+import { v } from "convex/values";
+
+export const createProjectValidator = v.object({
+  name: v.string(),
+  description: v.optional(v.string()),
+  priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  startDate: v.optional(v.number()),
+  settings: v.object({
+    isPublic: v.boolean(),
+    allowComments: v.boolean(),
+  }),
+});
+
+// Usage in mutation
+export const createProject = mutation({
+  args: createProjectValidator,
+  handler: async (ctx, args) => {
+    const user = await requireAuth(ctx);
+    
+    return await ctx.db.insert("projects", {
+      ...args,
+      ownerId: user._id,
+      status: "planning",
+      tags: [],
+    });
+  },
+});
+```
+
+**Business Logic Validation:**
+```typescript
+// Custom validation functions
+export const validateProjectAccess = async (
+  ctx: QueryCtx | MutationCtx,
+  projectId: Id<"projects">,
+  userId: Id<"users">,
+  requiredRole?: "owner" | "admin" | "member"
+) => {
+  const membership = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project_and_user", (q) => 
+      q.eq("projectId", projectId).eq("userId", userId)
+    )
+    .unique();
+
+  if (!membership) {
+    throw new Error("Access denied: Not a project member");
+  }
+
+  if (requiredRole && !hasRequiredRole(membership.role, requiredRole)) {
+    throw new Error(`Access denied: ${requiredRole} role required`);
+  }
+
+  return membership;
+};
+```
+
+---
+
+<!-- STATIC -->
+## Migration Strategies
+
+<!-- STATIC -->
+### Schema Evolution
+<!-- DYNAMIC: [Migration approach and versioning strategy] -->
+
+**Migration Patterns:**
+1. **Additive Changes**: New fields with optional values
+2. **Field Renaming**: Gradual migration with backward compatibility
+3. **Data Restructuring**: Background jobs for large data changes
+4. **Index Changes**: Add new indexes before removing old ones
+
+**Migration Example:**
+```typescript
+// Migration function for adding new field
+export const migrateUserPreferences = internalMutation({
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    
+    for (const user of users) {
+      if (!user.preferences) {
+        await ctx.db.patch(user._id, {
+          preferences: {
+            theme: "light",
+            notifications: true,
+            timezone: "UTC",
+          }
+        });
+      }
+    }
+  },
+});
+```
+
+**Versioning Strategy:**
+- Use optional fields for backward compatibility
+- Gradual rollout of schema changes
+- Test migrations in development environment
+- Monitor query performance after changes
+
+---
+
+<!-- STATIC -->
+## Performance Considerations
+
+<!-- STATIC -->
+### Query Performance
+<!-- DYNAMIC: [Performance optimization strategies] -->
+
+**Index Design:**
+- Analyze query patterns to design optimal indexes
+- Use compound indexes for frequently combined filters
+- Consider query selectivity when ordering index fields
+- Monitor index usage in Convex dashboard
+
+**Data Access Patterns:**
+```typescript
+// Efficient pagination
+export const getProjectsPaginated = query({
+  args: {
+    cursor: v.optional(v.string()),
+    limit: v.number(),
+  },
+  handler: async (ctx, { cursor, limit }) => {
+    let query = ctx.db.query("projects").withIndex("by_created_time");
+    
+    if (cursor) {
+      query = query.filter((q) => q.gte(q.field("_creationTime"), cursor));
+    }
+    
+    const results = await query.order("desc").take(limit + 1);
+    const hasMore = results.length > limit;
+    const items = hasMore ? results.slice(0, -1) : results;
+    
+    return {
+      items,
+      hasMore,
+      nextCursor: hasMore ? items[items.length - 1]._creationTime : null,
+    };
+  },
+});
+```
+
+**Real-time Optimization:**
+- Design subscriptions to minimize data transfer
+- Use specific indexes for subscription queries
+- Consider data denormalization for read-heavy workloads
+- Implement proper pagination for large datasets
+
+---
+
+<!-- STATIC -->
+## Security & Access Control
+
+<!-- STATIC -->
+### Data Security
+<!-- DYNAMIC: [Security patterns and access control implementation] -->
+
+**Row-Level Security Patterns:**
+```typescript
+// User can only access their own data
+export const getUserProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireAuth(ctx);
+    return await ctx.db.get(user._id);
+  },
+});
+
+// Project access control
+export const getProject = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const user = await requireAuth(ctx);
+    
+    // Check if user has access to project
+    await validateProjectAccess(ctx, projectId, user._id);
+    
+    return await ctx.db.get(projectId);
+  },
+});
+```
+
+**Audit Logging:**
+```typescript
+// Audit trail for sensitive operations
+export const deleteProject = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const user = await requireAuth(ctx);
+    await validateProjectAccess(ctx, projectId, user._id, "owner");
+    
+    // Log the deletion
+    await ctx.db.insert("activities", {
+      projectId,
+      userId: user._id,
+      type: "project_deleted",
+      description: `Project deleted by ${user.name}`,
+      metadata: { projectId },
+      isRead: false,
+    });
+    
+    // Soft delete or hard delete based on requirements
+    await ctx.db.patch(projectId, { status: "deleted" });
+  },
+});
+```
+
+---
+
+<!-- STATIC -->
+## Testing Strategy
+
+<!-- STATIC -->
+### Schema Testing
+<!-- DYNAMIC: [Testing approach for database operations] -->
+
+**Unit Testing Functions:**
+```typescript
+// convex/functions.test.ts
+import { convexTest } from "convex-test";
+import { describe, it, expect } from "vitest";
+import schema from "./schema";
+import { createProject } from "./projects";
+
+describe("Project Functions", () => {
+  it("should create a project with valid data", async () => {
+    const t = convexTest(schema);
+    
+    const user = await t.db.insert("users", {
+      name: "Test User",
+      email: "test@example.com",
+      role: "user",
+      isActive: true,
+    });
+    
+    const projectId = await t.mutation(createProject, {
+      name: "Test Project",
+      priority: "medium",
+      settings: {
+        isPublic: false,
+        allowComments: true,
+      },
+    });
+    
+    const project = await t.db.get(projectId);
+    expect(project?.name).toBe("Test Project");
+    expect(project?.ownerId).toBe(user);
+  });
+});
+```
+
+**Integration Testing:**
+- Test complete user workflows
+- Validate data consistency across relationships
+- Test real-time subscription behavior
+- Performance testing for large datasets
+
+---
+
+<!-- STATIC -->
+*This schema should evolve with application requirements. All schema changes should be carefully planned, tested in development, and deployed with appropriate migration strategies. Regular performance monitoring helps identify optimization opportunities.*

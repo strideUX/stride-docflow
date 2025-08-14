@@ -1,0 +1,377 @@
+# Technology Stack Guidelines - Next.js + Supabase
+
+<!-- STATIC -->
+## Overview
+This project uses Next.js 15+ with Supabase for a full-stack application with PostgreSQL database, authentication, and real-time capabilities. This document defines the technology choices, patterns, and best practices for maintaining consistency across all development work.
+
+<!-- DYNAMIC: [Project-specific implementation notes and current version details] -->
+
+---
+
+<!-- STATIC -->
+## Core Technologies
+
+<!-- STATIC -->
+### Frontend Framework - Next.js 15+
+<!-- DYNAMIC: [Current Next.js version and key features being used] -->
+- **Version**: Next.js 15.x (App Router)
+- **Key Features**: Server Components, App Router, Server Actions, Streaming
+- **TypeScript**: Strict mode enabled
+- **Why Chosen**: Best-in-class React framework with excellent Supabase integration
+
+<!-- STATIC -->
+### Backend/Database - Supabase
+<!-- DYNAMIC: [Supabase configuration and PostgreSQL features] -->
+- **Database**: PostgreSQL with real-time subscriptions
+- **Authentication**: Supabase Auth with multiple providers
+- **Storage**: Supabase Storage for file uploads
+- **Edge Functions**: TypeScript-based serverless functions
+- **Why Chosen**: Full-stack PostgreSQL solution with excellent developer experience
+
+<!-- STATIC -->
+### Authentication - Supabase Auth
+<!-- DYNAMIC: [Auth providers and security configuration] -->
+- **Primary**: Supabase Auth
+- **Providers**: <!-- DYNAMIC: [Configured auth providers: Email, Google, GitHub, etc.] -->
+- **Security**: Row Level Security (RLS), JWT tokens
+- **Pattern**: Server-side auth validation with client-side React hooks
+
+<!-- STATIC -->
+### Styling & UI - Tailwind CSS + shadcn/ui
+<!-- DYNAMIC: [UI component library setup and theming] -->
+- **CSS Framework**: Tailwind CSS v3+
+- **Component Library**: shadcn/ui
+- **Theme System**: CSS variables with dark/light mode support
+- **Icons**: Lucide React
+- **Fonts**: <!-- DYNAMIC: [Selected fonts from Google Fonts or custom] -->
+
+---
+
+<!-- STATIC -->
+## Development Patterns
+
+<!-- STATIC -->
+### Project Structure
+<!-- DYNAMIC: [Current Next.js App Router structure with Supabase integration] -->
+
+```
+<!-- DYNAMIC: [Complete directory structure example] -->
+src/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Route groups for auth pages
+│   ├── (dashboard)/       # Protected dashboard routes
+│   ├── api/               # API routes and webhooks
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── forms/            # Form components
+│   ├── auth/             # Auth-specific components
+│   └── layout/           # Layout components
+├── lib/                  # Utility functions
+│   ├── supabase/         # Supabase client configuration
+│   ├── utils.ts          # General utilities
+│   ├── validations.ts    # Zod schemas
+│   └── constants.ts      # App constants
+├── hooks/                # Custom React hooks
+│   ├── use-auth.ts       # Authentication hooks
+│   └── use-supabase.ts   # Supabase data hooks
+├── types/                # TypeScript type definitions
+│   ├── database.ts       # Supabase generated types
+│   └── auth.ts           # Auth-related types
+└── middleware.ts         # Next.js middleware for auth
+
+supabase/
+├── config.toml           # Supabase configuration
+├── migrations/           # Database migrations
+│   └── 001_initial.sql   # Initial schema
+├── functions/            # Edge Functions
+│   └── hello/            # Example function
+└── seed.sql             # Database seed data
+```
+
+<!-- STATIC -->
+### Code Organization Standards
+<!-- DYNAMIC: [Naming conventions and import patterns for Next.js + Supabase] -->
+
+**File Naming:**
+- Components: `PascalCase.tsx`
+- Pages: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`
+- Hooks: `use-feature-name.ts`
+- Utils: `kebab-case.ts`
+- Database types: `database.ts` (auto-generated)
+
+**Import Order:**
+1. React imports
+2. Next.js imports
+3. External libraries
+4. Supabase imports (`@supabase/supabase-js`, `@supabase/ssr`)
+5. Internal components
+6. Internal utilities and hooks
+7. Types
+
+**Supabase Client Patterns:**
+- Server Components: Use `createClient` from `@supabase/ssr`
+- Client Components: Use browser client with React hooks
+- Route Handlers: Use server client with cookie handling
+- Middleware: Use middleware client for auth checks
+
+<!-- STATIC -->
+### Component Patterns
+<!-- DYNAMIC: [React Server Components patterns with Supabase data fetching] -->
+
+**Server Components (Default):**
+```typescript
+// Fetch data directly in Server Components
+import { createClient } from '@/lib/supabase/server';
+
+export default async function HomePage() {
+  const supabase = createClient();
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  return (
+    <div>
+      <PostsList posts={posts} />
+    </div>
+  );
+}
+```
+
+**Client Components:**
+```typescript
+"use client";
+import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react';
+
+export function RealtimePosts() {
+  const [posts, setPosts] = useState([]);
+  const supabase = createClient();
+  
+  useEffect(() => {
+    const channel = supabase
+      .channel('posts')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'posts' },
+        (payload) => {
+          // Handle real-time updates
+        }
+      )
+      .subscribe();
+      
+    return () => supabase.removeChannel(channel);
+  }, []);
+  
+  // Component logic...
+}
+```
+
+---
+
+<!-- STATIC -->
+## Configuration & Setup
+
+<!-- STATIC -->
+### Environment Configuration
+<!-- DYNAMIC: [Environment variables and deployment configuration] -->
+
+**Required Environment Variables:**
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Next.js
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Optional: External integrations
+STRIPE_SECRET_KEY=sk_test_...
+UPLOADTHING_SECRET=sk_live_...
+```
+
+<!-- STATIC -->
+### Development Workflow
+<!-- DYNAMIC: [Development setup and commands] -->
+
+**Development Commands:**
+```bash
+# Start development servers
+npm run dev              # Next.js dev server
+supabase start          # Local Supabase stack
+supabase db reset       # Reset local database
+
+# Database management
+supabase db diff        # Generate migration
+supabase db push        # Apply migrations
+supabase gen types typescript --local > src/types/database.ts
+
+# Building and deployment
+npm run build           # Build Next.js app
+supabase deploy         # Deploy to production
+```
+
+**Development Setup:**
+1. Clone repository
+2. Install dependencies: `npm install`
+3. Set up Supabase: `supabase init` and `supabase start`
+4. Configure environment variables
+5. Generate types: `supabase gen types typescript --local`
+6. Start development: `npm run dev`
+
+<!-- STATIC -->
+### Testing Strategy
+<!-- DYNAMIC: [Testing frameworks and patterns for Next.js + Supabase] -->
+
+**Frontend Testing:**
+- **Unit Tests**: Vitest + React Testing Library
+- **E2E Tests**: Playwright with Supabase test database
+- **Component Tests**: Storybook (optional)
+
+**Database Testing:**
+- **Migration Tests**: Test schema changes
+- **RLS Policy Tests**: Verify security policies
+- **Function Tests**: Test PostgreSQL functions
+
+**Integration Testing:**
+- **Auth Flow Tests**: Test complete authentication flows
+- **API Tests**: Test Route Handlers and Edge Functions
+- **Real-time Tests**: Test subscription behavior
+
+**Test Structure:**
+```
+tests/
+├── __mocks__/          # Test mocks and fixtures
+├── e2e/               # Playwright tests
+├── components/        # Component tests
+├── database/          # Database and RLS tests
+└── api/               # API route tests
+```
+
+---
+
+<!-- STATIC -->
+## Best Practices & Conventions
+
+<!-- STATIC -->
+### Code Quality
+<!-- DYNAMIC: [ESLint, Prettier, and TypeScript configuration] -->
+
+**Linting & Formatting:**
+- **ESLint**: Next.js recommended + Supabase rules
+- **Prettier**: Consistent code formatting
+- **TypeScript**: Strict mode with generated database types
+- **Husky**: Pre-commit hooks for quality gates
+
+**Database Type Safety:**
+- Generate types from Supabase schema
+- Use typed clients for all database operations
+- Validate data with Zod schemas
+- Type-safe RLS policy definitions
+
+<!-- STATIC -->
+### Performance Guidelines
+<!-- DYNAMIC: [Next.js performance optimization with Supabase] -->
+
+**Next.js Optimizations:**
+- Use Server Components for initial data loading
+- Implement proper loading states with Suspense
+- Optimize images with next/image
+- Use dynamic imports for code splitting
+- Enable compression and caching
+
+**Supabase Optimizations:**
+- Design efficient PostgreSQL queries with proper indexes
+- Use connection pooling for high-traffic applications
+- Implement pagination for large datasets
+- Cache frequently accessed data
+- Use Edge Functions for compute-heavy operations
+
+**Real-time Optimizations:**
+- Subscribe only to necessary table changes
+- Use filters to minimize data transfer
+- Implement optimistic updates for better UX
+- Handle connection states gracefully
+
+<!-- STATIC -->
+### Security Considerations
+<!-- DYNAMIC: [Security best practices for Next.js + Supabase stack] -->
+
+**Authentication Security:**
+- Server-side auth validation in all protected routes
+- Proper session management with HTTP-only cookies
+- CSRF protection with Next.js built-ins
+- Secure redirect handling
+
+**Database Security:**
+- Row Level Security (RLS) policies for all tables
+- Principle of least privilege for database roles
+- Input validation and sanitization
+- Audit logging for sensitive operations
+- Regular security policy reviews
+
+**API Security:**
+- Rate limiting for public endpoints
+- Input validation with Zod schemas
+- Proper error handling without information leakage
+- CORS configuration for production
+
+---
+
+<!-- STATIC -->
+## External Resources
+
+<!-- STATIC -->
+### Official Documentation
+<!-- DYNAMIC: [Current documentation links for all technologies] -->
+
+**Primary Resources:**
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [shadcn/ui Components](https://ui.shadcn.com)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+**Integration Guides:**
+- [Next.js + Supabase Integration](https://supabase.com/docs/guides/getting-started/tutorials/with-nextjs)
+- [Supabase Auth with Next.js](https://supabase.com/docs/guides/auth/auth-helpers/nextjs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
+<!-- STATIC -->
+### Community Resources
+<!-- DYNAMIC: [Recommended learning resources and community links] -->
+
+**Learning Resources:**
+- [Supabase Examples](https://github.com/supabase/supabase/tree/master/examples)
+- [Next.js Examples](https://github.com/vercel/next.js/tree/canary/examples)
+- [PostgreSQL Tutorials](https://www.postgresqltutorial.com/)
+
+**Community:**
+- [Supabase Discord](https://discord.supabase.com)
+- [Next.js Discord](https://nextjs.org/discord)
+- [Stack Overflow: supabase](https://stackoverflow.com/questions/tagged/supabase)
+
+<!-- STATIC -->
+### Updates & Migration
+<!-- DYNAMIC: [Strategy for keeping stack current] -->
+
+**Update Strategy:**
+- Monitor Next.js releases for App Router improvements
+- Follow Supabase updates for new features and security patches
+- Update dependencies monthly with testing
+- Review PostgreSQL version updates quarterly
+- Test major updates in staging environment
+
+**Migration Considerations:**
+- Database migration best practices
+- Breaking changes in dependencies
+- Supabase feature deprecations
+- Performance impact assessment
+- RLS policy updates with schema changes
+
+---
+
+<!-- STATIC -->
+*This document should be updated when significant technology changes occur or when upgrading to new versions. Always consult the latest official documentation for the most current patterns and best practices.*

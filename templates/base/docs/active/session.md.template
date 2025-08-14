@@ -1,0 +1,66 @@
+# Session Notes
+
+<!-- STATIC -->
+## Current Session
+**Date:** <!-- DYNAMIC: [Current date] -->
+**Focus:** <!-- DYNAMIC: [Main focus for this session] -->
+**Duration:** <!-- DYNAMIC: [Time spent] -->
+
+<!-- STATIC -->
+### Accomplishments
+<!-- DYNAMIC: [What was completed this session] -->
+
+<!-- STATIC -->
+### Decisions Made
+<!-- DYNAMIC: [Important decisions with rationale] -->
+
+<!-- STATIC -->
+### Issues Discovered
+<!-- DYNAMIC: [Bugs found, blockers encountered, etc.] -->
+
+<!-- STATIC -->
+### Items Added
+<!-- DYNAMIC: [New features/enhancements/bugs added to backlog or current release] -->
+
+<!-- STATIC -->
+### Next Session Priority
+<!-- DYNAMIC: [Clear priority for next session] -->
+
+---
+
+<!-- STATIC -->
+## Session Archive
+
+<!-- STATIC -->
+### Session Template
+<!-- STATIC -->
+```markdown
+### [Date] - [Duration]
+**Focus:** [What was the main focus]
+**Accomplishments:** [What was completed]
+**Decisions:** [Key decisions made]
+**Issues:** [Problems discovered]
+**Next:** [Priority for next session]
+```
+
+<!-- DYNAMIC: [Previous session summaries - populated during "wrap session" command] -->
+
+---
+
+<!-- STATIC -->
+## Wrap Session Checklist
+
+<!-- STATIC -->
+When ending a session, ensure:
+- [ ] Current work status updated in releases/current/index.md
+- [ ] Progress documented in relevant feature/enhancement/bug files
+- [ ] Any new items added to appropriate files
+- [ ] active/focus.md updated with clear next steps
+- [ ] Session summary added to archive above
+- [ ] Code is in stable state with any debug code removed
+- [ ] Any architectural decisions documented in architecture.md
+
+---
+
+<!-- STATIC -->
+*This file serves as the handoff point between sessions and between AI assistants. Keep it current and detailed enough for seamless continuation of work.*

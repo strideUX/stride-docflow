@@ -1,0 +1,118 @@
+# <!-- DYNAMIC: [Project Name] --> - Technical Architecture
+
+<!-- STATIC -->
+## System Overview
+
+<!-- DYNAMIC: [High-level description of the system architecture, key components, and how they interact] -->
+
+---
+
+<!-- STATIC -->
+## Architectural Decisions
+
+<!-- STATIC -->
+*Use this section to document significant technical decisions made during development. Each decision should include context, the decision made, rationale, and trade-offs considered.*
+
+<!-- STATIC -->
+### Decision Template
+```
+### Decision N: [Decision Title]
+**Context:** [What situation led to this decision?]
+**Decision:** [What was decided?]
+**Rationale:** [Why was this chosen?]
+**Trade-offs:** [What were the alternatives and their pros/cons?]
+**Status:** [Active/Superseded/Deprecated]
+**Date:** [When was this decided?]
+```
+
+<!-- DYNAMIC: [Initial architectural decisions made during project setup - to be populated during generation] -->
+
+---
+
+<!-- STATIC -->
+## System Components
+
+<!-- STATIC -->
+### Data Layer
+<!-- DYNAMIC: [Description of data storage, models, and data flow patterns] -->
+
+<!-- STATIC -->
+### Business Logic Layer
+<!-- DYNAMIC: [How business rules and processes are organized and implemented] -->
+
+<!-- STATIC -->
+### Presentation Layer
+<!-- DYNAMIC: [UI architecture, component organization, and state management approach] -->
+
+<!-- STATIC -->
+### Integration Layer
+<!-- DYNAMIC: [External service integrations, API design, and communication patterns] -->
+
+---
+
+<!-- STATIC -->
+## Security Architecture
+
+<!-- STATIC -->
+### Authentication & Authorization
+<!-- DYNAMIC: [How users are authenticated and what authorization patterns are used] -->
+
+<!-- STATIC -->
+### Data Protection
+<!-- DYNAMIC: [How sensitive data is protected, encryption approaches, and privacy considerations] -->
+
+<!-- STATIC -->
+### API Security
+<!-- DYNAMIC: [API security patterns, rate limiting, and input validation approaches] -->
+
+---
+
+<!-- STATIC -->
+## Scalability & Performance
+
+<!-- STATIC -->
+### Performance Considerations
+<!-- DYNAMIC: [Key performance requirements and optimization strategies] -->
+
+<!-- STATIC -->
+### Scalability Patterns
+<!-- DYNAMIC: [How the system can scale and what bottlenecks to monitor] -->
+
+<!-- STATIC -->
+### Monitoring & Observability
+<!-- DYNAMIC: [What metrics are tracked and how system health is monitored] -->
+
+---
+
+<!-- STATIC -->
+## Development Architecture
+
+<!-- STATIC -->
+### Code Organization
+<!-- DYNAMIC: [How code is structured, module boundaries, and dependency management] -->
+
+<!-- STATIC -->
+### Testing Strategy
+<!-- DYNAMIC: [Testing approaches, what gets tested at each level, and testing infrastructure] -->
+
+<!-- STATIC -->
+### Deployment Architecture
+<!-- DYNAMIC: [How the application is deployed, environments, and CI/CD approach] -->
+
+---
+
+<!-- STATIC -->
+## Future Considerations
+
+<!-- STATIC -->
+### Technical Debt
+<!-- DYNAMIC: [Known technical debt items and plans for addressing them] -->
+
+<!-- STATIC -->
+### Evolution Path
+<!-- DYNAMIC: [How the architecture might evolve as requirements change] -->
+
+---
+
+<!-- STATIC -->
+*This document should be updated when making significant architectural changes or decisions. New decisions should be added chronologically with proper documentation of rationale and trade-offs.*

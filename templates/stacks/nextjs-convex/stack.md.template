@@ -1,0 +1,335 @@
+# Technology Stack Guidelines - Next.js + Convex
+
+<!-- STATIC -->
+## Overview
+This project uses Next.js 15+ with Convex for a modern, real-time full-stack application. This document defines the technology choices, patterns, and best practices for maintaining consistency across all development work.
+
+<!-- DYNAMIC: [Project-specific implementation notes and current version details] -->
+
+---
+
+<!-- STATIC -->
+## Core Technologies
+
+<!-- STATIC -->
+### Frontend Framework - Next.js 15+
+<!-- DYNAMIC: [Current Next.js version and key features being used] -->
+- **Version**: Next.js 15.x (App Router)
+- **Key Features**: Server Components, App Router, Server Actions, Streaming
+- **TypeScript**: Strict mode enabled
+- **Why Chosen**: Best-in-class React framework with excellent Convex integration
+
+<!-- STATIC -->
+### Backend/Database - Convex
+<!-- DYNAMIC: [Convex configuration and real-time features] -->
+- **Version**: Latest Convex SDK
+- **Key Capabilities**: Real-time database, server functions, automatic API generation
+- **Authentication**: Convex Auth with multiple providers
+- **Why Chosen**: Excellent developer experience, real-time capabilities, type safety
+
+<!-- STATIC -->
+### Authentication - Convex Auth
+<!-- DYNAMIC: [Auth providers and security configuration] -->
+- **Primary**: Convex Auth
+- **Providers**: <!-- DYNAMIC: [Configured auth providers: Google, GitHub, Email, etc.] -->
+- **Security**: JWT tokens, automatic session management
+- **Pattern**: Server-side auth validation with client-side React hooks
+
+<!-- STATIC -->
+### Styling & UI - Tailwind CSS + shadcn/ui
+<!-- DYNAMIC: [UI component library setup and theming] -->
+- **CSS Framework**: Tailwind CSS v3+
+- **Component Library**: shadcn/ui
+- **Theme System**: CSS variables with dark/light mode support
+- **Icons**: Lucide React
+- **Fonts**: <!-- DYNAMIC: [Selected fonts from Google Fonts or custom] -->
+
+---
+
+<!-- STATIC -->
+## Development Patterns
+
+<!-- STATIC -->
+### Project Structure
+<!-- DYNAMIC: [Current Next.js App Router structure with Convex integration] -->
+
+```
+<!-- DYNAMIC: [Complete directory structure example] -->
+src/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Route groups for auth pages
+│   ├── (dashboard)/       # Protected dashboard routes
+│   ├── api/               # API routes (minimal with Convex)
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── forms/            # Form components
+│   └── layout/           # Layout components
+├── lib/                  # Utility functions
+│   ├── utils.ts          # General utilities
+│   ├── validations.ts    # Zod schemas
+│   └── constants.ts      # App constants
+├── hooks/                # Custom React hooks
+└── types/                # TypeScript type definitions
+
+convex/
+├── schema.ts             # Database schema
+├── auth.config.ts        # Auth configuration
+├── _generated/           # Auto-generated files
+└── functions/            # Server functions
+    ├── users.ts          # User management
+    ├── auth.ts           # Auth functions
+    └── [feature].ts      # Feature-specific functions
+```
+
+<!-- STATIC -->
+### Code Organization Standards
+<!-- DYNAMIC: [Naming conventions and import patterns for Next.js + Convex] -->
+
+**File Naming:**
+- Components: `PascalCase.tsx`
+- Pages: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`
+- Hooks: `use-feature-name.ts`
+- Utils: `kebab-case.ts`
+- Convex functions: `kebab-case.ts`
+
+**Import Order:**
+1. React imports
+2. Next.js imports
+3. External libraries
+4. Convex imports (`convex/react`, `convex/_generated`)
+5. Internal components
+6. Internal utilities
+7. Types
+
+**Component Patterns:**
+- Server Components by default
+- Client Components with "use client" directive
+- Async Server Components for data fetching
+- Error boundaries for robust UX
+
+<!-- STATIC -->
+### Component Patterns
+<!-- DYNAMIC: [React Server Components patterns with Convex data fetching] -->
+
+**Server Components (Default):**
+```typescript
+// Fetch data directly in Server Components
+import { api } from "@/convex/_generated/api";
+import { preloadQuery } from "convex/nextjs";
+
+export default async function HomePage() {
+  const preloadedPosts = await preloadQuery(api.posts.list);
+  
+  return (
+    <div>
+      <Suspense fallback={<PostsSkeleton />}>
+        <PostsList preloadedPosts={preloadedPosts} />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+**Client Components:**
+```typescript
+"use client";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+export function PostsList() {
+  const posts = useQuery(api.posts.list);
+  const createPost = useMutation(api.posts.create);
+  
+  // Component logic...
+}
+```
+
+---
+
+<!-- STATIC -->
+## Configuration & Setup
+
+<!-- STATIC -->
+### Environment Configuration
+<!-- DYNAMIC: [Environment variables and deployment configuration] -->
+
+**Required Environment Variables:**
+```bash
+# Convex
+CONVEX_DEPLOYMENT=dev:your-deployment-name
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+
+# Authentication (if using external providers)
+AUTH_GITHUB_ID=your-github-client-id
+AUTH_GITHUB_SECRET=your-github-secret
+AUTH_GOOGLE_ID=your-google-client-id
+AUTH_GOOGLE_SECRET=your-google-secret
+
+# Optional
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+<!-- STATIC -->
+### Development Workflow
+<!-- DYNAMIC: [Development setup and commands] -->
+
+**Development Commands:**
+```bash
+# Start development servers
+npm run dev          # Next.js dev server
+npx convex dev      # Convex dev environment
+
+# Database management
+npx convex dashboard # Open Convex dashboard
+npx convex import   # Import data
+npx convex export   # Export data
+
+# Building and deployment
+npm run build       # Build Next.js app
+npx convex deploy   # Deploy Convex functions
+```
+
+**Development Setup:**
+1. Clone repository
+2. Install dependencies: `npm install`
+3. Set up Convex: `npx convex dev --run setup`
+4. Configure environment variables
+5. Start development: `npm run dev`
+
+<!-- STATIC -->
+### Testing Strategy
+<!-- DYNAMIC: [Testing frameworks and patterns for Next.js + Convex] -->
+
+**Frontend Testing:**
+- **Unit Tests**: Vitest + React Testing Library
+- **E2E Tests**: Playwright
+- **Component Tests**: Storybook (optional)
+
+**Backend Testing:**
+- **Convex Functions**: Built-in Convex testing utilities
+- **Integration Tests**: Test full data flow
+- **Schema Validation**: Runtime validation with Zod
+
+**Test Structure:**
+```
+tests/
+├── __mocks__/          # Test mocks
+├── e2e/               # Playwright tests
+├── components/        # Component tests
+└── convex/           # Convex function tests
+```
+
+---
+
+<!-- STATIC -->
+## Best Practices & Conventions
+
+<!-- STATIC -->
+### Code Quality
+<!-- DYNAMIC: [ESLint, Prettier, and TypeScript configuration] -->
+
+**Linting & Formatting:**
+- **ESLint**: Next.js recommended + Convex rules
+- **Prettier**: Consistent code formatting
+- **TypeScript**: Strict mode with path mapping
+- **Husky**: Pre-commit hooks for quality gates
+
+**Quality Gates:**
+- Type checking: `tsc --noEmit`
+- Linting: `eslint . --ext .ts,.tsx`
+- Testing: `npm test`
+- Build validation: `npm run build`
+
+<!-- STATIC -->
+### Performance Guidelines
+<!-- DYNAMIC: [Next.js performance optimization with Convex] -->
+
+**Next.js Optimizations:**
+- Use Server Components for initial data loading
+- Implement proper loading states with Suspense
+- Optimize images with next/image
+- Use dynamic imports for code splitting
+- Enable compression and caching
+
+**Convex Optimizations:**
+- Design efficient database queries
+- Use proper indexes for query performance
+- Implement pagination for large datasets
+- Cache computed values with Convex functions
+- Monitor query performance in dashboard
+
+<!-- STATIC -->
+### Security Considerations
+<!-- DYNAMIC: [Security best practices for Next.js + Convex stack] -->
+
+**Authentication Security:**
+- Server-side auth validation in all API routes
+- Proper session management with Convex Auth
+- CSRF protection with Next.js built-ins
+- Secure cookie settings for production
+
+**Data Security:**
+- Input validation with Zod schemas
+- Database-level access control with Convex
+- Sanitize user inputs
+- Rate limiting for public endpoints
+- Environment variable security
+
+---
+
+<!-- STATIC -->
+## External Resources
+
+<!-- STATIC -->
+### Official Documentation
+<!-- DYNAMIC: [Current documentation links for all technologies] -->
+
+**Primary Resources:**
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Convex Documentation](https://docs.convex.dev)
+- [shadcn/ui Components](https://ui.shadcn.com)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+**Integration Guides:**
+- [Next.js + Convex Integration](https://docs.convex.dev/client/react/nextjs)
+- [Convex Auth Setup](https://docs.convex.dev/auth)
+- [Next.js Deployment](https://nextjs.org/docs/deployment)
+
+<!-- STATIC -->
+### Community Resources
+<!-- DYNAMIC: [Recommended learning resources and community links] -->
+
+**Learning Resources:**
+- [Convex Stack Examples](https://github.com/get-convex/convex-examples)
+- [Next.js Examples](https://github.com/vercel/next.js/tree/canary/examples)
+- [shadcn/ui Examples](https://github.com/shadcn-ui/ui)
+
+**Community:**
+- [Convex Discord](https://convex.dev/community)
+- [Next.js Discord](https://nextjs.org/discord)
+- [Stack Overflow: convex](https://stackoverflow.com/questions/tagged/convex)
+
+<!-- STATIC -->
+### Updates & Migration
+<!-- DYNAMIC: [Strategy for keeping stack current] -->
+
+**Update Strategy:**
+- Monitor Next.js releases for App Router improvements
+- Follow Convex SDK updates for new features
+- Update dependencies monthly with testing
+- Review security advisories weekly
+- Test major updates in staging environment
+
+**Migration Considerations:**
+- Next.js canary features evaluation
+- Convex schema migrations
+- Breaking changes in dependencies
+- Performance impact assessment
+
+---
+
+<!-- STATIC -->
+*This document should be updated when significant technology changes occur or when upgrading to new versions. Always consult the latest official documentation for the most current patterns and best practices.*

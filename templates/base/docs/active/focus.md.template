@@ -1,0 +1,56 @@
+# Current Focus
+
+<!-- STATIC -->
+## Active Work
+<!-- DYNAMIC: [What is currently being worked on - updated in real-time] -->
+
+**Current Item:** [Feature/Enhancement/Bug name and ID]
+**Status:** [In Progress/Feedback]
+**Started:** [When work began on this item]
+
+### What I'm Working On
+<!-- DYNAMIC: [Specific task or subtask currently active] -->
+
+### Next Steps
+<!-- DYNAMIC: [Immediate next actions to take] -->
+1. [Specific next step]
+2. [Specific next step]
+3. [Specific next step]
+
+### Current Blockers
+<!-- DYNAMIC: [Any issues preventing progress] -->
+
+---
+
+<!-- STATIC -->
+## Session Context
+
+<!-- STATIC -->
+### Today's Goals
+<!-- DYNAMIC: [What should be accomplished in this session] -->
+
+<!-- STATIC -->
+### Progress Made
+<!-- DYNAMIC: [What has been completed this session] -->
+
+<!-- STATIC -->
+### Decisions Made
+<!-- DYNAMIC: [Any important decisions made during this session] -->
+
+---
+
+<!-- STATIC -->
+## Handoff Information
+
+<!-- STATIC -->
+### For Next Session
+<!-- DYNAMIC: [Clear instructions for picking up work] -->
+
+<!-- STATIC -->
+### Context for AI
+<!-- DYNAMIC: [Important context that AI assistants should know] -->
+
+---
+
+<!-- STATIC -->
+*This file should be updated throughout the work session to maintain clear focus and enable clean handoffs. Updated by both human and AI during active development.*

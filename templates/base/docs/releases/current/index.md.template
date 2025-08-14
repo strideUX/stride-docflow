@@ -1,0 +1,56 @@
+# Current Release: <!-- DYNAMIC: [Release Version/Name] --> Overview
+
+<!-- STATIC -->
+## 🎯 Current Focus
+<!-- DYNAMIC: [What is currently being worked on - will be updated during development] -->
+- **Active**: [Current item being worked on with status]
+- **Next**: [Next priority item]
+
+<!-- STATIC -->
+## 📊 Release Progress <!-- DYNAMIC: [X/Y items complete] -->
+
+<!-- STATIC -->
+### Features <!-- DYNAMIC: [X/Y complete] -->
+<!-- DYNAMIC: [List of features with checkboxes and current status - populated during generation] -->
+- [ ] Feature 1 - [Name] (Status)
+- [ ] Feature 2 - [Name] (Status)
+
+<!-- STATIC -->
+### Enhancements <!-- DYNAMIC: [X/Y complete] -->
+<!-- DYNAMIC: [List of enhancements with checkboxes and current status - populated during generation] -->
+- [ ] Enhancement 1 - [Name] (Status)
+- [ ] Enhancement 2 - [Name] (Status)
+
+<!-- STATIC -->
+### Bugs <!-- DYNAMIC: [X/Y complete] -->
+<!-- DYNAMIC: [List of bugs with checkboxes and current status - populated during generation] -->
+- [ ] Bug 1 - [Name] (Priority: High/Low/Critical)
+- [ ] Bug 2 - [Name] (Priority: High/Low/Critical)
+
+<!-- STATIC -->
+## 🔗 Quick Links
+- [Features Details](./features.md)
+- [Enhancements Details](./enhancements.md) 
+- [Bugs Details](./bugs.md)
+- [Current Session](../../active/session.md)
+- [Session Focus](../../active/focus.md)
+- [Backlog Items](../../backlog/)
+
+<!-- STATIC -->
+## 📋 Status Legend
+- **Idea**: Rough concept, needs planning
+- **Planning**: Being defined and scoped
+- **Ready**: Fully defined, ready for implementation
+- **In Progress**: Currently being worked on
+- **Feedback**: Implemented, needs iteration/review
+- **Complete**: Finished and verified
+- **Blocked**: Cannot proceed due to dependency
+
+<!-- STATIC -->
+## 🚨 Critical Items
+<!-- DYNAMIC: [Any critical bugs or blockers - updated in real-time] -->
+
+---
+
+<!-- STATIC -->
+*This file is the primary reference for Cursor AI. Keep it updated as work progresses. Last updated: <!-- DYNAMIC: [Auto-update timestamp] -->*

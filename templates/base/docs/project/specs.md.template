@@ -1,0 +1,91 @@
+# <!-- DYNAMIC: [Project Name] --> - Project Specifications
+
+<!-- STATIC -->
+## Overview
+This document serves as the single source of truth for project requirements, scope, and high-level specifications. It provides essential context for AI development assistants and team members.
+
+<!-- DYNAMIC: [2-3 sentence description of what this application does, who it's for, and the primary value proposition] -->
+
+---
+
+<!-- STATIC -->
+## Core Requirements
+
+<!-- STATIC -->
+### Primary Objectives
+<!-- DYNAMIC: [List 3-5 main goals this application should achieve. Be specific and measurable where possible] -->
+
+<!-- STATIC -->
+### Success Criteria
+<!-- DYNAMIC: [Define what "success" looks like for this project. Include measurable outcomes where possible] -->
+
+<!-- STATIC -->
+### Out of Scope
+<!-- DYNAMIC: [Explicitly list what this project will NOT include. This prevents scope creep and sets clear boundaries] -->
+
+---
+
+<!-- STATIC -->
+## Technical Context
+
+<!-- STATIC -->
+### Technology Stack
+<!-- DYNAMIC: [Reference the chosen stack from stack.md - will be populated during generation] -->
+
+<!-- STATIC -->
+### Key Integrations
+<!-- DYNAMIC: [List any external services, APIs, or systems this application needs to integrate with] -->
+
+<!-- STATIC -->
+### Performance Requirements
+<!-- DYNAMIC: [Any specific performance, scalability, or reliability requirements] -->
+
+---
+
+<!-- STATIC -->
+## User Context
+
+<!-- STATIC -->
+### Target Users
+<!-- DYNAMIC: [Define the primary user types/roles who will use this application] -->
+
+<!-- STATIC -->
+### User Journey Overview
+<!-- DYNAMIC: [High-level flow of how users will interact with the application] -->
+
+---
+
+<!-- STATIC -->
+## Business Context
+
+<!-- STATIC -->
+### Project Timeline
+<!-- DYNAMIC: [High-level milestones or deadlines if applicable] -->
+
+<!-- STATIC -->
+### Constraints & Considerations
+<!-- DYNAMIC: [Any business constraints, compliance requirements, or special considerations] -->
+
+---
+
+<!-- STATIC -->
+## AI Development Context
+
+<!-- STATIC -->
+### Key Patterns to Maintain
+<!-- DYNAMIC: [Any specific patterns, conventions, or approaches that should be consistent throughout development] -->
+
+<!-- STATIC -->
+### Domain Knowledge
+<!-- DYNAMIC: [Any domain-specific knowledge that AI assistants should understand about this project] -->
+
+---
+
+<!-- STATIC -->
+## References
+<!-- DYNAMIC: [Links to wireframes, design mockups, external documentation, or other relevant resources] -->
+
+---
+
+<!-- STATIC -->
+*This document should be updated when significant scope or requirement changes occur. See docs/active/session.md for day-to-day development updates.*
