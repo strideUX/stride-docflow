@@ -17,15 +17,33 @@ import { listTemplatesCommand } from './commands/list-templates.js';
 import { createCommand } from './commands/create.js';
 import { configCommand } from './commands/config.js';
 
-// Handle Ctrl+C gracefully like Claude Code - immediate exit on first Ctrl+C
+// Handle Ctrl+C gracefully - force immediate exit
+let exitingInProgress = false;
+
 process.on('SIGINT', () => {
+  if (exitingInProgress) {
+    // Second Ctrl+C - force immediate exit
+    console.log('\n🚨 Force exiting...');
+    process.exit(1);
+  }
+  
+  exitingInProgress = true;
+  (global as any).exitingInProgress = true; // Share flag with other modules
   console.log('\n👋 Exiting Docflow...');
-  process.exit(0);
+  
+  // Clear any active progress lines
+  process.stdout.write('\r\x1b[K');
+  
+  // Force exit after short delay to allow cleanup
+  setTimeout(() => {
+    process.exit(0);
+  }, 100);
 });
 
 // Handle termination signals
 process.on('SIGTERM', () => {
   console.log('\n👋 Docflow terminated');
+  process.stdout.write('\r\x1b[K');
   process.exit(0);
 });
 

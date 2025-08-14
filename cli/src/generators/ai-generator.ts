@@ -32,6 +32,14 @@ export async function generateWithAI(
 
 		for (let i = 0; i < dynamicSections.length; i++) {
 			const section = dynamicSections[i]!;
+			
+			// Check if process is exiting (Ctrl+C pressed)
+			if ((global as any).exitingInProgress) {
+				process.stdout.write('\r\x1b[K');
+				console.log('\n⚠️  Generation interrupted by user');
+				break;
+			}
+			
 			try {
 				updateAIProgress(i + 1, dynamicSections.length, section.instruction);
 				const aiContent = await generateSectionWithAI(
