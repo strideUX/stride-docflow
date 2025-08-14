@@ -117,7 +117,24 @@ export async function generateDocs(
 		process.stdout.write('\r\x1b[K');
 		console.log(`\n✨ ${chalk.green('Documentation Complete!')}`);
 		console.log(`📊 ${chalk.green(successCount)} files generated successfully`);
-		if (warningCount > 0) console.log(`⚠️  ${chalk.yellow(warningCount)} files had warnings`);
+		if (warningCount > 0) {
+			console.log(`⚠️  ${chalk.yellow(warningCount)} files had warnings`);
+			// Show detailed error information for debugging
+			const globalErrors = (global as any).docflowErrors;
+			if (globalErrors && globalErrors.size > 0) {
+				console.log(`\n🔍 ${chalk.yellow('Warning Details for Debugging:')}`);
+				const uniqueErrors = Array.from(globalErrors).slice(0, 10) as string[];
+				uniqueErrors.forEach((error: string, i: number) => {
+					const truncated = error.length > 150 ? error.slice(0, 150) + '...' : error;
+					console.log(`   ${i + 1}. ${chalk.gray(truncated)}`);
+				});
+				if (globalErrors.size > 10) {
+					console.log(`   ${chalk.gray(`... and ${globalErrors.size - 10} more unique errors`)}`);
+				}
+				// Clear for next run
+				delete (global as any).docflowErrors;
+			}
+		}
 		if (errorCount > 0) console.log(`❌ ${chalk.red(errorCount)} files failed`);
 
 		return {

@@ -1,6 +1,7 @@
 import { OpenAI } from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import * as p from '@clack/prompts';
+import path from 'path';
 import { GenerationOptions } from './docs.js';
 
 export async function generateWithAI(
@@ -25,6 +26,10 @@ export async function generateWithAI(
 			process.stdout.write(`🧠 AI Generation: ${percentage}% (${sectionIndex}/${total}) | ${truncated}`);
 		};
 
+		let failureCount = 0;
+		let successCount = 0;
+		const detailedErrors: string[] = [];
+
 		for (let i = 0; i < dynamicSections.length; i++) {
 			const section = dynamicSections[i]!;
 			try {
@@ -37,14 +42,12 @@ export async function generateWithAI(
 					options.reasoningEffort,
 					options.verbosity
 				);
-				// Replace the DYNAMIC marker/placeholder with generated content
-				processedContent = processedContent.replace(
-					section.fullMatch,
-					aiContent
-				);
+				processedContent = processedContent.replace(section.fullMatch, aiContent);
+				successCount++;
 			} catch (e: any) {
-				process.stdout.write('\r\x1b[K');
-				console.log(`⚠️  AI section failed in ${filePath}: ${e?.message || String(e)}`);
+				failureCount++;
+				const errorMessage = e?.message || String(e);
+				detailedErrors.push(errorMessage);
 				processedContent = processedContent.replace(
 					section.fullMatch,
 					formatLocalContent(section.instruction, context, filePath)
@@ -55,10 +58,25 @@ export async function generateWithAI(
 		// Clear AI progress line
 		process.stdout.write('\r\x1b[K');
 
+		// Consolidated summary if any failures, and collect errors globally for final summary
+		if (failureCount > 0) {
+			const fileName = path.basename(filePath);
+			console.log(`⚠️  ${fileName}: ${successCount}/${dynamicSections.length} AI sections succeeded (${failureCount} used fallback)`);
+			// Collect detailed errors globally
+			if (!(global as any).docflowErrors) {
+				(global as any).docflowErrors = new Set<string>();
+			}
+			detailedErrors.forEach(err => (global as any).docflowErrors.add(err));
+		}
+
 		return processedContent;
 
 	} catch (error: any) {
-		p.log.warn(`AI generation failed for ${filePath}, falling back to local generation`);
+		// Collect top-level errors for summary
+		if (!(global as any).docflowErrors) {
+			(global as any).docflowErrors = new Set<string>();
+		}
+		(global as any).docflowErrors.add(error?.message || String(error));
 		try {
 			const sections = extractDynamicSections(content);
 			let processed = content;
@@ -70,7 +88,7 @@ export async function generateWithAI(
 			}
 			return processed;
 		} catch (e: any) {
-			p.log.warn(`Local fallback also failed: ${e?.message || String(e)}`);
+			// Last-resort
 			// Final safety: leave placeholders as-is
 			return content;
 		}
@@ -191,24 +209,63 @@ async function generateWithOpenAI(
 		apiKey: process.env.OPENAI_API_KEY!
 	});
 
-	const selectedModel = model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o';
+	const getModelType = (modelName: string): 'o1' | 'gpt5' | 'standard' => {
+		if (modelName.includes('o1')) return 'o1';
+		if (modelName.includes('gpt-5') || modelName.includes('gpt5')) return 'gpt5';
+		return 'standard';
+	};
 
-	// For now, use Chat Completions API for all models until GPT-5 is released
-	const isO1Model = selectedModel.startsWith('o1-');
-	
-	const response = await openai.chat.completions.create({
+	const getOptimalParams = (modelName: string) => {
+		if (modelName.includes('gpt-5') || modelName.includes('gpt5')) {
+			return { max_completion_tokens: 3000 } as const;
+		}
+		if (modelName.includes('gpt-4o')) {
+			return { max_completion_tokens: 2000, temperature: 0.3 } as const;
+		}
+		return { max_completion_tokens: 2000, temperature: 0.3 } as const;
+	};
+
+	const selectedModel = (model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-5-mini').trim();
+	const modelType = getModelType(selectedModel);
+	const baseParams = getOptimalParams(selectedModel);
+
+	const requestParams: any = {
 		model: selectedModel,
-		messages: isO1Model 
+		messages: modelType === 'o1'
 			? [{ role: 'user', content: `${systemPrompt}\n\n${userPrompt}` }]
 			: [
 				{ role: 'system', content: systemPrompt },
 				{ role: 'user', content: userPrompt }
 			],
-		...(isO1Model ? {} : { temperature: 0.3 }),
-		max_completion_tokens: 2000
-	});
+		max_completion_tokens: baseParams.max_completion_tokens,
+	};
 
-	return response.choices[0]?.message?.content || '[Content generation failed]';
+	// Only add temperature for models that support it (not o1 or gpt-5)
+	if (modelType === 'standard' && (baseParams as any).temperature !== undefined) {
+		requestParams.temperature = (baseParams as any).temperature;
+	}
+
+	// Add GPT-5 specific parameters
+	if (modelType === 'gpt5') {
+		const eff = reasoningEffort || process.env.DOCFLOW_REASONING_EFFORT;
+		const verb = verbosity || process.env.DOCFLOW_VERBOSITY;
+		if (eff) requestParams.reasoning_effort = eff;
+		if (verb) requestParams.response_format = { type: 'text', verbosity: verb };
+	}
+
+	// Debugging output for model params to help diagnose GPT-5 issues
+	console.log('\n🔧 Debug - Request Parameters:');
+	console.log(`Model: ${selectedModel}`);
+	console.log(`Model Type: ${modelType}`);
+	console.log('Parameters:', JSON.stringify(requestParams, null, 2));
+
+	try {
+		const response = await openai.chat.completions.create(requestParams);
+		return response.choices[0]?.message?.content || '[Content generation failed]';
+	} catch (error: any) {
+		console.log('\n❌ OpenAI API Error:', error?.message || String(error));
+		throw error;
+	}
 }
 
 async function generateWithAnthropic(
