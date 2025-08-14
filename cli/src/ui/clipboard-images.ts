@@ -139,17 +139,17 @@ class ClipboardImageManager {
   }): Promise<{ text: string; images: PastedImage[] }> {
     const images: PastedImage[] = [];
 
-    // Enhanced multi-image flow
     p.log.info(`${promptConfig.message}`);
     p.log.info(`${chalk.gray('Tip: Paste images with')} ${chalk.cyan('Ctrl+V')} ${chalk.gray('or provide file paths. You can add multiple images!')}`);
 
     let addingImages = true;
 
     while (addingImages) {
-      // Check for image in clipboard
+      // Always check clipboard first
       const clipboardType = await this.detectClipboardContent();
 
       if (clipboardType === 'image') {
+        // Found image in clipboard - ask if they want to use it
         const shouldUseImage = await p.confirm({
           message: `Detected image in clipboard. Include it? ${images.length > 0 ? `(${images.length} images added so far)` : ''}`,
           initialValue: true
@@ -162,21 +162,40 @@ class ClipboardImageManager {
             p.log.success(`Added ${pastedImage.placeholder}`);
           }
         }
-      }
 
-      // Ask if they want to add more images
-      const addMore = await p.confirm({
-        message: images.length > 0
-          ? `Add another image? (${images.length} images added)`
-          : 'Do you have images to add? (screenshots, wireframes, mockups, etc.)',
-        initialValue: images.length === 0 // Default to true if no images yet
-      });
+        // After processing (or skipping) the clipboard image, ask if they want more
+        const addMore = await p.confirm({
+          message: `Add another image? (${images.length} images added)`,
+          initialValue: false // Default to false after processing one
+        });
 
-      if (p.isCancel(addMore) || !addMore) {
-        addingImages = false;
-      } else if (images.length === 0) {
-        // If they want to add images but clipboard is empty, prompt for file paths via next text prompt
-        p.log.info(`${chalk.gray('Copy an image to clipboard or provide a file path in the next prompt')}`);
+        if (p.isCancel(addMore) || !addMore) {
+          addingImages = false;
+        }
+
+      } else {
+        // No image in clipboard - ask if they want to add images
+        const wantToAdd = await p.confirm({
+          message: images.length > 0
+            ? `Add another image? (${images.length} images added - copy to clipboard first)`
+            : 'Do you have images to add? (screenshots, wireframes, mockups, etc.)',
+          initialValue: images.length === 0 // Default to true if no images yet
+        });
+
+        if (p.isCancel(wantToAdd) || !wantToAdd) {
+          addingImages = false;
+        } else {
+          // They want to add but no image in clipboard
+          p.log.info(`${chalk.yellow('Copy an image to clipboard, then press Enter to continue...')}`);
+
+          // Wait for them to prepare clipboard
+          await p.text({
+            message: 'Press Enter when you have copied an image to clipboard (or type "skip" to continue)',
+            placeholder: 'Press Enter...'
+          });
+
+          // Loop will check clipboard again on next iteration
+        }
       }
     }
 
@@ -199,7 +218,7 @@ class ClipboardImageManager {
       process.exit(0);
     }
 
-    // Enhanced file path detection for multiple paths
+    // Handle file paths in text input (existing logic for multiple paths)
     if (textResponse && this.containsImagePaths(textResponse)) {
       const imagePaths = this.extractImagePaths(textResponse);
 
@@ -210,7 +229,6 @@ class ClipboardImageManager {
         });
 
         if (shouldUseAsImage && !p.isCancel(shouldUseAsImage)) {
-          // Process each path as image
           const originalClipboard = await clipboardy.read();
           await clipboardy.write(imagePath);
 
@@ -224,7 +242,6 @@ class ClipboardImageManager {
         }
       }
 
-      // If all paths were processed as images, clear them from text
       if (imagePaths.length > 0) {
         let remainingText = textResponse;
         for (const pth of imagePaths) {
