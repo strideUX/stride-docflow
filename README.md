@@ -58,6 +58,9 @@ docflow generate --dry-run
 # Generate project documentation
 docflow generate [options]
 
+# Use GPT-5 with optimized settings
+docflow generate --model gpt-5-mini --reasoning-effort minimal --verbosity medium
+
 # List available technology stacks
 docflow list
 
@@ -115,11 +118,42 @@ your-project/
 
 ```bash
 # AI Providers
-OPENAI_API_KEY=your-openai-key
-ANTHROPIC_API_KEY=your-anthropic-key
+OPENAI_API_KEY=sk-proj-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+
+# Optional: Default model preferences
+DOCFLOW_DEFAULT_PROVIDER=openai
+DOCFLOW_DEFAULT_MODEL=gpt-5-mini
+
+# Optional: GPT-5 optimization settings
+DOCFLOW_REASONING_EFFORT=minimal   # minimal, low, medium, high
+DOCFLOW_VERBOSITY=medium          # low, medium, high
 
 # Optional: Research capabilities
 CONTEXT7_API_KEY=your-context7-key
+```
+
+### GPT-5 Optimizations
+
+Docflow leverages GPT-5's latest features for optimal documentation generation:
+
+- **🧠 Reasoning Effort**: Controls AI processing depth
+  - `minimal` - Fast, cost-effective (default for docs)
+  - `low` - Balanced reasoning
+  - `medium` - Thorough analysis  
+  - `high` - Deep reasoning for complex projects
+
+- **📝 Verbosity Control**: Manages output length
+  - `low` - Concise, bullet-point style
+  - `medium` - Balanced detail (default)
+  - `high` - Comprehensive explanations
+
+- **⚡ Responses API**: Automatic use of GPT-5's optimized API for better performance
+
+```bash
+# Fine-tune GPT-5 for your needs
+docflow generate --reasoning-effort low --verbosity high   # Detailed explanations
+docflow generate --reasoning-effort minimal --verbosity low # Fast, concise output
 ```
 
 ### Custom Templates

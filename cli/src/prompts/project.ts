@@ -86,7 +86,7 @@ class ProjectPrompts {
       aiProvider: () => options.aiProvider ? Promise.resolve(options.aiProvider) : p.select({
         message: 'Which AI provider would you like to use?',
         options: [
-          { label: 'OpenAI (GPT-4, GPT-4o)', value: 'openai', hint: 'Recommended for detailed documentation' },
+          { label: 'OpenAI (GPT-5-mini, GPT-4o)', value: 'openai', hint: 'Recommended - includes latest models' },
           { label: 'Anthropic (Claude)', value: 'anthropic', hint: 'Great for technical content' },
           { label: 'Local/Custom', value: 'local', hint: 'Use your own AI setup' }
         ],

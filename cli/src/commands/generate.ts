@@ -13,6 +13,8 @@ export const generateCommand = new Command('generate')
   .option('-o, --output <path>', 'Output directory', './project-docs')
   .option('--ai-provider <provider>', 'AI provider (openai, anthropic, local)', 'openai')
   .option('--model <model>', 'AI model to use')
+  .option('--reasoning-effort <effort>', 'GPT-5 reasoning effort (minimal, low, medium, high)', 'minimal')
+  .option('--verbosity <level>', 'GPT-5 output verbosity (low, medium, high)', 'medium')
   .option('--research', 'Enable research mode with MCP and web search', true)
   .option('--dry-run', 'Show what would be generated without creating files', false)
   .action(async (options) => {

@@ -53,13 +53,34 @@ Return JSON only, no other text.`;
         apiKey: process.env.OPENAI_API_KEY
       });
 
-      const result = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3
-      });
+      const model = process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-5-mini';
+      const isGPT5Model = model.startsWith('gpt-5');
+      const isO1Model = model.startsWith('o1-');
 
-      response = result.choices[0]?.message?.content || '';
+      if (isGPT5Model) {
+        // Use Responses API for GPT-5 models
+        const result = await openai.responses.create({
+          model,
+          input: prompt,
+          reasoning: {
+            effort: 'minimal'  // Fast parsing of project ideas
+          },
+          text: {
+            verbosity: 'low'   // Concise JSON output
+          }
+        });
+        
+        response = result.text || '';
+      } else {
+        // Fallback to Chat Completions for older models
+        const result = await openai.chat.completions.create({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          ...(isO1Model ? {} : { temperature: 0.3 })
+        });
+
+        response = result.choices[0]?.message?.content || '';
+      }
     }
 
     // Extract JSON from response
