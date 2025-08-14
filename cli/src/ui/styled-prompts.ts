@@ -30,7 +30,7 @@ export const styledPrompts = {
   
   note: (message: string, title?: string) => {
     p.note(
-      chalk.gray(message),
+      theme.text(message),
       title ? theme.cyan(title) : undefined
     );
   },

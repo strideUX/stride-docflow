@@ -193,6 +193,12 @@ class ClipboardImageManager {
         if (pastedImage) {
           images.push(pastedImage);
           console.log(`✅ Added ${pastedImage.placeholder}`);
+          
+          // Return the placeholder as text so it shows in the UI
+          return {
+            text: pastedImage.placeholder,
+            images
+          };
         }
         
         // Restore original clipboard content
