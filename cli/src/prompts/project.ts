@@ -111,23 +111,28 @@ class ProjectPrompts {
         });
       },
 
-      name: () => {
+      name: async () => {
         const aiSuggestedName = data.name && data.name.length > 0 ? data.name : 'Fitness Tracker Pro';
         const hasAiSuggestion = data.name && data.name.length > 0;
         
         if (hasAiSuggestion) {
-          console.log(`🤖 ${theme.fuchsia('AI Suggestion')}: "${theme.cyan(aiSuggestedName)}" (press Enter to use, or type your own)`);
+          console.log(`🤖 ${theme.fuchsia('AI Suggestion')}: "${theme.cyan(aiSuggestedName)}" (press Enter to accept, or type your own)`);
         }
         
-        return p.text({
+        const userInput = await p.text({
           message: 'What should we call your app?',
           placeholder: aiSuggestedName,
-          defaultValue: hasAiSuggestion ? aiSuggestedName : undefined,
           validate: (value) => {
-            if (!value || value.length === 0) return 'App name is required';
+            // Allow empty input if we have an AI suggestion (user presses Enter)
+            if ((!value || value.length === 0) && !hasAiSuggestion) {
+              return 'App name is required';
+            }
             return undefined;
           }
         });
+        
+        // If user pressed Enter (empty input) and we have AI suggestion, use it
+        return (!userInput || (typeof userInput === 'string' && userInput.length === 0)) && hasAiSuggestion ? aiSuggestedName : userInput;
       },
 
       stack: () => (data.stack || options.stack) ? Promise.resolve(data.stack || options.stack) : p.select({
