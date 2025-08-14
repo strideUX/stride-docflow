@@ -40,7 +40,15 @@ export const generateCommand = new Command('generate')
       }
 
       // Generate documentation with progress tracking
-      const result = await generateDocs(projectData, options);
+      const result = await generateDocs(projectData, {
+        output: options.output,
+        aiProvider: options.aiProvider,
+        model: options.model,
+        research: options.research,
+        dryRun: options.dryRun,
+        reasoningEffort: options.reasoningEffort,
+        verbosity: options.verbosity,
+      });
 
       styledPrompts.outro(`${symbols.success} Project documentation generated successfully!`);
       
