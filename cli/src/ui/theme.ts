@@ -1,17 +1,17 @@
 import chalk from 'chalk';
 import stripAnsi from 'strip-ansi';
 
-// Miami Neon Color Palette
+// Miami Neon Color Palette - Adjusted for better readability
 export const colors = {
-  fuchsia: '#FF00CC',
-  hotPink: '#FF4DD2', 
-  violet: '#B266FF',
-  electricBlue: '#4D4DFF',
-  cyan: '#00E5FF',
+  fuchsia: '#FF66E6',      // Lightened for better contrast
+  hotPink: '#FF99E6', 
+  violet: '#CC99FF',       // Much lighter purple
+  electricBlue: '#66B3FF', // Lightened blue
+  cyan: '#66FFFF',         // Brightened cyan
   // Accent colors
   ocean: '#1A1A2E',
-  chrome: '#C0C0C0',
-  palm: '#228B22'
+  chrome: '#E0E0E0',       // Brighter for better visibility
+  palm: '#66DD66'          // Brighter green
 };
 
 // Chalk color functions with fallbacks
@@ -27,11 +27,11 @@ export const theme = {
   neonGradient: (text: string) => {
     const chars = text.split('');
     const colors = [
-      chalk.hex('#FF00CC'), // fuchsia
-      chalk.hex('#FF4DD2'), // hot pink
-      chalk.hex('#B266FF'), // violet
-      chalk.hex('#4D4DFF'), // electric blue
-      chalk.hex('#00E5FF')  // cyan
+      chalk.hex('#FF66E6'), // fuchsia
+      chalk.hex('#FF99E6'), // hot pink
+      chalk.hex('#CC99FF'), // violet
+      chalk.hex('#66B3FF'), // electric blue
+      chalk.hex('#66FFFF')  // cyan
     ];
     
     return chars.map((char, i) => {

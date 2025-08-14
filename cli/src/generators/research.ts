@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { context7Search } from '../mcp/tools/context7.js';
+import { grepSearch } from '../mcp/tools/grep.js';
+import { webSearchMCP } from '../mcp/tools/web-search.js';
 
 export interface ResearchResult {
   query: string;
@@ -13,18 +16,10 @@ export interface ResearchResult {
 
 export async function webSearch(query: string): Promise<ResearchResult> {
   try {
-    // Note: In a real implementation, this would integrate with:
-    // 1. MCP context7 for documentation lookup
-    // 2. MCP grep for code pattern search
-    // 3. Web search APIs for current information
-    
-    console.log(`🔍 Researching: ${query}`);
-    
-    // Mock implementation - in production this would:
-    // - Use MCP context7 to search documentation
-    // - Use web search APIs to find current best practices
-    // - Cache results for efficiency
-    
+    const mcp = await webSearchMCP({ query, limit: 5 });
+    if (mcp.sources.length > 0 || mcp.summary) {
+      return { query: mcp.query, sources: mcp.sources, summary: mcp.summary || `Search results for ${query}` };
+    }
     return {
       query,
       sources: [
@@ -37,7 +32,6 @@ export async function webSearch(query: string): Promise<ResearchResult> {
       ],
       summary: `Research completed for ${query}. Found current best practices and patterns.`
     };
-    
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.warn(`Research failed for "${query}":`, message);
@@ -50,31 +44,29 @@ export async function webSearch(query: string): Promise<ResearchResult> {
 }
 
 export async function mcpContext7Search(query: string): Promise<ResearchResult> {
-  // This would integrate with the context7 MCP for documentation search
-  console.log(`📚 Searching documentation for: ${query}`);
-  
-  // TODO: Implement actual MCP integration
-  // This would use the context7 MCP to search current documentation
-  
-  return {
-    query,
-    sources: [],
-    summary: `MCP search for ${query} - would return current documentation`
-  };
+  try {
+    const res = await context7Search({ query, limit: 8 });
+    return {
+      query,
+      sources: res.sources,
+      summary: res.summary || `Documentation results for ${query}`
+    };
+  } catch (e) {
+    return { query, sources: [], summary: `MCP unavailable for ${query}` };
+  }
 }
 
 export async function mcpGrepSearch(pattern: string, fileTypes: string[] = []): Promise<ResearchResult> {
-  // This would integrate with the grep MCP for code pattern search
-  console.log(`🔍 Searching code patterns for: ${pattern}`);
-  
-  // TODO: Implement actual MCP integration
-  // This would use the grep MCP to find code patterns and examples
-  
-  return {
-    query: pattern,
-    sources: [],
-    summary: `Code pattern search for ${pattern} - would return matching code examples`
-  };
+  try {
+    const res = await grepSearch({ pattern, fileTypes, limit: 30 });
+    return {
+      query: pattern,
+      sources: res.sources.map(s => ({ title: s.title, url: s.url, snippet: s.snippet })),
+      summary: res.summary || `Matches for ${pattern}`
+    };
+  } catch (e) {
+    return { query: pattern, sources: [], summary: `MCP unavailable for ${pattern}` };
+  }
 }
 
 export class ResearchEngine {

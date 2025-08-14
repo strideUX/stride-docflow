@@ -4,8 +4,18 @@ import { z } from 'zod';
 import { parseIdeaWithAI } from '../generators/ai-parser.js';
 import { getAvailableStacks } from '../templates/stack-registry.js';
 
+// Convert user-friendly name to URL-safe project slug
+function toProjectSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with hyphens
+    .replace(/^-+|-+$/g, '')     // Remove leading/trailing hyphens
+    .replace(/-+/g, '-');        // Collapse multiple hyphens
+}
+
 const ProjectDataSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
+  projectSlug: z.string().min(1, 'Project slug is required'), // URL-safe version for directories
   description: z.string().min(10, 'Description should be at least 10 characters'),
   stack: z.string(),
   objectives: z.array(z.string()),
@@ -13,6 +23,14 @@ const ProjectDataSchema = z.object({
   features: z.array(z.string()),
   constraints: z.array(z.string()).optional(),
   timeline: z.string().optional(),
+  designInput: z.object({
+    vibe: z.string().optional(),
+    lookAndFeel: z.string().optional(), 
+    userFlows: z.array(z.string()).optional(),
+    screens: z.array(z.string()).optional(),
+    wireframes: z.string().optional(),
+    inspirations: z.string().optional()
+  }).optional(),
   aiProvider: z.enum(['openai', 'anthropic', 'local']),
   model: z.string().optional()
 });
@@ -49,20 +67,20 @@ class ProjectPrompts {
 
     // Use Clack's group prompt for a beautiful flow
     const answers = await p.group({
-      name: () => data.name ? Promise.resolve(data.name) : p.text({
-        message: 'What is your project name?',
-        placeholder: 'My Awesome Project',
+      description: () => data.description ? Promise.resolve(data.description) : p.text({
+        message: 'Describe your app idea:',
+        placeholder: 'A fitness tracking app that helps users set goals and track workouts...',
         validate: (value) => {
-          if (!value || value.length === 0) return 'Project name is required';
+          if (!value || value.length < 10) return 'Description should be at least 10 characters';
           return undefined;
         }
       }),
-      
-      description: () => data.description ? Promise.resolve(data.description) : p.text({
-        message: 'Describe your project in one sentence:',
-        placeholder: 'A platform that helps users...',
+
+      name: () => data.name ? Promise.resolve(data.name) : p.text({
+        message: 'What should we call your app?',
+        placeholder: 'Fitness Tracker Pro',
         validate: (value) => {
-          if (!value || value.length < 10) return 'Description should be at least 10 characters';
+          if (!value || value.length === 0) return 'App name is required';
           return undefined;
         }
       }),
@@ -92,6 +110,36 @@ class ProjectPrompts {
         placeholder: 'Mobile-first design, GDPR compliance, Budget under $50k',
       }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
+      designVibe: () => p.text({
+        message: 'What vibe or style are you going for? (optional)',
+        placeholder: 'Modern minimalist, Playful and colorful, Professional corporate, Retro gaming...',
+      }),
+
+      lookAndFeel: () => p.text({
+        message: 'Describe the look and feel you want: (optional)',
+        placeholder: 'Clean white backgrounds, bold typography, soft rounded corners...',
+      }),
+
+      userFlows: () => p.text({
+        message: 'Key user flows or journeys? (optional, comma-separated)',
+        placeholder: 'Onboarding flow, Purchase flow, Social sharing flow...',
+      }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
+
+      screens: () => p.text({
+        message: 'Main screens or pages? (optional, comma-separated)', 
+        placeholder: 'Home, Profile, Settings, Dashboard, Chat, Search...',
+      }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
+
+      wireframes: () => p.text({
+        message: 'Any wireframes, mockups, or design files? (optional)',
+        placeholder: 'Path to files, URLs, or detailed descriptions...',
+      }),
+
+      inspirations: () => p.text({
+        message: 'Apps or sites that inspire you? (optional)',
+        placeholder: 'Linear for clean design, Stripe for payments, Discord for community...',
+      }),
+
       aiProvider: () => options.aiProvider ? Promise.resolve(options.aiProvider) : p.select({
         message: 'Which AI provider would you like to use?',
         options: [
@@ -107,10 +155,26 @@ class ProjectPrompts {
       },
     });
 
+    // Generate project slug from name
+    const projectSlug = toProjectSlug(answers.name || data.name || '');
+    
+    // Show the user what directory will be created
+    p.note(`Directory name: ${chalk.cyan(projectSlug)}`, '📁 Project folder');
+
     // Merge with existing data and options
     const mergedData = {
       ...data,
       ...answers,
+      projectSlug,
+      // Structure design input properly
+      designInput: {
+        vibe: answers.designVibe || undefined,
+        lookAndFeel: answers.lookAndFeel || undefined,
+        userFlows: answers.userFlows?.length ? answers.userFlows : undefined,
+        screens: answers.screens?.length ? answers.screens : undefined,
+        wireframes: answers.wireframes || undefined,
+        inspirations: answers.inspirations || undefined
+      },
       model: options.model
     };
 
@@ -124,15 +188,24 @@ class ProjectPrompts {
   }
 
   async confirmGeneration(data: ProjectData): Promise<boolean> {
-    p.note(
-      `Name: ${chalk.cyan(data.name)}
+    let summary = `Name: ${chalk.cyan(data.name)}
 Description: ${chalk.gray(data.description)}
 Stack: ${chalk.yellow(data.stack)}
 Objectives: ${chalk.gray(data.objectives.join(', '))}
 Target Users: ${chalk.gray(data.targetUsers.join(', '))}
-Features: ${chalk.gray(data.features.join(', '))}`,
-      '📋 Project Summary'
-    );
+Features: ${chalk.gray(data.features.join(', '))}`;
+
+    // Add design info if provided
+    if (data.designInput) {
+      const design = data.designInput;
+      if (design.vibe) summary += `\nDesign Vibe: ${chalk.magenta(design.vibe)}`;
+      if (design.lookAndFeel) summary += `\nLook & Feel: ${chalk.magenta(design.lookAndFeel)}`;
+      if (design.screens?.length) summary += `\nKey Screens: ${chalk.gray(design.screens.join(', '))}`;
+      if (design.userFlows?.length) summary += `\nUser Flows: ${chalk.gray(design.userFlows.join(', '))}`;
+      if (design.inspirations) summary += `\nInspirations: ${chalk.gray(design.inspirations)}`;
+    }
+
+    p.note(summary, '📋 Project Summary');
 
     const confirm = await p.confirm({
       message: 'Generate documentation with these settings?',

@@ -8,6 +8,7 @@ import { createSplash, shouldShowSplash } from './ui/theme.js';
 import { generateCommand } from './commands/generate.js';
 import { validateCommand } from './commands/validate.js';
 import { listTemplatesCommand } from './commands/list-templates.js';
+import { createCommand } from './commands/create.js';
 
 const program = new Command();
 
@@ -26,6 +27,7 @@ program
 program.addCommand(generateCommand);
 program.addCommand(validateCommand);
 program.addCommand(listTemplatesCommand);
+program.addCommand(createCommand);
 
 // Parse arguments
 program.parse();
