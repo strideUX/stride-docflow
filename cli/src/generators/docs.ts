@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import { ProjectData } from '../prompts/project.js';
 import { getStackByName } from '../templates/stack-registry.js';
 import { researchEngine } from './research.js';
-import { generateWithAI } from './ai-generator.js';
+import { generateWithAI, generateFileWithAI } from './ai-generator.js';
 import { fileURLToPath } from 'url';
 
 export interface GenerationOptions {
@@ -25,7 +25,7 @@ export interface GenerationResult {
 	outputPath: string;
 	filesGenerated: string[];
 	researchResults?: any[];
-	warnings?: string[];
+	warnings?: { file: string; message: string }[];
 }
 
 export async function generateDocs(
@@ -61,81 +61,115 @@ export async function generateDocs(
 			return performDryRun(templateFiles, context, options.output);
 		}
 
-		// Generate files with compact progress display
+		// Generate files with parallel processing for better performance
 		const filesGenerated: string[] = [];
-		const warnings: string[] = [];
+		const warnings: { file: string; message: string }[] = [];
+		const errors: { file: string; message: string }[] = [];
 		let successCount = 0;
 		let warningCount = 0;
 		let errorCount = 0;
 
 		console.log(`\n📝 ${chalk.cyan('Generating Documentation')} (${templateFiles.length} files)`);
 
-		const updateProgress = (current: number, total: number, fileName: string, status: string = '') => {
-			const percentage = Math.round((current / total) * 100);
-			const filled = Math.floor(percentage / 10);
-			const progressBar = '█'.repeat(filled) + '░'.repeat(10 - filled);
-			const statusText = status ? ` | ${status}` : '';
-			process.stdout.write('\r\x1b[K');
-			process.stdout.write(`Progress: ${chalk.cyan(progressBar)} ${percentage}% (${current}/${total}) | Current: ${chalk.yellow(fileName)}${statusText}`);
-		};
-
-		for (let i = 0; i < templateFiles.length; i++) {
-			const templateFile = templateFiles[i];
-			if (!templateFile) continue;
-
-			const fileName = path.basename(templateFile.outputPath);
-			updateProgress(i, templateFiles.length, fileName, 'Processing...');
-
-			try {
-				const generatedFile = await processTemplate(templateFile, context, options);
-				filesGenerated.push(generatedFile);
-				successCount++;
-
-				// Soft warning: content indicates local fallback used while provider wasn't local
-				try {
-					if (options.aiProvider !== 'local') {
-						const content = await fs.readFile(generatedFile, 'utf-8');
-						if (content.includes('<!-- Generated locally:')) {
-							warningCount++;
-							warnings.push(generatedFile);
-						}
-					}
-				} catch {}
-
-				updateProgress(i + 1, templateFiles.length, fileName, '✅');
-			} catch (error) {
-				errorCount++;
-				updateProgress(i + 1, templateFiles.length, fileName, '❌ Error');
-				console.log(`\n⚠️  Failed to generate ${fileName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-			}
-
-			// Small delay to make progress visible
-			await new Promise(resolve => setTimeout(resolve, 60));
+		// Create batches for parallel processing
+		const batchSize = 3;
+		const fileBatches: TemplateFile[][] = [];
+		for (let i = 0; i < templateFiles.length; i += batchSize) {
+			fileBatches.push(templateFiles.slice(i, i + batchSize));
 		}
 
-		// Clear progress line and show summary
-		process.stdout.write('\r\x1b[K');
+		for (let batchIndex = 0; batchIndex < fileBatches.length; batchIndex++) {
+			const batch = fileBatches[batchIndex]!;
+			console.log(`\n📦 Processing batch ${batchIndex + 1}/${fileBatches.length} (${batch?.length || 0} files)`);
+
+			const batchPromises = batch.map(async (templateFile) => {
+				if (!templateFile) return null as any;
+				const fileName = path.basename(templateFile.outputPath);
+				const relativePath = templateFile.outputPath;
+				try {
+					const generatedFile = await processTemplate(templateFile, context, options);
+					return { success: true, file: generatedFile, fileName, relativePath } as const;
+				} catch (error) {
+					return { success: false, error: error instanceof Error ? error.message : 'Unknown error', fileName, relativePath } as const;
+				}
+			});
+
+			const batchResults = await Promise.all(batchPromises);
+
+			for (const result of batchResults) {
+				if (!result) continue;
+				if (result.success) {
+					filesGenerated.push(result.file);
+					successCount++;
+					// Soft warning detection
+					try {
+						if (options.aiProvider !== 'local') {
+							const content = await fs.readFile(result.file, 'utf-8');
+							if (content.includes('<!-- Generated locally:')) {
+								warningCount++;
+								warnings.push({ file: result.relativePath || result.fileName, message: 'AI generation failed, used fallback' });
+								// Track in global map for debugging across runs
+								if (!(global as any).docflowErrorsByFile) {
+									(global as any).docflowErrorsByFile = new Map<string, Set<string>>();
+								}
+								const map = (global as any).docflowErrorsByFile as Map<string, Set<string>>;
+								const key = 'AI generation failed, used fallback';
+								const set = map.get(key) || new Set<string>();
+								set.add(result.relativePath || result.fileName);
+								map.set(key, set);
+							}
+						}
+					} catch {}
+					console.log(`   ✅ ${result.fileName}`);
+				} else {
+					errorCount++;
+					errors.push({ file: result.relativePath || result.fileName, message: result.error });
+					console.log(`   ❌ ${result.fileName}: ${result.error}`);
+					// Track in global map as well
+					if (!(global as any).docflowErrorsByFile) {
+						(global as any).docflowErrorsByFile = new Map<string, Set<string>>();
+					}
+					const map = (global as any).docflowErrorsByFile as Map<string, Set<string>>;
+					const key = result.error || 'Unknown error';
+					const set = map.get(key) || new Set<string>();
+					set.add(result.relativePath || result.fileName);
+					map.set(key, set);
+				}
+			}
+		}
 		console.log(`\n✨ ${chalk.green('Documentation Complete!')}`);
 		console.log(`📊 ${chalk.green(successCount)} files generated successfully`);
 		if (warningCount > 0) {
 			console.log(`⚠️  ${chalk.yellow(warningCount)} files had warnings`);
-			// Show detailed error information for debugging
-			const globalErrors = (global as any).docflowErrors;
-			if (globalErrors && globalErrors.size > 0) {
-				console.log(`\n🔍 ${chalk.yellow('Warning Details for Debugging:')}`);
-				const uniqueErrors = Array.from(globalErrors).slice(0, 10) as string[];
-				uniqueErrors.forEach((error: string, i: number) => {
-					const truncated = error.length > 150 ? error.slice(0, 150) + '...' : error;
-					console.log(`   ${i + 1}. ${chalk.gray(truncated)}`);
-				});
-				if (globalErrors.size > 10) {
-					console.log(`   ${chalk.gray(`... and ${globalErrors.size - 10} more unique errors`)}`);
-				}
-				// Clear for next run
-				delete (global as any).docflowErrors;
+			// Group warnings by message and list affected files
+			console.log(`\n🔍 ${chalk.yellow('Warning Details:')}`);
+			const warningsByMessage = new Map<string, string[]>();
+			for (const w of warnings) {
+				const files = warningsByMessage.get(w.message) || [];
+				files.push(w.file);
+				warningsByMessage.set(w.message, files);
+			}
+			for (const [message, files] of warningsByMessage) {
+				console.log(`• ${message} (${files.length} files):`);
+				files.forEach(f => console.log(`  - ${f}`));
 			}
 		}
-		if (errorCount > 0) console.log(`❌ ${chalk.red(errorCount)} files failed`);
+		if (errorCount > 0) {
+			console.log(`❌ ${chalk.red(errorCount)} files failed`);
+			// Group errors by message and list affected files
+			console.log(`\n🛠️  ${chalk.red('Error Details:')}`);
+			const errorsByMessage = new Map<string, string[]>();
+			for (const e of errors) {
+				const files = errorsByMessage.get(e.message) || [];
+				files.push(e.file);
+				errorsByMessage.set(e.message, files);
+			}
+			for (const [message, files] of errorsByMessage) {
+				const truncated = message.length > 150 ? message.slice(0, 150) + '...' : message;
+				console.log(`• ${chalk.gray(truncated)} (${files.length} files):`);
+				files.forEach(f => console.log(`  - ${f}`));
+			}
+		}
 
 		return {
 			outputPath: options.output,
@@ -228,7 +262,6 @@ async function prepareContext(
 			lookAndFeel: projectData.designInput.lookAndFeel || '',
 			userFlows: projectData.designInput.userFlows?.join(', ') || '',
 			screens: projectData.designInput.screens?.join(', ') || '',
-			wireframes: projectData.designInput.wireframes || '',
 			inspirations: projectData.designInput.inspirations || '',
 			images: projectData.designInput.images?.map(img => img.placeholder).join(', ') || ''
 		} : undefined,
@@ -280,10 +313,10 @@ async function processTemplate(
 	const dynamicBracketCount = (content.match(/\[AI Content:\s*.*?\s*-\s*To be generated\]/g) || []).length;
 	const totalDynamic = dynamicCommentCount + dynamicBracketCount;
 
-	// Process DYNAMIC sections with AI if they exist
+	// Process DYNAMIC sections with AI if they exist (file-level batching)
 	if (totalDynamic > 0) {
 		p.log.info(`🤖 Processing ${totalDynamic} AI section(s) in ${templateFile.outputPath}`);
-		content = await generateWithAI(content, context, templateFile.outputPath, options);
+		content = await generateFileWithAI(content, context, templateFile.outputPath, options);
 	}
 
 	// Write processed content

@@ -2,6 +2,7 @@ import { OpenAI } from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import * as p from '@clack/prompts';
 import path from 'path';
+import ora from 'ora';
 import { GenerationOptions } from './docs.js';
 
 export async function generateWithAI(
@@ -19,13 +20,6 @@ export async function generateWithAI(
 
 		let processedContent = content;
 
-		const updateAIProgress = (sectionIndex: number, total: number, instruction: string) => {
-			const percentage = Math.round((sectionIndex / total) * 100);
-			const truncated = instruction.slice(0, 60) + (instruction.length > 60 ? '...' : '');
-			process.stdout.write('\r\x1b[K');
-			process.stdout.write(`🧠 AI Generation: ${percentage}% (${sectionIndex}/${total}) | ${truncated}`);
-		};
-
 		let failureCount = 0;
 		let successCount = 0;
 		const detailedErrors: string[] = [];
@@ -40,8 +34,15 @@ export async function generateWithAI(
 				break;
 			}
 			
+			const percentage = Math.round(((i + 1) / dynamicSections.length) * 100);
+			const truncated = section.instruction.slice(0, 50) + (section.instruction.length > 50 ? '...' : '');
+			const spinner = ora({
+				text: `AI Generation: ${percentage}% (${i + 1}/${dynamicSections.length}) | ${truncated}`,
+				spinner: 'dots',
+				color: 'cyan',
+			}).start();
+
 			try {
-				updateAIProgress(i + 1, dynamicSections.length, section.instruction);
 				const aiContent = await generateSectionWithAI(
 					section.instruction,
 					context,
@@ -52,6 +53,7 @@ export async function generateWithAI(
 				);
 				processedContent = processedContent.replace(section.fullMatch, aiContent);
 				successCount++;
+				spinner.succeed(`AI Generation: ${percentage}% (${i + 1}/${dynamicSections.length}) | ✅ Generated`);
 			} catch (e: any) {
 				failureCount++;
 				const errorMessage = e?.message || String(e);
@@ -60,11 +62,9 @@ export async function generateWithAI(
 					section.fullMatch,
 					formatLocalContent(section.instruction, context, filePath)
 				);
+				spinner.warn(`AI Generation: ${percentage}% (${i + 1}/${dynamicSections.length}) | ⚠️ Using fallback`);
 			}
 		}
-
-		// Clear AI progress line
-		process.stdout.write('\r\x1b[K');
 
 		// Consolidated summary if any failures, and collect errors globally for final summary
 		if (failureCount > 0) {
@@ -101,6 +101,192 @@ export async function generateWithAI(
 			return content;
 		}
 	}
+}
+
+export async function generateFileWithAI(
+    content: string,
+    context: any,
+    filePath: string,
+    options: GenerationOptions & { reasoningEffort?: string; verbosity?: string }
+): Promise<string> {
+    try {
+        const dynamicSections = extractDynamicSections(content);
+        if (dynamicSections.length === 0) {
+            return content;
+        }
+
+        const fileName = path.basename(filePath);
+        const spinner = ora({
+            text: `Generating ${fileName} (${dynamicSections.length} AI sections)`,
+            spinner: 'dots',
+            color: 'cyan',
+        }).start();
+
+        // If local provider, synthesize content locally without external API
+        if (options.aiProvider === 'local') {
+            let localContent = content;
+            for (const section of dynamicSections) {
+                localContent = localContent.replace(
+                    section.fullMatch,
+                    formatLocalContent(section.instruction, context, filePath)
+                );
+            }
+            spinner.succeed(`✅ Generated ${fileName} locally (${dynamicSections.length} sections)`);
+            return localContent;
+        }
+
+        try {
+            const { systemPrompt, userPrompt } = createFileGenerationPrompt(
+                content,
+                dynamicSections,
+                context,
+                filePath
+            );
+
+            const aiContent = await generateWithProvider(
+                systemPrompt,
+                userPrompt,
+                options
+            );
+
+            const processedContent = applyFileAIResponse(
+                content,
+                aiContent,
+                dynamicSections,
+                context,
+                filePath
+            );
+
+            spinner.succeed(`✅ Generated ${fileName} (${dynamicSections.length} sections)`);
+            return processedContent;
+
+        } catch (e: any) {
+            spinner.warn(`⚠️  ${fileName} - Using fallback generation`);
+
+            // Fallback to local generation for entire file
+            let fallbackContent = content;
+            for (const section of dynamicSections) {
+                fallbackContent = fallbackContent.replace(
+                    section.fullMatch,
+                    formatLocalContent(section.instruction, context, filePath)
+                );
+            }
+
+            // Collect error for summary
+            if (!(global as any).docflowErrors) {
+                (global as any).docflowErrors = new Set<string>();
+            }
+            (global as any).docflowErrors.add(e?.message || String(e));
+
+            return fallbackContent;
+        }
+
+    } catch (_error: any) {
+        // Final fallback - return original content
+        return content;
+    }
+}
+
+function createFileGenerationPrompt(
+    content: string,
+    sections: DynamicSection[],
+    context: any,
+    filePath: string
+) {
+    const fileName = path.basename(filePath);
+    const projectInfo = `Project: ${context.projectName} | Stack: ${context.stack} | Description: ${context.description}`;
+
+    const systemPrompt = `You are a technical documentation expert. Generate detailed, accurate, and current content for project documentation.
+
+Context: ${projectInfo}
+
+You will receive a documentation file template with ${sections.length} sections marked for AI generation. Each section has specific instructions about what content to generate.
+
+Instructions:
+1. Generate professional, comprehensive content for each marked section
+2. Ensure consistency across all sections within this file
+3. Use the project context to make content specific and relevant
+4. Follow markdown formatting and documentation best practices
+5. Make content actionable and detailed, not generic`;
+
+    const designBlock = context.design ? `
+DESIGN CONTEXT:
+- Vibe: ${context.design.vibe}
+- Look & Feel: ${context.design.lookAndFeel}
+- User Flows: ${context.design.userFlows}
+- Screens: ${context.design.screens}` : '';
+
+    const userPrompt = `Generate content for all AI sections in this ${fileName} file:
+
+TEMPLATE CONTENT:
+${content}
+
+SECTIONS TO GENERATE (${sections.length} sections):
+${sections.map((s, i) => `${i + 1}. "${s.instruction}"`).join('\n')}
+
+PROJECT CONTEXT:
+- Name: ${context.projectName}
+- Description: ${context.description}
+- Stack: ${context.stackDescription}
+- Technologies: ${context.technologies}
+- Features: ${context.features}
+${designBlock}
+
+Please provide the complete file content with all AI sections filled in. Maintain the exact structure and formatting of the template, only replacing the AI section markers with generated content.`;
+
+    return { systemPrompt, userPrompt };
+}
+
+async function generateWithProvider(
+    systemPrompt: string,
+    userPrompt: string,
+    options: GenerationOptions & { reasoningEffort?: string; verbosity?: string }
+) {
+    if (options.aiProvider === 'anthropic') {
+        return await generateWithAnthropic(systemPrompt, userPrompt, options.model);
+    }
+    return await generateWithOpenAI(
+        systemPrompt,
+        userPrompt,
+        options.model,
+        options.reasoningEffort,
+        options.verbosity
+    );
+}
+
+function applyFileAIResponse(
+    originalContent: string,
+    aiResponse: string,
+    sections: DynamicSection[],
+    context: any,
+    filePath: string
+): string {
+    let processedContent = originalContent;
+
+    // Heuristic: if the response looks like a full file, use it
+    if (aiResponse && aiResponse.length > originalContent.length * 0.8 && /\n#\s+/.test(aiResponse)) {
+        return aiResponse;
+    }
+
+    // Fallback: split response into parts and apply in order
+    const responseParts = (aiResponse || '')
+        .split(/\n\n+/)
+        .map(part => part.trim())
+        .filter(part => part.length > 50);
+
+    sections.forEach((section, index) => {
+        if (index < responseParts.length) {
+            const part = responseParts[index] as string;
+            processedContent = processedContent.replace(section.fullMatch, part);
+        } else {
+            processedContent = processedContent.replace(
+                section.fullMatch,
+                formatLocalContent(section.instruction, context, filePath)
+            );
+        }
+    });
+
+    return processedContent;
 }
 
 interface DynamicSection {

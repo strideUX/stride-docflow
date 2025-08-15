@@ -30,7 +30,6 @@ const ProjectDataSchema = z.object({
     lookAndFeel: z.string().optional(), 
     userFlows: z.array(z.string()).optional(),
     screens: z.array(z.string()).optional(),
-    wireframes: z.string().optional(),
     inspirations: z.string().optional(),
     images: z.array(z.object({
       id: z.string(),
@@ -176,6 +175,15 @@ class ProjectPrompts {
         placeholder: 'Mobile-first design, GDPR compliance, Budget under $50k',
       }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
+      // Collect all images upfront before design questions
+      images: async () => {
+        const result = await clipboardImageManager.promptWithImageSupport({
+          message: 'Let\'s start by collecting any images you have for this project',
+          placeholder: 'Not applicable - images are collected via prompts above'
+        });
+        return result.images;
+      },
+
       designVibe: () => p.text({
         message: 'What vibe or style are you going for? (optional)',
         placeholder: 'Modern minimalist, Playful and colorful, Professional corporate, Retro gaming...',
@@ -195,11 +203,6 @@ class ProjectPrompts {
         message: 'Main screens or pages? (optional, comma-separated)', 
         placeholder: 'Home, Profile, Settings, Dashboard, Chat, Search...',
       }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
-
-      wireframes: () => p.text({
-        message: 'Any wireframes, mockups, or design notes? (optional)',
-        placeholder: 'Describe your design vision or reference existing designs...',
-      }),
 
       inspirations: () => p.text({
         message: 'Apps or sites that inspire you? (optional)',
@@ -227,9 +230,8 @@ class ProjectPrompts {
     // Show the user what directory will be created
     p.note(`Directory name: ${chalk.cyan(projectSlug)}`, '📁 Project folder');
 
-    // Handle wireframes response (could be text + images)
-    const wireframesText = typeof answers.wireframes === 'string' ? answers.wireframes : '';
-    const allPastedImages = clipboardImageManager.getImages();
+    // Images are now collected via the dedicated prompt
+    const allPastedImages = answers.images || [];
 
     // Merge with existing data and options
     const mergedData = {
@@ -242,7 +244,6 @@ class ProjectPrompts {
         lookAndFeel: answers.lookAndFeel || undefined,
         userFlows: answers.userFlows?.length ? answers.userFlows : undefined,
         screens: answers.screens?.length ? answers.screens : undefined,
-        wireframes: wireframesText || undefined,
         inspirations: answers.inspirations || undefined,
         images: allPastedImages?.length ? allPastedImages : undefined
       },
