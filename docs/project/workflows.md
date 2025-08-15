@@ -1,32 +1,35 @@
 # Project Workflows & Protocols
 
-## WrapSession Protocol
+## CaptureNote Protocol
 
 ### Purpose
-Systematic capture of session decisions, changes, and insights to maintain project context and evolution tracking.
+Systematic capture of decisions, changes, and insights during active development work to maintain project context and evolution tracking.
 
-### When to Use
-- End of significant development/planning sessions
-- After major decisions or scope changes
-- When architectural insights emerge
-- Before handoffs between team members or AI assistants
+### When to Capture Notes (AI Should Proactively Identify)
+- **DECISION RECORD**: Major architectural, technical, or strategic decisions are made
+- **SCOPE CHANGE**: Project scope, timeline, or feature modifications occur
+- **INSIGHT**: Important design discoveries or realizations emerge  
+- **CHANGE**: Structural, process, or workflow modifications happen
+- **NOTE**: Important context, observations, or external factors arise
+- **BLOCKER**: Issues preventing progress are identified
+- **MILESTONE**: Major completions or achievements occur
 
-### Protocol Steps
+### CaptureNote Process
 
-#### 1. Create or Locate Daily Notes File
+#### 1. Automatic Triggers
+AI should recognize and capture when:
+- User makes architectural or technology decisions
+- Project scope or requirements change during discussion
+- Important design patterns or insights are discovered
+- File structures or processes are modified
+- External blockers or dependencies are identified
+
+#### 2. File Management
 - Check if file exists for today: `/docs/notes/YYYY-MM-DD.md`
 - If not exists, create using template format
 - If exists, append new timestamped section
 
-#### 2. Identify Session Content to Capture
-Capture any of these significant events:
-- **DECISION RECORD**: Architectural, technical, or strategic decisions
-- **SCOPE CHANGE**: Modifications to timeline, features, or project scope  
-- **INSIGHT**: Important design discoveries or realizations
-- **CHANGE**: Structural, process, or workflow modifications
-- **NOTE**: Context, observations, or important information
-
-#### 3. Use Standard Entry Format
+#### 3. Standard Entry Format
 ```markdown
 ## HH:MM - ENTRY_TYPE: Brief Description
 **Type:** [Category/Impact Area]
@@ -70,11 +73,63 @@ Capture any of these significant events:
 - User feedback or requirements clarification
 - Research findings or external factors
 
-#### 5. Cross-Reference Updates
-When creating session notes, also update:
-- `/docs/active/focus.md` if priorities change
-- `/docs/active/session.md` for handoff context
-- Relevant project documents if core specifications change
+**BLOCKER**
+- Technical issues preventing progress
+- Missing dependencies or resources
+- External factors causing delays
+- Decisions pending from stakeholders
+
+**MILESTONE**
+- Major feature completions
+- Significant architecture implementations
+- Phase transitions or major deliverables
+- Testing or deployment achievements
+
+## WrapSession Protocol
+
+### Purpose
+End-of-session cleanup and documentation to ensure clean handoffs and fresh starting points for future work.
+
+### When to Use
+- End of significant development/planning sessions
+- Before switching contexts or team handoffs
+- When major work phases are completed
+- Before extended breaks from the project
+
+### Protocol Steps
+
+#### 1. Capture Outstanding Decisions/Changes
+- Execute **CaptureNote Protocol** for any undocumented major decisions or scope changes from the session
+- Focus only on significant decisions, architectural changes, or scope modifications
+
+#### 2. Update Active Work Status
+- Update `/docs/active/focus.md` with:
+  - Current work item status
+  - Next steps for continuation
+  - Any new blockers or dependencies
+  - Handoff context for AI assistants
+
+#### 3. Update Task Progress
+- Mark completed tasks/features in relevant documentation
+- Update priority levels if they've changed
+- Document any new tasks discovered during the session
+
+#### 4. Clean Up Development Environment
+- Ensure code is in stable state with debug code removed
+- Commit any work-in-progress with clear commit messages
+- Document any temporary workarounds or incomplete implementations
+
+#### 5. Prepare Session Handoff
+- Update `/docs/active/session.md` with:
+  - What was accomplished this session
+  - Current state and next priorities
+  - Context needed for next session
+  - Any important discoveries or insights
+
+#### 6. Final Context Check
+- Ensure sufficient context is captured for seamless continuation
+- Verify all major decisions are documented
+- Confirm next session can start cleanly
 
 ### Example Session Capture
 
@@ -120,7 +175,7 @@ When creating session notes, also update:
 3. Ensure all decisions and changes are documented
 4. Provide clear next steps and priorities
 
-## QuickStart Protocol
+## StartSession Protocol
 
 ### Purpose
 Provide immediate, concise status and next actions when resuming development work. No verbose explanations - just essential context.
@@ -131,7 +186,7 @@ Provide immediate, concise status and next actions when resuming development wor
 - Want focused, actionable next steps without long explanations
 
 ### Usage
-**Prompt:** "Execute QuickStart protocol - where are we and what's next?"
+**Prompt:** "Execute StartSession protocol - where are we and what's next?"
 
 ### Response Format
 ```markdown
@@ -155,7 +210,7 @@ Provide immediate, concise status and next actions when resuming development wor
 ```
 
 ### Implementation Steps
-When QuickStart is requested:
+When StartSession is requested:
 1. Check `/docs/active/focus.md` for current priorities
 2. Review latest `/docs/notes/` file for recent decisions
 3. Scan `/docs/releases/current/` for active feature status
@@ -171,8 +226,8 @@ When QuickStart is requested:
 **WrapSession Direct Invocation:**
 > "Please execute the WrapSession protocol to capture the key decisions and changes from our current discussion."
 
-**QuickStart Direct Invocation:**
-> "Execute QuickStart protocol - where are we and what's next?"
+**StartSession Direct Invocation:**
+> "Execute StartSession protocol - where are we and what's next?"
 
 ### Manual Process
 1. Check today's date: `YYYY-MM-DD`

@@ -28,7 +28,7 @@ This is the Docflow CLI tool for generating AI-powered project documentation. Th
 - Read `/docs/notes/2025-08-15.md` for major decisions and session context
 
 ### Workflow Protocols
-- Follow `/docs/project/workflows.md` for WrapSession and QuickStart protocols
+- Follow `/docs/project/workflows.md` for WrapSession, StartSession, and CaptureNote protocols
 
 ### Documentation Philosophy
 - Read the "Documentation Philosophy & Structure" section in `README.md`
@@ -137,7 +137,7 @@ For significant changes, scope modifications, or architectural decisions, add ti
 - `NOTE`: Important insights or design discoveries
 - `CHANGE`: Structural or process changes
 
-**Format:** Follow WrapSession Protocol in `/docs/project/workflows.md`
+**Format:** Follow CaptureNote Protocol in `/docs/project/workflows.md`
 
 **Quick Reference:**
 ```
@@ -148,7 +148,7 @@ For significant changes, scope modifications, or architectural decisions, add ti
 **Affects:** What systems/processes this impacts
 ```
 
-## QuickStart Protocol
+## StartSession Protocol
 
 When asked "where are we and what's next?", provide:
 
