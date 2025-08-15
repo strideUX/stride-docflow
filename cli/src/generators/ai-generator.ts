@@ -258,27 +258,27 @@ async function generateWithOpenAI(
 		const eff = reasoningEffort || process.env.DOCFLOW_REASONING_EFFORT;
 		const verb = verbosity || process.env.DOCFLOW_VERBOSITY;
 		if (eff) requestParams.reasoning_effort = eff;
-		if (verb) {
-			requestParams.response_format = {
-				type: 'text',
-				text: {
-					verbosity: verb
-				}
-			};
-		}
+		// Don't add verbosity for now - API seems to have issues with it
+		// if (verb) {
+		//   requestParams.response_format = {
+		//     type: 'text',
+		//     text: {
+		//       verbosity: verb
+		//     }
+		//   };
+		// }
 	}
-
-	// Debugging output for model params to help diagnose GPT-5 issues
-	console.log('\n🔧 Debug - Request Parameters:');
-	console.log(`Model: ${selectedModel}`);
-	console.log(`Model Type: ${modelType}`);
-	console.log('Parameters:', JSON.stringify(requestParams, null, 2));
 
 	try {
 		const response = await openai.chat.completions.create(requestParams);
 		return response.choices[0]?.message?.content || '[Content generation failed]';
 	} catch (error: any) {
-		console.log('\n❌ OpenAI API Error:', error?.message || String(error));
+		// Collect API errors for summary instead of logging immediately
+		if (!(global as any).docflowErrors) {
+			(global as any).docflowErrors = new Set<string>();
+		}
+		const errorMessage = error?.message || String(error);
+		(global as any).docflowErrors.add(errorMessage);
 		throw error;
 	}
 }

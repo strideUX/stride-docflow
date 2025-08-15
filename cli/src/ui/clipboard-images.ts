@@ -140,75 +140,58 @@ class ClipboardImageManager {
     const images: PastedImage[] = [];
 
     p.log.info(`${promptConfig.message}`);
-    p.log.info(`${chalk.gray('Tip: Paste images with')} ${chalk.cyan('Ctrl+V')} ${chalk.gray('or provide file paths. You can add multiple images!')}`);
+    p.log.info(`${chalk.gray('Tip: You can add images (screenshots, wireframes, mockups, etc.)')}`);
 
-    // First, check if there's already an image in clipboard
-    let keepChecking = true;
+    // Simple ask-paste-repeat loop
+    let wantToAddImages = await p.confirm({
+      message: 'Do you have images to add? (screenshots, wireframes, mockups, etc.)',
+      initialValue: false
+    });
 
-    while (keepChecking) {
-      // Check clipboard content each iteration
+    while (wantToAddImages && !p.isCancel(wantToAddImages)) {
+      // Prompt user to paste and press Enter
+      p.log.info(`${chalk.cyan('Paste an image to clipboard, then press Enter...')}`);
+
+      const ready = await p.text({
+        message: 'Press Enter after pasting an image (or type "skip" to skip this one)',
+        placeholder: 'Press Enter...'
+      });
+
+      if (p.isCancel(ready)) {
+        p.cancel('Operation cancelled');
+        process.exit(0);
+      }
+
+      // If user typed skip, do not attempt detection this round
+      if (typeof ready === 'string' && ready.trim().toLowerCase() === 'skip') {
+        // Ask if they want to add more
+        wantToAddImages = await p.confirm({
+          message: `Do you have more images to add? (${images.length} added so far)`,
+          initialValue: false
+        });
+        continue;
+      }
+
+      // Now check clipboard for image
       const clipboardType = await this.detectClipboardContent();
 
       if (clipboardType === 'image') {
-        // Found image - ask if they want to include it
-        const shouldUseImage = await p.confirm({
-          message: `Detected image in clipboard. Include it?${images.length > 0 ? ` (${images.length} images added so far)` : ''}`,
-          initialValue: true
-        });
-
-        if (shouldUseImage && !p.isCancel(shouldUseImage)) {
-          const pastedImage = await this.handlePastedImage();
-          if (pastedImage) {
-            images.push(pastedImage);
-            p.log.success(`✅ Added ${pastedImage.placeholder}`);
-          }
-        }
-
-        // After processing the current image, ask if they want to add more
-        const addAnother = await p.confirm({
-          message: `Add another image? (${images.length} added)`,
-          initialValue: false
-        });
-
-        if (p.isCancel(addAnother) || !addAnother) {
-          keepChecking = false;
+        const pastedImage = await this.handlePastedImage();
+        if (pastedImage) {
+          images.push(pastedImage);
+          p.log.success(`✅ Added ${pastedImage.placeholder}`);
         } else {
-          // They want to add another - prompt them to prepare it
-          p.log.info(`${chalk.cyan('Copy another image to clipboard...')}`);
-          // Give them a moment to copy, then continue loop
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          p.log.warn(`⚠️  Could not process image from clipboard`);
         }
-
       } else {
-        // No image detected in clipboard
-        if (images.length > 0) {
-          // They already have images, ask if they want more
-          const addAnother = await p.confirm({
-            message: `Add another image? (${images.length} added - copy to clipboard first)`,
-            initialValue: false
-          });
-
-          if (p.isCancel(addAnother) || !addAnother) {
-            keepChecking = false;
-          } else {
-            p.log.info(`${chalk.yellow('Copy an image to clipboard, then we\'ll detect it automatically...')}`);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-          }
-        } else {
-          // No images yet, ask if they want to add any
-          const wantImages = await p.confirm({
-            message: 'Do you have images to add? (screenshots, wireframes, mockups, etc.)',
-            initialValue: false
-          });
-
-          if (p.isCancel(wantImages) || !wantImages) {
-            keepChecking = false;
-          } else {
-            p.log.info(`${chalk.yellow('Copy an image to clipboard, then we\'ll detect it automatically...')}`);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-          }
-        }
+        p.log.warn(`⚠️  No image detected in clipboard. Make sure you copied an image first.`);
       }
+
+      // Ask if they want to add more
+      wantToAddImages = await p.confirm({
+        message: `Do you have more images to add? (${images.length} added so far)`,
+        initialValue: false
+      });
     }
 
     // Show final summary if images were added
