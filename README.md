@@ -88,29 +88,86 @@ docflow --help
 - **Technologies**: React Native, Expo SDK 51+, Convex, TypeScript, NativeWind
 - **Features**: Mobile optimizations, app store deployment, offline support
 
-## 🎯 Generated Documentation Structure
+## 🎯 Documentation Philosophy & Structure
 
-Each project gets a complete documentation suite:
+Docflow follows a **layered information architecture** designed to eliminate duplication and provide clear purpose for each document:
+
+### Information Hierarchy
+
+```
+User Story (specs) → Feature (releases/current) → Implementation → Core Docs Updated
+```
+
+**Core Principle**: Each document serves a specific purpose, and information flows naturally without duplication.
+
+### Document Purpose Framework
+
+#### **Core Project Docs** (What the system IS - updated after releases)
+- **specs.md**: High-level vision, user stories, core capabilities
+- **architecture.md**: How the system works technically  
+- **design.md**: UX patterns, conversation flows, user experience
+- **stack.md**: Technology decisions and implementation approach
+
+#### **Release Management** (What we're building NOW)
+- **releases/current/**: Active development tracking
+  - **features.md**: Specific features being built this release
+  - **bugs.md**: Issues being resolved
+  - **enhancements.md**: Improvements to existing functionality
+  - **index.md**: Release overview, timeline, success criteria
+
+#### **Backlog** (What we're building NEXT)
+- **features.md**: Future feature pipeline
+- **enhancements.md**: Planned improvements
+- **bugs.md**: Known issues to address
+
+#### **Active Session Management** (What's happening RIGHT NOW)
+- **active/focus.md**: Current work and immediate priorities
+- **active/session.md**: Handoff notes and context for AI tools
+
+### Generated Documentation Structure
+
+Each project gets a complete documentation suite following this philosophy:
 
 ```
 your-project/
 ├── docs/
-│   ├── project/               # Static context
-│   │   ├── specs.md          # Requirements & scope
-│   │   ├── architecture.md   # Technical decisions
-│   │   ├── design.md         # UI/UX guidelines
-│   │   └── stack.md          # Technology choices
-│   ├── releases/current/      # Active development
+│   ├── project/               # What the system IS
+│   │   ├── specs.md          # High-level vision & user stories
+│   │   ├── architecture.md   # Technical system design
+│   │   ├── design.md         # UX patterns & guidelines
+│   │   └── stack.md          # Technology choices & rationale
+│   ├── releases/current/      # What we're building NOW
 │   │   ├── index.md          # 🎯 PRIMARY REFERENCE
-│   │   ├── features.md       # Feature specifications
-│   │   ├── enhancements.md   # Improvements
-│   │   └── bugs.md           # Issue tracking
-│   ├── active/               # Session management
-│   │   ├── focus.md          # Current work
-│   │   └── session.md        # Handoff notes
-│   └── backlog/              # Future planning
+│   │   ├── features.md       # Active feature development
+│   │   ├── enhancements.md   # Current improvements
+│   │   └── bugs.md           # Issues being resolved
+│   ├── active/               # What's happening RIGHT NOW
+│   │   ├── focus.md          # Current work session
+│   │   └── session.md        # AI handoff context
+│   ├── backlog/              # What we're building NEXT
+│   │   ├── features.md       # Future feature pipeline
+│   │   ├── enhancements.md   # Planned improvements
+│   │   └── bugs.md           # Known issues to address
+│   └── notes/                # Session notes & decision records
+│       └── YYYY-MM-DD.md     # Daily decision tracking
 └── .cursor/rules/            # AI tool configuration
 ```
+
+### Session Notes & Decision Records
+
+**Purpose**: Capture project evolution and decision-making process
+- **`/docs/notes/`**: Daily files tracking decisions, scope changes, and insights
+- **Format**: Timestamped entries with type classification (DECISION RECORD, SCOPE CHANGE, INSIGHT, etc.)
+- **Integration**: Cross-referenced with active focus and session handoff documents
+- **Protocol**: Systematic WrapSession process documented in `/docs/project/workflows.md`
+
+### Key Benefits
+
+- **No Duplication**: Each piece of information lives in exactly one place
+- **Clear Purpose**: Every document serves specific stakeholders and use cases
+- **Natural Flow**: Information progresses logically from vision to implementation
+- **AI-Optimized**: Structure supports AI tools in understanding project context and current state
+- **Decision Tracking**: Complete audit trail of why decisions were made and what they impact
 
 ## 🔧 Configuration
 
