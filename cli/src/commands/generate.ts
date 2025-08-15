@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { styledPrompts, symbols } from '../ui/styled-prompts.js';
 import { projectPrompts } from '../prompts/project.js';
 import { generateDocs } from '../generators/docs.js';
+import { NoopConversationEngine } from '../conversation/engine.js';
 
 export const generateCommand = new Command('generate')
   .alias('gen')
@@ -15,14 +16,28 @@ export const generateCommand = new Command('generate')
   .option('--model <model>', 'AI model to use')
   .option('--reasoning-effort <effort>', 'GPT-5 reasoning effort (minimal, low, medium, high)', 'minimal')
   .option('--verbosity <level>', 'GPT-5 output verbosity (low, medium, high)', 'medium')
+  .option('--conversational', 'Enable conversational mode (experimental)', false)
   .option('--research', 'Enable research mode with MCP and web search', true)
   .option('--dry-run', 'Show what would be generated without creating files', false)
   .action(async (options) => {
     try {
       styledPrompts.intro(`${symbols.rocket} Starting project documentation generation`);
 
-      // Gather project requirements
-      const projectData = await projectPrompts.gatherProjectData(options);
+      // Gather project requirements (conversational stub or form prompts)
+      let projectData = null as any;
+      if (options.conversational) {
+        const engine = new NoopConversationEngine();
+        const conv = await engine.start({ idea: options.idea, aiProvider: options.aiProvider, model: options.model });
+        // Fallback to prompts to complete required fields with sensible defaults
+        const seed = {
+          idea: conv.summary.description || options.idea,
+          aiProvider: options.aiProvider,
+          model: options.model,
+        };
+        projectData = await projectPrompts.gatherProjectData(seed);
+      } else {
+        projectData = await projectPrompts.gatherProjectData(options);
+      }
 
       // Confirm before generation
       const shouldGenerate = await projectPrompts.confirmGeneration(projectData);

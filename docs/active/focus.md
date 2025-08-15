@@ -1,84 +1,61 @@
-# Current Focus: Conversational Docflow Implementation
+# Active Feature Focus
 
-## Today's Priority: Documentation Analysis & Gap Identification
+## F001: AI Project Discovery Engine
+**Status:** in_review  
+**Started:** 2025-08-15  
+**Priority:** P0 (Critical)  
+**From:** docs/releases/current/features.md
 
-**Date:** August 15, 2025  
-**Phase:** Planning & Design  
-**Next Session Goal:** Identify gaps between current template system and conversational vision
+### Description
+Interactive conversation engine that understands project context through dynamic Q&A flow instead of static forms.
 
-## Current State Analysis
+### Current Todos
+- [ ] Review Cursor's conversation engine scaffolding implementation
+- [ ] Test the `--conversational` flag functionality  
+- [ ] Design actual discovery question flows (not just noop)
+- [ ] Implement real conversation logic with AI provider
+- [ ] Add file-based context persistence (replace InMemoryContextStore)
 
-### What We've Accomplished ✅
-- Created comprehensive project specifications following proper information hierarchy
-- Documented conversational AI architecture with clear component separation
-- Designed three-phase user experience flow (Discovery → Design → Generation)
-- Established document purpose framework to replace static templates
-- Updated Docflow README with documentation philosophy for future reference
+### Completed This Session
+- ✅ Added conversational scaffolding with NoopConversationEngine
+- ✅ Wired `--conversational` flag to generate command
+- ✅ Created basic unit test for conversation engine  
+- ✅ Added context store with InMemoryContextStore
+- ✅ Created `/src/conversation/engine.ts` and `/src/context/store.ts`
 
-### Key Insights from Documentation Exercise 💡
-1. **Current template system is rigid** - fills predefined structures rather than understanding purpose
-2. **Missing conversational intelligence** - no way to ask clarifying questions or build understanding
-3. **Document disconnection** - generated sections lack cohesion and cross-references
-4. **One-shot generation limitation** - no iterative refinement or user collaboration
+### What Cursor Implemented ✅
+**Files Created:**
+- `/src/conversation/engine.ts` - Complete conversation interfaces and NoopConversationEngine stub
+- `/src/context/store.ts` - Context management interfaces with InMemoryContextStore  
+- `/src/test/conversation-engine.test.ts` - Unit tests for conversation engine
+- `/src/test/context-store.test.ts` - Unit tests for context store
 
-### Gaps Identified 🎯
-1. **Conversation Engine**: Need complete replacement of current batch generation with interactive AI
-2. **Context Management**: Current system has no persistent conversation state or context building
-3. **Purpose Framework**: Templates need to become purpose-driven document definitions
-4. **User Experience**: CLI needs conversational interface instead of form-filling prompts
+**Files Modified:**
+- `/src/commands/generate.ts` - Added `--conversational` flag integration (lines 19, 28-40)
+- `package.json` - Added `test:run` script for CI-friendly testing
 
-## Next Steps
+**Technical Implementation:**
+- **Conversation Engine**: Full TypeScript interfaces for conversation phases, turns, state, and I/O
+- **Flag Integration**: `--conversational` routes through NoopConversationEngine then falls back to existing prompts  
+- **Context Store**: Generic context persistence interface with in-memory implementation
+- **Testing**: Basic unit tests verify the scaffolding structure works correctly
+- **Non-Breaking**: All changes are additive - existing functionality untouched
 
-### Immediate Actions (This Session)
-- [ ] Review current codebase structure to understand integration points
-- [ ] Identify which components can be evolved vs need complete replacement
-- [ ] Plan implementation approach: gradual enhancement vs clean rewrite
-- [ ] Define MVP scope for initial conversational prototype
+### Next Actions
+1. **Test Current State**: Run `docflow generate --conversational` to see what works
+2. **Review Code**: Understand the scaffolding Cursor built
+3. **Design Questions**: Create actual conversation flows for project discovery
+4. **Implement Logic**: Replace noop with real AI conversation
 
-### Short-term Development Plan (Next 2 weeks)
-- [ ] Prototype conversation engine with basic project discovery
-- [ ] Design context management data structures and persistence
-- [ ] Create document purpose registry to replace template system
-- [ ] Build iterative refinement interface for generated content
-
-### Questions to Resolve
-- Should we build conversational features as CLI flags (`--conversational`) or replace current approach entirely?
-- How do we maintain backward compatibility for existing Docflow users?
-- What's the minimal viable conversation that demonstrates the approach?
-- Which AI provider should we prototype with first (OpenAI GPT-5, Claude, or local)?
-
-## Implementation Approach Decision
-
-Based on documentation analysis, recommend **gradual enhancement approach**:
-
-1. **Phase 1**: Add conversational mode as optional CLI flag alongside existing templates
-2. **Phase 2**: Migrate successful patterns from conversational mode to replace templates  
-3. **Phase 3**: Fully replace template system with conversational approach as default
-
-This allows:
-- User testing and feedback during development
-- Backward compatibility during transition
-- Risk mitigation with fallback to working system
-- Iterative improvement based on real usage
-
-## Code Areas Requiring Change
-
-### Major Modifications Needed
-- `src/prompts/project.ts` - Replace form prompts with conversation engine
-- `src/generators/ai-generator.ts` - Enhance from section-filling to purpose-driven generation
-- `src/generators/docs.ts` - Replace template processing with conversational workflow
-
-### New Components Required
-- `src/conversation/` - New conversation engine and phase management
-- `src/context/` - Context management and persistence
-- `src/purposes/` - Document purpose framework and registry
-
-### Integration Points
-- Maintain existing CLI framework and beautiful terminal experience
-- Preserve AI provider abstraction and error handling
-- Keep file generation and organization patterns
-- Retain progress indicators and user feedback systems
+### Questions for Review
+- Does the `--conversational` flag work end-to-end?
+- What does the conversation engine interface look like?
+- How should we design the discovery question flow?
+- Should we implement file-based context persistence next?
 
 ---
 
-*Focus will shift to prototyping conversation engine once architectural analysis is complete.*
+**Status Guide:**
+- `in_progress`: Actively working on todos
+- `in_review`: Ready for testing/feedback, may iterate  
+- `completed`: Feature done, ready to archive and move to next

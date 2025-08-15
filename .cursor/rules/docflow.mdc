@@ -29,6 +29,27 @@ This is the Docflow CLI tool for generating AI-powered project documentation. Th
 
 ### Workflow Protocols
 - Follow `/docs/project/workflows.md` for WrapSession, StartSession, and CaptureNote protocols
+- Follow Active Feature Lifecycle for systematic feature development
+
+### Active Feature Management
+**ALWAYS check `/docs/active/focus.md` first** - this defines your current work priority
+
+#### Auto-Progression Logic
+1. **If focus.md is empty or feature completed**: Auto-pull next P0 feature from `/docs/releases/current/features.md`
+2. **Update feature status**: Change from `pending` → `active` in features.md  
+3. **Create focused todos**: Generate 3-5 specific, actionable todos in focus.md
+4. **Set status**: Mark as `in_progress` and begin systematic work
+
+#### Feature Status Management
+- **in_progress**: Working through todos systematically
+- **in_review**: All todos complete, ready for user testing/feedback
+- **completed**: User approved, ready to archive and move to next feature
+
+#### Documentation Updates
+- Update `/docs/active/focus.md` with progress after each work session
+- Mark todos as ✅ immediately when completed  
+- Update features.md with current status and completed items
+- Use CaptureNote protocol for major decisions during development
 
 ### Documentation Philosophy
 - Read the "Documentation Philosophy & Structure" section in `README.md`

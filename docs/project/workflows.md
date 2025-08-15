@@ -155,25 +155,61 @@ End-of-session cleanup and documentation to ensure clean handoffs and fresh star
 **Action Required:** Update project roadmap and stakeholder communication
 ```
 
+## Active Feature Lifecycle
+
+### Purpose
+Systematic workflow for managing single-feature focus with clear progression through development phases.
+
+### Feature Status Flow
+```
+pending → in_progress → in_review → completed (archived)
+```
+
+### Auto-Progression Logic for AI
+
+#### When Starting Work
+1. **Check Active Focus**: Review `/docs/active/focus.md` for current feature
+2. **If Empty/Completed**: Auto-pull next P0 feature from `/docs/releases/current/features.md`
+3. **Update Status**: Change feature status from `pending` → `active` in features.md
+4. **Create Focused Todos**: Generate 3-5 specific todos in focus.md
+5. **Set Status**: Mark feature as `in_progress`
+
+#### During Development
+1. **Work Systematically**: Complete todos in order
+2. **Mark Completed**: Update todos with ✅ as finished
+3. **Document Progress**: Update "What was accomplished" section
+4. **When All Done**: Change status to `in_review`
+
+#### In Review Phase
+1. **User Testing**: User tests and reviews the implementation
+2. **Iterate**: May add/remove todos based on feedback
+3. **Refine**: Continue development based on user input
+4. **When Approved**: User confirms completion → status = `completed`
+
+#### On Completion
+1. **Archive Feature**: Move to `/docs/active/archive/F001-feature-name.md`
+2. **Update Release**: Mark feature as `completed` in features.md  
+3. **Clear Focus**: Reset `/docs/active/focus.md`
+4. **Auto-Start Next**: Pull next P0 feature and restart cycle
+
 ### Integration with Development Workflow
 
 #### Daily Development Sessions
-1. Start session by reviewing `/docs/active/focus.md` and latest notes
-2. Work on assigned tasks and features
-3. Before ending session, run WrapSession protocol for significant changes
-4. Update focus document with next session priorities
+1. Check `/docs/active/focus.md` for current feature and todos
+2. Work through todos systematically, marking complete as you go
+3. Run WrapSession protocol before ending significant sessions
+4. Update focus with session progress and next steps
 
-#### Architecture and Planning Sessions  
-1. Capture all major decisions using DECISION RECORD format
-2. Document scope changes with impact analysis
-3. Record insights about user needs or technical approaches
-4. Update core project documentation if fundamental changes occur
+#### Feature Review Sessions  
+1. User tests current implementation against acceptance criteria
+2. User provides feedback, may add/remove todos
+3. Use CaptureNote protocol for any scope changes or important decisions
+4. Continue iteration until user confirms completion
 
-#### Handoff Sessions
-1. Create comprehensive session handoff in `/docs/active/session.md`
-2. Capture context in notes for future reference
-3. Ensure all decisions and changes are documented
-4. Provide clear next steps and priorities
+#### Session Management
+1. `/docs/active/session.md` captures current session work (archived on wrap)
+2. `/docs/notes/YYYY-MM-DD.md` captures major decisions and scope changes (permanent)
+3. WrapSession archives session.md and creates fresh one for next session
 
 ## StartSession Protocol
 

@@ -12,6 +12,7 @@
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest",
+    "test:run": "vitest run",
     "link": "npm link",
     "unlink": "npm unlink"
   },

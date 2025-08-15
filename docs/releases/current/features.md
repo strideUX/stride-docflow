@@ -7,7 +7,7 @@ This release introduces three major feature categories that transform Docflow fr
 ## Phase 1 Features: Conversation Engine
 
 ### F001: AI Project Discovery Engine
-**Status:** 📋 Planned  
+**Status:** 🔄 Active - In Review  
 **Priority:** P0 - Critical  
 **Complexity:** High - New conversation architecture  
 **Dependencies:** None  
@@ -15,18 +15,34 @@ This release introduces three major feature categories that transform Docflow fr
 **Description:**  
 Intelligent conversation system that conducts deep project exploration through natural language interaction.
 
-**Acceptance Criteria:**
+**Completed Items:**
+- ✅ Conversation engine interfaces and type definitions
+- ✅ NoopConversationEngine scaffolding implementation
+- ✅ `--conversational` CLI flag integration
+- ✅ Context store interfaces with in-memory implementation
+- ✅ Unit test coverage for conversation engine structure
+- ✅ Non-breaking integration with existing command flow
+
+**Remaining Acceptance Criteria:**
 - [ ] AI asks contextually relevant follow-up questions based on user responses
 - [ ] System builds comprehensive project understanding through iterative questioning
 - [ ] Conversation covers all essential project aspects: goals, users, constraints, scope
 - [ ] AI adapts questioning strategy based on project type and complexity
 - [ ] User can clarify or correct AI understanding at any point
 
+**Next Steps:**
+- [ ] Test current `--conversational` flag functionality
+- [ ] Replace NoopConversationEngine with real AI conversation logic
+- [ ] Design actual discovery question flows
+- [ ] Implement file-based context persistence
+
 **Technical Implementation:**
-- Context-aware question generation using project domain knowledge
-- Progressive information building with validation checkpoints
-- Conversation state management with branching logic
-- Natural language understanding for user clarification and corrections
+- ✅ Conversation interfaces: ConversationEngine, ConversationState, ConversationTurn
+- ✅ Context management: ContextStore interface with InMemoryContextStore
+- ✅ CLI integration: Generate command routes through conversation engine
+- [ ] Context-aware question generation using project domain knowledge
+- [ ] Progressive information building with validation checkpoints
+- [ ] Natural language understanding for user clarification and corrections
 
 ### F002: Context Management System
 **Status:** 📋 Planned  
