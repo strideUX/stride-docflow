@@ -150,11 +150,11 @@ class ClipboardImageManager {
 
     while (wantToAddImages && !p.isCancel(wantToAddImages)) {
       // Prompt user to paste and press Enter
-      p.log.info(`${chalk.cyan('Paste an image to clipboard, then press Enter...')}`);
+      p.log.info(`${chalk.cyan('Paste an image to clipboard OR paste the file path, then press Enter...')}`);
 
       const ready = await p.text({
-        message: 'Press Enter after pasting an image (or type "skip" to skip this one)',
-        placeholder: 'Press Enter...'
+        message: 'Press Enter after pasting an image/path (or type "skip" to skip this one)',
+        placeholder: 'Press Enter or paste file path...'
       });
 
       if (p.isCancel(ready)) {
@@ -172,19 +172,43 @@ class ClipboardImageManager {
         continue;
       }
 
-      // Now check clipboard for image
-      const clipboardType = await this.detectClipboardContent();
+      // NEW: Check if user typed a file path directly
+      if (typeof ready === 'string' && ready.trim() && this.isImageFilePath(ready.trim())) {
+        const imagePath = ready.trim();
+        const shouldUseAsImage = await p.confirm({
+          message: `Include "${path.basename(imagePath)}" as an image?`,
+          initialValue: true
+        });
 
-      if (clipboardType === 'image') {
-        const pastedImage = await this.handlePastedImage();
-        if (pastedImage) {
-          images.push(pastedImage);
-          p.log.success(`✅ Added ${pastedImage.placeholder}`);
-        } else {
-          p.log.warn(`⚠️  Could not process image from clipboard`);
+        if (shouldUseAsImage && !p.isCancel(shouldUseAsImage)) {
+          const originalClipboard = await clipboardy.read();
+          await clipboardy.write(imagePath);
+
+          const pastedImage = await this.handlePastedImage();
+          if (pastedImage) {
+            images.push(pastedImage);
+            p.log.success(`✅ Added ${pastedImage.placeholder}`);
+          } else {
+            p.log.warn(`⚠️  Could not process image file`);
+          }
+
+          await clipboardy.write(originalClipboard);
         }
       } else {
-        p.log.warn(`⚠️  No image detected in clipboard. Make sure you copied an image first.`);
+        // Now check clipboard for image
+        const clipboardType = await this.detectClipboardContent();
+
+        if (clipboardType === 'image') {
+          const pastedImage = await this.handlePastedImage();
+          if (pastedImage) {
+            images.push(pastedImage);
+            p.log.success(`✅ Added ${pastedImage.placeholder}`);
+          } else {
+            p.log.warn(`⚠️  Could not process image from clipboard`);
+          }
+        } else {
+          p.log.warn(`⚠️  No image detected in clipboard. Make sure you copied an image first.`);
+        }
       }
 
       // Ask if they want to add more

@@ -196,21 +196,10 @@ class ProjectPrompts {
         placeholder: 'Home, Profile, Settings, Dashboard, Chat, Search...',
       }).then(text => text && typeof text === 'string' ? text.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
 
-      wireframes: async () => {
-        const result = await clipboardImageManager.promptWithImageSupport({
-          message: 'Any wireframes, mockups, or design files? (optional)',
-          placeholder: 'Describe your design vision, or paste/provide image file paths...'
-        });
-
-        if (result.images.length > 0) {
-          // Show a small summary note for user feedback
-          console.log(`\n📸 Added ${result.images.length} image${result.images.length > 1 ? 's' : ''}`);
-          console.log(result.images.map((img, i) => `   ${i + 1}. ${img.placeholder}`).join('\n'));
-          console.log();
-        }
-
-        return result;
-      },
+      wireframes: () => p.text({
+        message: 'Any wireframes, mockups, or design notes? (optional)',
+        placeholder: 'Describe your design vision or reference existing designs...',
+      }),
 
       inspirations: () => p.text({
         message: 'Apps or sites that inspire you? (optional)',
@@ -239,7 +228,7 @@ class ProjectPrompts {
     p.note(`Directory name: ${chalk.cyan(projectSlug)}`, '📁 Project folder');
 
     // Handle wireframes response (could be text + images)
-    const wireframesData = answers.wireframes as { text: string; images: PastedImage[] };
+    const wireframesText = typeof answers.wireframes === 'string' ? answers.wireframes : '';
     const allPastedImages = clipboardImageManager.getImages();
 
     // Merge with existing data and options
@@ -253,7 +242,7 @@ class ProjectPrompts {
         lookAndFeel: answers.lookAndFeel || undefined,
         userFlows: answers.userFlows?.length ? answers.userFlows : undefined,
         screens: answers.screens?.length ? answers.screens : undefined,
-        wireframes: wireframesData?.text || undefined,
+        wireframes: wireframesText || undefined,
         inspirations: answers.inspirations || undefined,
         images: allPastedImages?.length ? allPastedImages : undefined
       },
