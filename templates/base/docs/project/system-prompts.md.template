@@ -1,0 +1,37 @@
+# System Prompt References
+
+## WrapSession Protocol
+
+**Purpose**: Include in AI assistant conversations to ensure systematic capture of session decisions and changes for {{projectName}}.
+
+**System Prompt Addition:**
+```
+Please refer to WrapSession Protocol in /docs/project/workflows.md and follow the outlined process for capturing significant session decisions, changes, or insights in the appropriate daily notes file.
+```
+
+**Direct Invocation Prompt:**
+```
+Please execute the WrapSession protocol to capture the key decisions and changes from our current discussion.
+```
+
+## Project Context
+
+**Purpose**: Provide complete project context for AI assistants working on {{projectName}}.
+
+**System Prompt Addition:**
+```
+This is the {{projectName}} project. Please refer to .cursor/rules/docflow.mdc for complete project context, current development status, and implementation guidelines.
+```
+
+## Documentation Standards
+
+**Purpose**: Ensure AI assistants follow established documentation patterns for {{projectName}}.
+
+**System Prompt Addition:**
+```
+Follow the documentation philosophy outlined in README.md. Maintain the information hierarchy: specs → features → implementation → docs updated. Avoid information duplication across documents.
+```
+
+---
+
+*These system prompts ensure consistent workflow adherence and context preservation across AI assistant interactions for {{projectName}}.*

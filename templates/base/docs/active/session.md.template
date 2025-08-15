@@ -52,10 +52,12 @@
 
 <!-- STATIC -->
 When ending a session, ensure:
+- [ ] **WrapSession Protocol**: Follow process in /docs/project/workflows.md for capturing decisions
 - [ ] Current work status updated in releases/current/index.md
 - [ ] Progress documented in relevant feature/enhancement/bug files
 - [ ] Any new items added to appropriate files
 - [ ] active/focus.md updated with clear next steps
+- [ ] Major decisions captured in daily notes file (/docs/notes/YYYY-MM-DD.md)
 - [ ] Session summary added to archive above
 - [ ] Code is in stable state with any debug code removed
 - [ ] Any architectural decisions documented in architecture.md

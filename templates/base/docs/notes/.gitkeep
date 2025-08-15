@@ -1,0 +1,14 @@
+# Session Notes & Decision Records
+
+This directory contains daily session notes tracking project evolution, decisions, and insights.
+
+Files are named by date: `YYYY-MM-DD.md`
+
+Follow the WrapSession Protocol documented in `/docs/project/workflows.md` for systematic capture of:
+- Decision records
+- Scope changes  
+- Architectural insights
+- Process changes
+- Important context
+
+This ensures project evolution and decision rationale are preserved for future development sessions.
