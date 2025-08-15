@@ -120,14 +120,59 @@ When creating session notes, also update:
 3. Ensure all decisions and changes are documented
 4. Provide clear next steps and priorities
 
+## QuickStart Protocol
+
+### Purpose
+Provide immediate, concise status and next actions when resuming development work. No verbose explanations - just essential context.
+
+### When to Use
+- Starting a new development session with AI assistants
+- Need rapid context switching between tasks
+- Want focused, actionable next steps without long explanations
+
+### Usage
+**Prompt:** "Execute QuickStart protocol - where are we and what's next?"
+
+### Response Format
+```markdown
+## 🎯 Current Status
+**Phase:** [Current development phase]
+**Priority:** [P0/P1/P2] [Current high-priority task]
+**Blockers:** [Any immediate blockers or dependencies]
+
+## ⚡ Next Actions
+1. [Immediate next task - specific and actionable]
+2. [Secondary task if first is blocked]
+3. [Third option/alternative approach]
+
+## 📋 Context Check
+- [ ] Active focus updated? (/docs/active/focus.md)
+- [ ] Latest notes reviewed? (/docs/notes/YYYY-MM-DD.md)  
+- [ ] Any decisions pending documentation?
+
+## 🚨 Alerts
+[Any urgent issues, breaking changes, or critical dependencies]
+```
+
+### Implementation Steps
+When QuickStart is requested:
+1. Check `/docs/active/focus.md` for current priorities
+2. Review latest `/docs/notes/` file for recent decisions
+3. Scan `/docs/releases/current/` for active feature status
+4. Identify immediate blockers or dependencies
+5. Provide 1-3 specific, actionable next steps
+
 ## Quick Reference Commands
 
 ### For AI Assistants
-**System Prompt Addition:**
+**WrapSession System Prompt:**
 > "Please refer to WrapSession Protocol in /docs/project/workflows.md and follow the outlined process for capturing significant session decisions, changes, or insights."
 
-**Direct Invocation:**
+**WrapSession Direct Invocation:**
 > "Please execute the WrapSession protocol to capture the key decisions and changes from our current discussion."
+
+**QuickStart Direct Invocation:**
+> "Execute QuickStart protocol - where are we and what's next?"
 
 ### Manual Process
 1. Check today's date: `YYYY-MM-DD`
@@ -138,4 +183,4 @@ When creating session notes, also update:
 
 ---
 
-*This protocol ensures project evolution is systematically captured and context is preserved for future development sessions.*
+*These protocols ensure project evolution is systematically captured and enable rapid context switching for efficient development sessions.*

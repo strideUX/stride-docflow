@@ -9,7 +9,8 @@ This release introduces three major feature categories that transform Docflow fr
 ### F001: AI Project Discovery Engine
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 2 weeks  
+**Complexity:** High - New conversation architecture  
+**Dependencies:** None  
 
 **Description:**  
 Intelligent conversation system that conducts deep project exploration through natural language interaction.
@@ -30,7 +31,8 @@ Intelligent conversation system that conducts deep project exploration through n
 ### F002: Context Management System
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1.5 weeks
+**Complexity:** High - Core state management  
+**Dependencies:** None (parallel with F001)
 
 **Description:**  
 Comprehensive system for managing conversation context, project understanding, and state persistence across sessions.
@@ -51,7 +53,8 @@ Comprehensive system for managing conversation context, project understanding, a
 ### F003: User Validation & Refinement
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1 week
+**Complexity:** Medium - UI and validation logic  
+**Dependencies:** F001 (conversation output), F002 (context state)
 
 **Description:**  
 Interactive system allowing users to review, validate, and refine AI understanding before proceeding to next phases.
@@ -74,7 +77,8 @@ Interactive system allowing users to review, validate, and refine AI understandi
 ### F004: Document Purpose Framework
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1 week
+**Complexity:** Medium - Template system replacement  
+**Dependencies:** None (new architecture)
 
 **Description:**  
 Replaces static templates with purpose-driven document definitions that understand stakeholder needs and document goals.
@@ -95,7 +99,8 @@ Replaces static templates with purpose-driven document definitions that understa
 ### F005: Architecture Decision Generator
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1.5 weeks
+**Complexity:** High - AI reasoning and decision logic  
+**Dependencies:** F001 (project understanding), F004 (purpose framework)
 
 **Description:**  
 AI system that proposes technical approaches and architectural decisions based on project specifications, with interactive refinement.
@@ -116,7 +121,8 @@ AI system that proposes technical approaches and architectural decisions based o
 ### F006: Stakeholder-Aware Content Generation
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1 week
+**Complexity:** Medium - Content adaptation algorithms  
+**Dependencies:** F004 (purpose framework)
 
 **Description:**  
 Content generation system that tailors documentation depth, technical level, and focus based on intended stakeholder audience.
@@ -139,7 +145,8 @@ Content generation system that tailors documentation depth, technical level, and
 ### F007: End-to-End Conversation Flow
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1.5 weeks
+**Complexity:** High - Full system integration  
+**Dependencies:** All Phase 1 & 2 features
 
 **Description:**  
 Seamless integration connecting conversation phases to final documentation generation with consistent user experience.
@@ -160,7 +167,8 @@ Seamless integration connecting conversation phases to final documentation gener
 ### F008: Iterative Refinement System
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1.5 weeks
+**Complexity:** High - Context-aware regeneration  
+**Dependencies:** F007 (end-to-end flow), F002 (context management)
 
 **Description:**  
 System enabling users to iteratively refine generated documentation while maintaining consistency and context awareness.
@@ -181,7 +189,8 @@ System enabling users to iteratively refine generated documentation while mainta
 ### F009: Performance Optimization & UX Polish
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1 week
+**Complexity:** Medium - Performance and UX improvements  
+**Dependencies:** F007 (end-to-end flow)
 
 **Description:**  
 Performance enhancements and user experience improvements for production-ready conversational documentation generation.
@@ -204,7 +213,8 @@ Performance enhancements and user experience improvements for production-ready c
 ### F010: Conversation Analytics & Insights
 **Status:** 📋 Planned  
 **Priority:** P2 - Medium  
-**Effort:** 0.5 weeks
+**Complexity:** Low - Data collection and analysis  
+**Dependencies:** F001 (conversation engine)
 
 **Description:**  
 Analytics system providing insights into conversation effectiveness and documentation quality.
@@ -218,7 +228,8 @@ Analytics system providing insights into conversation effectiveness and document
 ### F011: Template Migration & Compatibility
 **Status:** 📋 Planned  
 **Priority:** P2 - Medium  
-**Effort:** 0.5 weeks
+**Complexity:** Low - Backward compatibility layer  
+**Dependencies:** F004 (purpose framework)
 
 **Description:**  
 Migration path for existing template-based users and backward compatibility support.
