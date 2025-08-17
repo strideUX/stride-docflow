@@ -1,0 +1,13 @@
+import { defineSchema, defineTable } from 'convex/server';
+import { v } from 'convex/values';
+
+export default defineSchema({
+    docflow_sessions: defineTable({
+        sessionId: v.string(),
+        data: v.any(),
+        createdAt: v.string(),
+        updatedAt: v.string(),
+    }).index('by_sessionId', ['sessionId']),
+});
+
+

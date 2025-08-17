@@ -1,5 +1,6 @@
 import { FileContextStore } from '../context/file-store.js';
 import { ContextStore } from '../context/store.js';
+import { ConvexContextStore } from '../context/convex-store.js';
 import type { ConversationState, ConversationTurn } from './engine.js';
 
 export interface SavedConversation {
@@ -11,7 +12,12 @@ export class ConversationSessionManager {
     private store: ContextStore;
 
     constructor(store?: ContextStore) {
-        this.store = store || new FileContextStore();
+        if (store) {
+            this.store = store;
+        } else {
+            const useConvex = !!process.env.DOCFLOW_CONVEX_ADMIN_URL;
+            this.store = useConvex ? new ConvexContextStore(process.env.DOCFLOW_CONVEX_ADMIN_URL) : new FileContextStore();
+        }
     }
 
     async createOrUpdate(state: ConversationState, summary: Record<string, unknown>): Promise<void> {

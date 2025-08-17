@@ -56,7 +56,8 @@ export class NoopConversationEngine implements ConversationEngine {
 import { parseIdeaWithAI } from '../generators/ai-parser.js';
 import { getAvailableStacks } from '../templates/stack-registry.js';
 import { summarizeDiscoveryWithOpenAI } from './summarizer.js';
-import { ConversationOrchestrator } from './orchestrator.js';
+import { ConversationSessionManager } from './session.js';
+import { ConversationOrchestrator, OrchestratorHooks } from './orchestrator.js';
 
 function toArray(text?: string): string[] {
     if (!text || typeof text !== 'string') return [];
@@ -73,6 +74,7 @@ export class RealConversationEngine implements ConversationEngine {
         const turns: ConversationTurn[] = [
             { role: 'system', content: 'Starting discovery conversation', timestamp: now },
         ];
+        const sessionManager = new ConversationSessionManager();
 
         // Seed via AI parse or heuristic
         let parsed: any = {};
@@ -95,6 +97,7 @@ export class RealConversationEngine implements ConversationEngine {
                 stackSuggestion: parsed.suggestedStack,
             };
             const state: ConversationState = { sessionId, phase: 'discovery', turns };
+            await sessionManager.createOrUpdate(state, summary as any);
             return { state, summary };
         }
 
@@ -108,7 +111,27 @@ export class RealConversationEngine implements ConversationEngine {
             constraints: parsed.constraints || [],
             stackSuggestion: parsed.suggestedStack,
         };
-        const managed = await orchestrator.manageConversation(seed, turns);
+        const hooks: OrchestratorHooks = {
+            onTurn: async (_turn) => {
+                // TODO: Replace with Convex AI persistence when integrated
+                return;
+            },
+        };
+        // Persist initial state
+        await sessionManager.createOrUpdate(
+            { sessionId, phase: 'discovery', turns },
+            (seed as any) || {}
+        );
+
+        const managed = await orchestrator.manageConversation(seed, turns, {
+            onTurn: async (turn) => {
+                try {
+                    await sessionManager.appendTurn(sessionId, turn);
+                } catch {
+                    // ignore persistence errors for now
+                }
+            },
+        });
 
         // Stack follow-ups moved after orchestration if a stack exists
         let summary = managed.summary;
@@ -138,6 +161,12 @@ export class RealConversationEngine implements ConversationEngine {
             phase: 'discovery',
             turns: managed.turns,
         };
+
+        try {
+            await sessionManager.createOrUpdate(state, summary as any);
+        } catch {
+            // ignore persistence errors for now
+        }
 
         return { state, summary };
     }

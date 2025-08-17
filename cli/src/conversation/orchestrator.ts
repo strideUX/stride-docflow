@@ -23,6 +23,13 @@ const REQUIREMENTS: DocumentRequirement[] = [
         required: true,
     },
     {
+        key: 'stackSuggestion',
+        label: 'Preferred technology stack',
+        type: 'string',
+        prompt: 'Which stack do you prefer (e.g., nextjs-convex, nextjs-supabase, react-native-convex)?',
+        required: false,
+    },
+    {
         key: 'objectives',
         label: 'Objectives',
         type: 'string[]',
@@ -54,8 +61,12 @@ const REQUIREMENTS: DocumentRequirement[] = [
 
 export interface OrchestratorOptions {
     aiProvider: Provider;
-    model?: string;
-    maxTurns?: number;
+    model?: string | undefined;
+    maxTurns?: number | undefined;
+}
+
+export interface OrchestratorHooks {
+    onTurn?: (turn: ConversationTurn) => Promise<void> | void;
 }
 
 function toArray(text?: string): string[] {
@@ -87,8 +98,13 @@ async function generateQuestionWithAI(
             return typeof value !== 'string' || (value as string).trim().length === 0;
         }).map((r) => r.label);
 
-        const system = `You are a senior technical consultant doing project discovery to generate documentation (specs.md, architecture.md, features.md, stack.md).
-Ask the single most effective next question to gather missing information. Output ONLY the question text.`;
+        const system = `You are a senior technical consultant doing project discovery for generating:
+ - specs.md (vision, objectives, target users, constraints)
+ - architecture.md (tech stack rationale, key components)
+ - features.md (feature list with priorities)
+ - stack.md (chosen stack and integration details)
+
+Ask the single most effective next question to gather missing information. Keep it specific and single-part. Output ONLY the question text.`;
         const convo = history.slice(-6).map((t) => `${t.role.toUpperCase()}: ${t.content}`).join('\n');
         const user = `Current known fields: ${JSON.stringify(current)}\nOutstanding fields: ${outstanding.join(', ') || 'None'}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo}`;
 
@@ -144,7 +160,8 @@ export class ConversationOrchestrator {
 
     async manageConversation(
         seed: Partial<DiscoverySummary>,
-        history: ConversationTurn[]
+        history: ConversationTurn[],
+        hooks?: OrchestratorHooks
     ): Promise<{ turns: ConversationTurn[]; summary: DiscoverySummary }> {
         const turns: ConversationTurn[] = [...history];
         let current: Partial<DiscoverySummary> = { ...seed };
@@ -171,6 +188,7 @@ export class ConversationOrchestrator {
                 timestamp: new Date().toISOString(),
             };
             turns.push(qTurn);
+            if (hooks?.onTurn) await hooks.onTurn(qTurn);
 
             const answer = await p.text({ message: question });
             if (p.isCancel(answer)) {
@@ -184,24 +202,30 @@ export class ConversationOrchestrator {
                 timestamp: new Date().toISOString(),
             };
             turns.push(aTurn);
+            if (hooks?.onTurn) await hooks.onTurn(aTurn);
 
             // Map answer into structured summary
             if (requirement.type === 'string') {
-                current[requirement.key] = String(answer).trim();
+                (current as any)[requirement.key] = String(answer).trim();
             } else if (requirement.type === 'string[]') {
-                current[requirement.key] = toArray(String(answer));
+                (current as any)[requirement.key] = toArray(String(answer));
             }
         }
 
-        const summary: DiscoverySummary = {
-            description: current.description || seed.description || 'Project generated via conversational mode',
-            objectives: current.objectives || [],
-            targetUsers: current.targetUsers || [],
-            features: current.features || [],
-            constraints: current.constraints || [],
-            stackSuggestion: current.stackSuggestion,
-            extras: current.extras,
+        const summaryBase: DiscoverySummary = {
+            description: (current.description || seed.description || 'Project generated via conversational mode') as string,
+            objectives: (current.objectives as string[] | undefined) || [],
+            targetUsers: (current.targetUsers as string[] | undefined) || [],
+            features: (current.features as string[] | undefined) || [],
+            constraints: (current.constraints as string[] | undefined) || [],
         };
+        const summary: DiscoverySummary = { ...summaryBase };
+        if (current.stackSuggestion) {
+            (summary as any).stackSuggestion = current.stackSuggestion as string;
+        }
+        if (current.extras) {
+            (summary as any).extras = current.extras as Record<string, unknown>;
+        }
 
         return { turns, summary };
     }
