@@ -49,11 +49,15 @@ Following proper information hierarchy:
 - Good error handling and progress indicators
 - Multi-image collection workflow
 
-### 🎯 Areas Requiring Enhancement
-- **Conversation Engine**: Need interactive AI discovery vs form prompts
-- **Context Management**: Need persistent conversation state and understanding
-- **Document Purposes**: Need purpose framework vs static templates
-- **Iterative Refinement**: Need ability to modify and regenerate content
+### ⚠️ Critical Issue Identified
+**F001 Architecture Problem**: Current RealConversationEngine is structured form with better prompts, NOT conversational AI
+
+### 🎯 Required Architecture Redesign
+- **ConversationOrchestrator**: Main conversation manager using our docs structure as discovery template
+- **Dynamic Question Generation**: AI generates questions based on conversation history and gaps
+- **Discovery Gap Assessment**: Evaluates what information is needed for complete documentation
+- **Provider Flexibility**: Configurable AI provider (OpenAI/Anthropic) with runtime model override
+- **Consultant-Style Flow**: Technical requirements gathering with 10-15 turn conversation
 
 ## Implementation Readiness
 
@@ -91,8 +95,9 @@ Following proper information hierarchy:
 
 ### Document Decisions and Changes
 - **WrapSession Protocol**: Follow systematic process in `/docs/project/workflows.md`
-- **Session Notes**: All major decisions documented in daily files under `/docs/notes/`
+- **Daily Notes Pattern**: One file per day `/docs/notes/YYYY-MM-DD.md` - append to today's file or create new one
 - **Decision Tracking**: Use structured format for DECISION RECORD, SCOPE CHANGE, INSIGHT, etc.
+- **Historical Preservation**: Never modify previous days' files - each day is preserved as historical record
 - **Cross-Reference**: Update active focus and session documents when priorities change
 
 ### Focus on User Experience

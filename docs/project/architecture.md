@@ -33,10 +33,10 @@ The Conversational AI Documentation Generator transforms Docflow from a template
 └─────────────────────────────────────────────────────────────┘
                                 │
 ┌─────────────────────────────────────────────────────────────┐
-│                 Conversation Engine Layer                   │
+│              Conversation Orchestrator Layer               │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │    Phase        │  │    Context      │  │   Question      │ │
-│  │  Management     │  │   Management    │  │   Generation    │ │
+│  │  Conversation   │  │   Discovery     │  │   Dynamic       │ │
+│  │  Orchestrator   │  │ Gap Assessor    │  │  Question Gen   │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                                 │
@@ -67,35 +67,55 @@ The Conversational AI Documentation Generator transforms Docflow from a template
 
 ## Core Components
 
-### Conversation Engine
+### Conversation Orchestrator
 
-**Purpose**: Orchestrates the three-phase conversational process for project understanding and documentation generation.
+**Purpose**: Main conversation manager that conducts requirements gathering like a technical consultant using our own documentation structure as the discovery template.
 
 **Key Classes:**
 ```typescript
-class ConversationalDocumentationGenerator {
-  private context: ProjectContext;
-  private currentPhase: ConversationPhase;
-  private conversationState: ConversationState;
+interface ConversationOrchestrator {
+  // Document-driven discovery using our docs structure
+  documentRequirements: DocumentRequirements  // From specs.md, architecture.md, features.md, stack.md
+  conversationHistory: ConversationTurn[]
+  discoveryGaps: string[]  // What information is still needed
   
-  async generateDocumentation(initialIdea: string): Promise<DocumentationSuite>
-  async exploreProject(idea: string): Promise<ProjectContext>
-  async designSystem(context: ProjectContext): Promise<ArchitectureContext>
-  async generateDocs(fullContext: FullProjectContext): Promise<DocumentationSuite>
+  // Core conversation methods
+  generateNextQuestion(context: ConversationHistory): Promise<string>
+  processUserResponse(response: string): Promise<ConversationUpdate>
+  assessCompleteness(): Promise<DiscoveryGaps>
+  finalizationConversation(): Promise<ProjectSummary>
 }
 
-class ConversationPhaseManager {
-  async executePhase(phase: ConversationPhase, context: ProjectContext): Promise<PhaseResult>
-  async validatePhaseCompletion(phase: ConversationPhase, result: PhaseResult): Promise<boolean>
-  async transitionToNextPhase(currentPhase: ConversationPhase): Promise<ConversationPhase>
+class ConversationalOrchestrator {
+  private questionGenerator: DynamicQuestionGenerator;
+  private gapAssessor: DiscoveryGapAssessor;
+  private sessionManager: ConversationSessionManager;
+  private aiProvider: AIProvider;  // Configurable OpenAI/Anthropic with runtime override
+  
+  async conductDiscovery(initialIdea: string): Promise<ProjectSummary>
+  async manageConversationFlow(maxTurns: number = 15): Promise<ConversationResult>
+  async evaluateInformationGaps(): Promise<string[]>
+  async generateDocumentation(summary: ProjectSummary): Promise<DocumentationSuite>
+}
+
+class DynamicQuestionGenerator {
+  async generateQuestion(conversationHistory: ConversationTurn[], discoveryGaps: string[]): Promise<string>
+  async analyzeUserResponse(response: string, context: ConversationHistory): Promise<DiscoveryUpdate>
+}
+
+class DiscoveryGapAssessor {
+  async assessInformationGaps(conversationHistory: ConversationTurn[]): Promise<string[]>
+  async checkDocumentReadiness(gaps: string[]): Promise<boolean>
 }
 ```
 
 **Responsibilities:**
-- Orchestrate three-phase conversation flow
-- Manage phase transitions and user validation
-- Coordinate between context management and AI integration
-- Handle conversation interruption and resumption
+- Conduct consultant-style technical requirements gathering with lighter tone
+- Generate dynamic AI-powered questions based on conversation history and gaps
+- Assess information completeness against our document requirements
+- Manage 10-15 turn conversation flow with completion detection
+- Support multiple AI providers (OpenAI/Anthropic) with runtime configuration
+- Use our own docs structure to define required information scope
 
 ### Context Management System
 

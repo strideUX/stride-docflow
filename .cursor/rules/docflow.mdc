@@ -25,7 +25,7 @@ This is the Docflow CLI tool for generating AI-powered project documentation. Th
 - Read `/docs/releases/current/index.md` for release plan
 - Read `/docs/releases/current/features.md` for detailed features
 - Read `/docs/active/focus.md` for current priorities
-- Read `/docs/notes/2025-08-15.md` for major decisions and session context
+- Read `/docs/notes/` for recent decisions and session context (check today's file first, then yesterday's if needed)
 
 ### Workflow Protocols
 - Follow `/docs/project/workflows.md` for WrapSession, StartSession, and CaptureNote protocols

@@ -24,10 +24,12 @@ AI should recognize and capture when:
 - File structures or processes are modified
 - External blockers or dependencies are identified
 
-#### 2. File Management
-- Check if file exists for today: `/docs/notes/YYYY-MM-DD.md`
-- If not exists, create using template format
-- If exists, append new timestamped section
+#### 2. Daily File Management
+- **Daily Pattern**: One file per day using format `/docs/notes/YYYY-MM-DD.md`
+- **If Today's File Exists**: Append new timestamped section to existing file
+- **If Today's File Missing**: Create new file with session overview header and first entry
+- **Historical Files**: Never modify previous days' files - each day is preserved as historical record
+- **File Structure**: Each daily file should have session overview at top, then chronological timestamped entries
 
 #### 3. Standard Entry Format
 ```markdown

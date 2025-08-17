@@ -4,7 +4,8 @@ import chalk from 'chalk';
 import { styledPrompts, symbols } from '../ui/styled-prompts.js';
 import { projectPrompts } from '../prompts/project.js';
 import { generateDocs } from '../generators/docs.js';
-import { NoopConversationEngine } from '../conversation/engine.js';
+import { NoopConversationEngine, RealConversationEngine } from '../conversation/engine.js';
+import { ConversationSessionManager } from '../conversation/session.js';
 
 export const generateCommand = new Command('generate')
   .alias('gen')
@@ -17,6 +18,8 @@ export const generateCommand = new Command('generate')
   .option('--reasoning-effort <effort>', 'GPT-5 reasoning effort (minimal, low, medium, high)', 'minimal')
   .option('--verbosity <level>', 'GPT-5 output verbosity (low, medium, high)', 'medium')
   .option('--conversational', 'Enable conversational mode (experimental)', false)
+  .option('--session <id>', 'Resume a previous conversational session by ID')
+  .option('--accept-defaults', 'Auto-accept suggestions and confirmation where possible', false)
   .option('--research', 'Enable research mode with MCP and web search', true)
   .option('--dry-run', 'Show what would be generated without creating files', false)
   .action(async (options) => {
@@ -26,21 +29,41 @@ export const generateCommand = new Command('generate')
       // Gather project requirements (conversational stub or form prompts)
       let projectData = null as any;
       if (options.conversational) {
-        const engine = new NoopConversationEngine();
-        const conv = await engine.start({ idea: options.idea, aiProvider: options.aiProvider, model: options.model });
-        // Fallback to prompts to complete required fields with sensible defaults
+        const sessionManager = new ConversationSessionManager();
+        let conv: any = null;
+        if (options.session) {
+          const loaded = await sessionManager.load(options.session);
+          if (loaded) {
+            conv = loaded;
+          }
+        }
+
+        if (!conv) {
+          const engine = new RealConversationEngine();
+          conv = await engine.start({ idea: options.idea, aiProvider: options.aiProvider, model: options.model });
+          await sessionManager.createOrUpdate(conv.state, conv.summary as any);
+        }
+
         const seed = {
-          idea: conv.summary.description || options.idea,
+          idea: (conv.summary as any).description || options.idea,
           aiProvider: options.aiProvider,
           model: options.model,
+          seed: {
+            description: (conv.summary as any).description,
+            objectives: (conv.summary as any).objectives,
+            targetUsers: (conv.summary as any).targetUsers,
+            features: (conv.summary as any).features,
+            constraints: (conv.summary as any).constraints,
+            stack: (conv.summary as any).stackSuggestion,
+          }
         };
         projectData = await projectPrompts.gatherProjectData(seed);
       } else {
         projectData = await projectPrompts.gatherProjectData(options);
       }
 
-      // Confirm before generation
-      const shouldGenerate = await projectPrompts.confirmGeneration(projectData);
+      // Confirm before generation (unless auto-accept)
+      const shouldGenerate = options.acceptDefaults ? true : await projectPrompts.confirmGeneration(projectData);
       if (!shouldGenerate) {
         p.cancel('Generation cancelled');
         return;

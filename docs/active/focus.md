@@ -1,57 +1,73 @@
 # Active Feature Focus
 
 ## F001: AI Project Discovery Engine
-**Status:** in_review  
+**Status:** in_review (Architecture Redesign Required)  
 **Started:** 2025-08-15  
 **Priority:** P0 (Critical)  
 **From:** docs/releases/current/features.md
 
 ### Description
-Interactive conversation engine that understands project context through dynamic Q&A flow instead of static forms.
+Conversational AI system that conducts requirements gathering like a technical consultant, using dynamic question generation and natural dialogue flow to build comprehensive project understanding.
 
-### Current Todos
-- [ ] Review Cursor's conversation engine scaffolding implementation
-- [ ] Test the `--conversational` flag functionality  
-- [ ] Design actual discovery question flows (not just noop)
-- [ ] Implement real conversation logic with AI provider
-- [ ] Add file-based context persistence (replace InMemoryContextStore)
+### **CRITICAL ISSUE IDENTIFIED**
+Current RealConversationEngine implementation is **structured form with better prompts, not conversational AI**. Need complete redesign for true conversational flow.
 
-### Completed This Session
-- ✅ Added conversational scaffolding with NoopConversationEngine
-- ✅ Wired `--conversational` flag to generate command
-- ✅ Created basic unit test for conversation engine  
-- ✅ Added context store with InMemoryContextStore
-- ✅ Created `/src/conversation/engine.ts` and `/src/context/store.ts`
+### Current Todos (Revised)
+- [ ] **Design ConversationOrchestrator**: Main conversation manager using our docs structure as discovery template
+- [ ] **Implement Dynamic Question Generation**: AI generates next question based on conversation history and gaps  
+- [ ] **Create Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation
+- [ ] **Build System Prompt Integration**: Extract requirements from our own docs structure (specs.md, architecture.md, etc.)
+- [ ] **Add Provider Configuration**: Runtime AI provider and model selection (OpenAI/Anthropic focus)
+- [ ] **Implement Session Memory**: Context persists during session, cleanup after doc generation
 
 ### What Cursor Implemented ✅
 **Files Created:**
-- `/src/conversation/engine.ts` - Complete conversation interfaces and NoopConversationEngine stub
+- `/src/conversation/engine.ts` - Conversation interfaces + RealConversationEngine (needs redesign)
 - `/src/context/store.ts` - Context management interfaces with InMemoryContextStore  
-- `/src/test/conversation-engine.test.ts` - Unit tests for conversation engine
-- `/src/test/context-store.test.ts` - Unit tests for context store
+- `/src/conversation/session.ts` - Session management (added later)
+- `/src/conversation/summarizer.ts` - AI summarization (added later)
+- `/src/conversation/types.ts` - Type definitions (added later)
+- Unit tests for conversation components
 
-**Files Modified:**
-- `/src/commands/generate.ts` - Added `--conversational` flag integration (lines 19, 28-40)
-- `package.json` - Added `test:run` script for CI-friendly testing
+**Technical Foundation (Good):**
+- ✅ Conversation interfaces and type definitions
+- ✅ CLI integration with `--conversational` flag
+- ✅ Context store pattern
+- ✅ Session management scaffolding
+- ✅ Non-breaking integration
 
-**Technical Implementation:**
-- **Conversation Engine**: Full TypeScript interfaces for conversation phases, turns, state, and I/O
-- **Flag Integration**: `--conversational` routes through NoopConversationEngine then falls back to existing prompts  
-- **Context Store**: Generic context persistence interface with in-memory implementation
-- **Testing**: Basic unit tests verify the scaffolding structure works correctly
-- **Non-Breaking**: All changes are additive - existing functionality untouched
+**Technical Issues (Need Redesign):**
+- ❌ **Linear Prompts**: Still predefined questions in sequence
+- ❌ **No Dynamic Generation**: Questions aren't generated based on responses
+- ❌ **No Gap Assessment**: Doesn't evaluate what information is missing
+- ❌ **No Conversation Flow**: Doesn't build on previous responses intelligently
+
+### Required Architecture (New Direction)
+```typescript
+interface ConversationOrchestrator {
+  documentRequirements: DocumentRequirements  // From our docs structure
+  conversationHistory: ConversationTurn[]
+  discoveryGaps: string[]  // What info is still needed
+  
+  generateNextQuestion(): Promise<string>      // AI-powered
+  assessCompleteness(): DiscoveryGaps         // Check if ready for docs
+  manageConversation(): ConversationFlow      // 10-15 turns max
+}
+```
+
+### Success Criteria
+- **True Conversation**: Like talking to a technical consultant, not filling out a form
+- **Document-Driven**: AI knows it needs info for specs.md, architecture.md, features.md, stack.md  
+- **Flexible Providers**: OpenAI/Anthropic with runtime model override
+- **Consultant Style**: Requirements gathering with lighter tone, SME-guided
+- **Conversation Management**: 10-15 meaningful turns, gap assessment, completion detection
 
 ### Next Actions
-1. **Test Current State**: Run `docflow generate --conversational` to see what works
-2. **Review Code**: Understand the scaffolding Cursor built
-3. **Design Questions**: Create actual conversation flows for project discovery
-4. **Implement Logic**: Replace noop with real AI conversation
-
-### Questions for Review
-- Does the `--conversational` flag work end-to-end?
-- What does the conversation engine interface look like?
-- How should we design the discovery question flow?
-- Should we implement file-based context persistence next?
+1. **Design the ConversationOrchestrator architecture**
+2. **Create system prompt that references our docs structure**
+3. **Implement AI-powered question generation** 
+4. **Replace linear prompts with dynamic conversation flow**
+5. **Test with our own project as the guinea pig**
 
 ---
 

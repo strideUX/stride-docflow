@@ -7,13 +7,13 @@ This release introduces three major feature categories that transform Docflow fr
 ## Phase 1 Features: Conversation Engine
 
 ### F001: AI Project Discovery Engine
-**Status:** 🔄 Active - In Review  
+**Status:** 🔄 Active - In Review (Architecture Redesign Required)  
 **Priority:** P0 - Critical  
-**Complexity:** High - New conversation architecture  
+**Complexity:** High - True conversational AI architecture  
 **Dependencies:** None  
 
 **Description:**  
-Intelligent conversation system that conducts deep project exploration through natural language interaction.
+Conversational AI system that conducts requirements gathering like a technical consultant, using dynamic question generation and natural dialogue flow to build comprehensive project understanding.
 
 **Completed Items:**
 - ✅ Conversation engine interfaces and type definitions
@@ -22,27 +22,39 @@ Intelligent conversation system that conducts deep project exploration through n
 - ✅ Context store interfaces with in-memory implementation
 - ✅ Unit test coverage for conversation engine structure
 - ✅ Non-breaking integration with existing command flow
+- ✅ RealConversationEngine initial implementation (needs redesign)
 
-**Remaining Acceptance Criteria:**
-- [ ] AI asks contextually relevant follow-up questions based on user responses
-- [ ] System builds comprehensive project understanding through iterative questioning
-- [ ] Conversation covers all essential project aspects: goals, users, constraints, scope
-- [ ] AI adapts questioning strategy based on project type and complexity
-- [ ] User can clarify or correct AI understanding at any point
+**ISSUE IDENTIFIED: Current implementation is structured form, not conversational AI**
 
-**Next Steps:**
-- [ ] Test current `--conversational` flag functionality
-- [ ] Replace NoopConversationEngine with real AI conversation logic
-- [ ] Design actual discovery question flows
-- [ ] Implement file-based context persistence
+**Revised Acceptance Criteria:**
+- [ ] **True Conversation Flow**: AI generates dynamic follow-up questions based on user responses (not predefined prompts)
+- [ ] **Consultant-Style Interview**: Technical requirements gathering with lighter tone, SME-guided questioning
+- [ ] **Document-Driven Discovery**: AI knows it needs information to generate specs.md, architecture.md, features.md, stack.md
+- [ ] **Provider Flexibility**: Configurable AI provider (OpenAI/Anthropic) with runtime model override
+- [ ] **Conversation Management**: 10-15 meaningful turns, gap assessment, completion detection
+- [ ] **Session Memory**: Context persists during session, dies after doc generation
+
+**Required Architecture Components:**
+- [ ] **ConversationOrchestrator**: Main conversation manager using docs structure as discovery template
+- [ ] **Dynamic Question Generator**: AI-powered next question generation based on conversation history
+- [ ] **Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation  
+- [ ] **System Prompt Integration**: Use our own docs structure to define required information
+- [ ] **Provider Configuration**: Runtime AI provider and model selection
+- [ ] **Memory Management**: Session-based context with cleanup after generation
 
 **Technical Implementation:**
-- ✅ Conversation interfaces: ConversationEngine, ConversationState, ConversationTurn
-- ✅ Context management: ContextStore interface with InMemoryContextStore
-- ✅ CLI integration: Generate command routes through conversation engine
-- [ ] Context-aware question generation using project domain knowledge
-- [ ] Progressive information building with validation checkpoints
-- [ ] Natural language understanding for user clarification and corrections
+- ✅ Basic conversation interfaces (need extension for orchestrator pattern)
+- ✅ CLI integration foundation
+- 🔄 **REDESIGN NEEDED**: Replace linear prompts with conversational AI flow
+- [ ] LLM-driven question generation based on conversation history and discovery gaps
+- [ ] Document requirements extraction from our own docs structure
+- [ ] AI provider abstraction with runtime configuration
+- [ ] Conversation turn management and completion assessment
+
+**Meta Approach:**
+- Use this project to document itself with the conversational approach
+- Create feedback loop to refine conversation quality
+- Future evolution: Single orchestrator → Domain agents → Multi-agent collaboration
 
 ### F002: Context Management System
 **Status:** 📋 Planned  
