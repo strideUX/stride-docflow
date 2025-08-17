@@ -35,21 +35,21 @@ Conversational AI system that conducts requirements gathering like a technical c
 - [ ] **Session Memory**: Context persists during session, dies after doc generation
 
 **Required Architecture Components:**
-- [ ] **ConversationOrchestrator**: Main conversation manager using docs structure as discovery template
-- [ ] **Dynamic Question Generator**: AI-powered next question generation based on conversation history
-- [ ] **Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation  
+- [x] **ConversationOrchestrator**: Main conversation manager using docs structure as discovery template
+- [x] **Dynamic Question Generator**: AI-powered next question generation based on conversation history
+- [x] **Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation  
 - [ ] **System Prompt Integration**: Use our own docs structure to define required information
 - [ ] **Provider Configuration**: Runtime AI provider and model selection
-- [ ] **Memory Management**: Session-based context with cleanup after generation
+- [ ] **Convex AI Integration**: Replace file-based session storage with Convex AI SDK for streaming, persistence, and multi-agent foundation
 
 **Technical Implementation:**
-- ✅ Basic conversation interfaces (need extension for orchestrator pattern)
+- ✅ Basic conversation interfaces (extended with orchestrator)
 - ✅ CLI integration foundation
-- 🔄 **REDESIGN NEEDED**: Replace linear prompts with conversational AI flow
-- [ ] LLM-driven question generation based on conversation history and discovery gaps
-- [ ] Document requirements extraction from our own docs structure
+- ✅ Conversational flow introduced via `ConversationOrchestrator`
+- 🔄 Document requirements extraction from our own docs structure (in progress)
 - [ ] AI provider abstraction with runtime configuration
-- [ ] Conversation turn management and completion assessment
+- [ ] Convex AI SDK integration for message streaming and persistence
+- [ ] Replace file-based ConversationSessionManager with Convex database storage
 
 **Meta Approach:**
 - Use this project to document itself with the conversational approach

@@ -13,12 +13,13 @@ Conversational AI system that conducts requirements gathering like a technical c
 Current RealConversationEngine implementation is **structured form with better prompts, not conversational AI**. Need complete redesign for true conversational flow.
 
 ### Current Todos (Revised)
-- [ ] **Design ConversationOrchestrator**: Main conversation manager using our docs structure as discovery template
-- [ ] **Implement Dynamic Question Generation**: AI generates next question based on conversation history and gaps  
-- [ ] **Create Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation
+- [x] **Design ConversationOrchestrator**: Main conversation manager using our docs structure as discovery template
+- [x] **Implement Dynamic Question Generation**: AI generates next question based on conversation history and gaps  
+- [x] **Create Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation
 - [ ] **Build System Prompt Integration**: Extract requirements from our own docs structure (specs.md, architecture.md, etc.)
 - [ ] **Add Provider Configuration**: Runtime AI provider and model selection (OpenAI/Anthropic focus)
-- [ ] **Implement Session Memory**: Context persists during session, cleanup after doc generation
+- [ ] **Integrate Convex AI SDK**: Replace file-based session storage with Convex AI for streaming, persistence, and multi-agent foundation
+- [ ] **Implement Session Memory**: Context persists during session via Convex database, cleanup after doc generation
 
 ### What Cursor Implemented ✅
 **Files Created:**
@@ -37,10 +38,9 @@ Current RealConversationEngine implementation is **structured form with better p
 - ✅ Non-breaking integration
 
 **Technical Issues (Need Redesign):**
-- ❌ **Linear Prompts**: Still predefined questions in sequence
-- ❌ **No Dynamic Generation**: Questions aren't generated based on responses
-- ❌ **No Gap Assessment**: Doesn't evaluate what information is missing
-- ❌ **No Conversation Flow**: Doesn't build on previous responses intelligently
+- ✅ **Dynamic Flow Introduced**: Orchestrator now generates questions per gaps (interactive)
+- ⚠️ **System Prompt Depth**: Needs richer doc-structure grounding
+- ⚠️ **Session Memory**: Persisted context exists, but not yet wired into orchestrator lifecycle
 
 ### Required Architecture (New Direction)
 ```typescript
@@ -63,11 +63,11 @@ interface ConversationOrchestrator {
 - **Conversation Management**: 10-15 meaningful turns, gap assessment, completion detection
 
 ### Next Actions
-1. **Design the ConversationOrchestrator architecture**
-2. **Create system prompt that references our docs structure**
-3. **Implement AI-powered question generation** 
-4. **Replace linear prompts with dynamic conversation flow**
-5. **Test with our own project as the guinea pig**
+1. **Enhance system prompt grounding**: Teach orchestrator about `specs.md`, `architecture.md`, and `features.md` fields
+2. **Integrate Convex AI SDK**: Replace file-based ConversationSessionManager with Convex AI for streaming and database persistence
+3. **Provider/model runtime config**: Surface through CLI and pass through orchestrator consistently
+4. **Expand stack follow-ups**: Add stack-specific branches via orchestrator
+5. **Test conversational mode end-to-end** with multiple project types
 
 ---
 
