@@ -1,8 +1,8 @@
-import * as p from '@clack/prompts';
 import { OpenAI } from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { DiscoverySummary } from './types.js';
 import type { ConversationTurn } from './engine.js';
+import { ChatUI } from '../ui/chat.js';
 
 export type Provider = 'openai' | 'anthropic' | 'local';
 
@@ -173,6 +173,98 @@ Ask the single most effective next question to gather missing information. Keep 
     }
 }
 
+async function streamQuestionWithAI(
+    chat: ChatUI,
+    provider: Provider,
+    model: string | undefined,
+    requirement: DocumentRequirement,
+    history: ConversationTurn[],
+    current: Partial<DiscoverySummary>
+): Promise<string> {
+    const fallback = async (): Promise<string> => {
+        const q = await generateQuestionWithAI(provider, model, requirement, history, current);
+        const question = q || requirement.prompt;
+        chat.printAssistantHeader('AI');
+        chat.appendAssistantChunk(question);
+        chat.endAssistantMessage();
+        return question;
+    };
+
+    try {
+        if (!hasProviderKey(provider)) return await fallback();
+
+        const outstanding = getDynamicRequirements(current).filter((r: DocumentRequirement) => {
+            const value = current[r.key as keyof DiscoverySummary];
+            if (r.type === 'string[]') return !Array.isArray(value) || (value as any[]).length === 0;
+            return typeof value !== 'string' || (value as string).trim().length === 0;
+        }).map((r) => r.label);
+
+        const system = `You are a senior technical consultant doing project discovery for generating:
+ - specs.md (vision, objectives, target users, constraints)
+ - architecture.md (tech stack rationale, key components)
+ - features.md (feature list with priorities)
+ - stack.md (chosen stack and integration details)
+
+Ask the single most effective next question to gather missing information. Keep it specific and single-part. Output ONLY the question text.`;
+        const convo = history.slice(-6).map((t) => `${t.role.toUpperCase()}: ${t.content}`).join('\n');
+        const user = `Current known fields: ${JSON.stringify(current)}\nOutstanding fields: ${outstanding.join(', ') || 'None'}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo}`;
+
+        chat.printAssistantHeader('AI');
+
+        if (provider === 'anthropic') {
+            const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+            const stream = await anthropic.messages.create({
+                model: model || 'claude-3-5-sonnet-20241022',
+                max_tokens: 200,
+                system,
+                messages: [{ role: 'user', content: user }],
+                stream: true,
+            } as any);
+
+            let full = '';
+            for await (const event of stream as any) {
+                if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+                    const text = event.delta.text || '';
+                    full += text;
+                    chat.appendAssistantChunk(text);
+                }
+            }
+            chat.endAssistantMessage();
+            return (full.trim() || requirement.prompt);
+        } else {
+            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+            const modelName = model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o-mini';
+            const isO1 = modelName.startsWith('o1-');
+            if (isO1) {
+                // o1 models do not support streaming via chat.completions
+                return await fallback();
+            }
+            const stream = await openai.chat.completions.create({
+                model: modelName,
+                messages: [
+                    { role: 'system', content: system },
+                    { role: 'user', content: user },
+                ],
+                temperature: 0.2,
+                max_tokens: 200,
+                stream: true,
+            } as any);
+            let full = '';
+            for await (const part of stream as any) {
+                const delta = part.choices?.[0]?.delta?.content || '';
+                if (delta) {
+                    full += delta;
+                    chat.appendAssistantChunk(delta);
+                }
+            }
+            chat.endAssistantMessage();
+            return (full.trim() || requirement.prompt);
+        }
+    } catch {
+        return await fallback();
+    }
+}
+
 export class ConversationOrchestrator {
     private options: OrchestratorOptions;
 
@@ -199,6 +291,7 @@ export class ConversationOrchestrator {
     async manageConversation(
         seed: Partial<DiscoverySummary>,
         history: ConversationTurn[],
+        chat: ChatUI,
         hooks?: OrchestratorHooks
     ): Promise<{ turns: ConversationTurn[]; summary: DiscoverySummary }> {
         const turns: ConversationTurn[] = [...history];
@@ -210,15 +303,15 @@ export class ConversationOrchestrator {
 
             const requirement = missing[0]!; // Ask about the highest priority missing field
 
-            // Generate a dynamic question (fallback to default prompt)
-            let question = await generateQuestionWithAI(
+            // Generate a dynamic question (streamed to UI, fallback to default)
+            const question = await streamQuestionWithAI(
+                chat,
                 this.options.aiProvider,
                 this.options.model,
                 requirement,
                 turns,
                 current
             );
-            if (!question) question = requirement.prompt;
 
             const qTurn: ConversationTurn = {
                 role: 'assistant',
@@ -228,11 +321,7 @@ export class ConversationOrchestrator {
             turns.push(qTurn);
             if (hooks?.onTurn) await hooks.onTurn(qTurn);
 
-            const answer = await p.text({ message: question });
-            if (p.isCancel(answer)) {
-                p.cancel('Operation cancelled.');
-                process.exit(0);
-            }
+            const answer = await chat.promptUser('You');
 
             const aTurn: ConversationTurn = {
                 role: 'user',

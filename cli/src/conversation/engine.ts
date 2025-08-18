@@ -54,10 +54,10 @@ export class NoopConversationEngine implements ConversationEngine {
 
 // Minimal interactive engine for Phase 1
 import { parseIdeaWithAI } from '../generators/ai-parser.js';
-import { getAvailableStacks } from '../templates/stack-registry.js';
 import { summarizeDiscovery, summarizeDiscoveryWithOpenAI } from './summarizer.js';
 import { ConversationSessionManager } from './session.js';
 import { ConversationOrchestrator, OrchestratorHooks } from './orchestrator.js';
+import { ChatUI } from '../ui/chat.js';
 
 function toArray(text?: string): string[] {
     if (!text || typeof text !== 'string') return [];
@@ -123,7 +123,8 @@ export class RealConversationEngine implements ConversationEngine {
             (seed as any) || {}
         );
 
-        const managed = await orchestrator.manageConversation(seed, turns, {
+        const chat = new ChatUI();
+        const managed = await orchestrator.manageConversation(seed, turns, chat, {
             onTurn: async (turn) => {
                 try {
                     await sessionManager.appendTurn(sessionId, turn);
@@ -132,26 +133,10 @@ export class RealConversationEngine implements ConversationEngine {
                 }
             },
         });
+        chat.close();
 
-        // Stack follow-ups moved after orchestration if a stack exists
+        // No form prompts; summarization will refine stack if needed
         let summary = managed.summary;
-        if (summary.stackSuggestion && summary.stackSuggestion.length > 0) {
-            // Optional: allow refinement via select if stack not chosen in seed
-            try {
-                const stacks = await getAvailableStacks();
-                const stackOptions = stacks.map((s) => ({ label: `${s.name} - ${s.description}`, value: s.name as any }));
-                const chosen = await p.select({
-                    message: 'Confirm or adjust your technology stack:',
-                    options: stackOptions,
-                    initialValue: summary.stackSuggestion as any,
-                });
-                if (!p.isCancel(chosen)) {
-                    summary.stackSuggestion = String(chosen);
-                }
-            } catch {
-                // ignore selection issues
-            }
-        }
 
         // Provider-aware summarization pass (graceful fallback when no key)
         summary = await summarizeDiscovery(input.aiProvider, input.idea, summary, input.model);

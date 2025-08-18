@@ -16,6 +16,7 @@ Current RealConversationEngine implementation is **structured form with better p
 - [x] **Design ConversationOrchestrator**: Main conversation manager using our docs structure as discovery template
 - [x] **Implement Dynamic Question Generation**: AI generates next question based on conversation history and gaps  
 - [x] **Create Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation
+- [x] **True chat loop & streaming UI**: Replace form prompts with natural chat, stream AI questions in terminal
 - [ ] **Build System Prompt Integration**: Extract requirements from our own docs structure (specs.md, architecture.md, etc.)
 - [ ] **Add Provider Configuration**: Runtime AI provider and model selection (OpenAI/Anthropic focus)
 - [ ] **Integrate Convex AI SDK**: Replace file-based session storage with Convex AI for streaming, persistence, and multi-agent foundation
@@ -68,6 +69,11 @@ interface ConversationOrchestrator {
 3. **Provider/model runtime config**: Surface through CLI and pass through orchestrator consistently
 4. **Expand stack follow-ups**: Add stack-specific branches via orchestrator
 5. **Test conversational mode end-to-end** with multiple project types
+
+### Progress (2025-08-18)
+- Implemented streaming chat UI (`cli/src/ui/chat.ts`) and wired into `ConversationOrchestrator` to ask AI-generated questions dynamically.
+- Removed `p.text()`/`p.select()` usage from conversational flow; stack confirmation moved to summarization.
+- Conversational mode in `generate` now builds `ProjectData` from conversation summary without form prompts.
 
 ---
 

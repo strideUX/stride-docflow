@@ -5,6 +5,8 @@ import { styledPrompts, symbols } from '../ui/styled-prompts.js';
 import { projectPrompts } from '../prompts/project.js';
 import { generateDocs } from '../generators/docs.js';
 import { NoopConversationEngine, RealConversationEngine } from '../conversation/engine.js';
+import { getAvailableStacks } from '../templates/stack-registry.js';
+import { buildProjectDataFromSummary } from '../conversation/project-data.js';
 import { ConversationSessionManager } from '../conversation/session.js';
 
 export const generateCommand = new Command('generate')
@@ -44,20 +46,14 @@ export const generateCommand = new Command('generate')
           await sessionManager.createOrUpdate(conv.state, conv.summary as any);
         }
 
-        const seed = {
-          idea: (conv.summary as any).description || options.idea,
-          aiProvider: options.aiProvider,
-          model: options.model,
-          seed: {
-            description: (conv.summary as any).description,
-            objectives: (conv.summary as any).objectives,
-            targetUsers: (conv.summary as any).targetUsers,
-            features: (conv.summary as any).features,
-            constraints: (conv.summary as any).constraints,
-            stack: (conv.summary as any).stackSuggestion,
-          }
-        };
-        projectData = await projectPrompts.gatherProjectData(seed);
+        // Build ProjectData directly from conversational summary without form prompts
+        const stacks = await getAvailableStacks();
+        projectData = buildProjectDataFromSummary(
+          conv.summary,
+          options.aiProvider,
+          options.model,
+          stacks
+        );
       } else {
         projectData = await projectPrompts.gatherProjectData(options);
       }
