@@ -55,7 +55,7 @@ export class NoopConversationEngine implements ConversationEngine {
 // Minimal interactive engine for Phase 1
 import { parseIdeaWithAI } from '../generators/ai-parser.js';
 import { getAvailableStacks } from '../templates/stack-registry.js';
-import { summarizeDiscoveryWithOpenAI } from './summarizer.js';
+import { summarizeDiscovery, summarizeDiscoveryWithOpenAI } from './summarizer.js';
 import { ConversationSessionManager } from './session.js';
 import { ConversationOrchestrator, OrchestratorHooks } from './orchestrator.js';
 
@@ -153,8 +153,8 @@ export class RealConversationEngine implements ConversationEngine {
             }
         }
 
-        // OpenAI summarization pass (graceful fallback when no key)
-        summary = await summarizeDiscoveryWithOpenAI(input.idea, summary, input.model);
+        // Provider-aware summarization pass (graceful fallback when no key)
+        summary = await summarizeDiscovery(input.aiProvider, input.idea, summary, input.model);
 
         const state: ConversationState = {
             sessionId,

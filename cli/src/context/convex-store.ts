@@ -31,16 +31,28 @@ export class ConvexContextStore implements ContextStore {
     }
 
     async set(session: SessionContext): Promise<void> {
+        const { __appendTurn, ...data } = (session.data || {}) as any;
         await this.client.mutation(api.contexts.upsertSession, {
             sessionId: session.id,
-            data: session.data,
+            data,
         });
     }
 
     async update(sessionId: string, updater: (previous: Record<string, unknown>) => Record<string, unknown>): Promise<SessionContext> {
         const existing = await this.get(sessionId);
-        const nextData = updater(existing?.data || {});
+        const nextDataRaw = updater(existing?.data || {});
+        const { __appendTurn, ...nextData } = (nextDataRaw || {}) as any;
         await this.client.mutation(api.contexts.upsertSession, { sessionId, data: nextData });
+        // If updater appended a turn, also push to messages
+        const maybeTurn = __appendTurn;
+        if (maybeTurn && maybeTurn.role && maybeTurn.content) {
+            await this.client.mutation(api.messages.appendMessage, {
+                sessionId,
+                role: String(maybeTurn.role) as any,
+                content: String(maybeTurn.content),
+                timestamp: String(maybeTurn.timestamp || new Date().toISOString()),
+            });
+        }
         const updated = await this.get(sessionId);
         if (!updated) {
             const now = new Date().toISOString();

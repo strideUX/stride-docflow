@@ -15,8 +15,8 @@ export class ConversationSessionManager {
         if (store) {
             this.store = store;
         } else {
-            const useConvex = !!process.env.DOCFLOW_CONVEX_ADMIN_URL;
-            this.store = useConvex ? new ConvexContextStore(process.env.DOCFLOW_CONVEX_ADMIN_URL) : new FileContextStore();
+            const useConvex = !!(process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL || process.env.EXPO_PUBLIC_CONVEX_URL || process.env.DOCFLOW_CONVEX_ADMIN_URL);
+            this.store = useConvex ? new ConvexContextStore() : new FileContextStore();
         }
     }
 
@@ -34,7 +34,8 @@ export class ConversationSessionManager {
             const updatedState: ConversationState | undefined = current
                 ? { ...current, turns: [...(current.turns || []), turn] }
                 : undefined;
-            return { ...prev, state: updatedState };
+            // Ephemeral marker understood by ConvexContextStore to also append to messages
+            return { ...prev, state: updatedState, __appendTurn: turn } as any;
         });
     }
 
