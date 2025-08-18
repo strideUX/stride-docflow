@@ -7,14 +7,16 @@ import type { ConversationTurn } from './engine.js';
 export type Provider = 'openai' | 'anthropic' | 'local';
 
 export interface DocumentRequirement {
-    key: keyof DiscoverySummary;
+    key: keyof DiscoverySummary | 'extras';
     label: string;
     type: 'string' | 'string[]';
     prompt: string;
     required: boolean;
+    scope?: 'summary' | 'extras';
+    extrasKey?: string; // used when scope === 'extras'
 }
 
-const REQUIREMENTS: DocumentRequirement[] = [
+const BASE_REQUIREMENTS: DocumentRequirement[] = [
     {
         key: 'description',
         label: 'Project description',
@@ -28,6 +30,7 @@ const REQUIREMENTS: DocumentRequirement[] = [
         type: 'string',
         prompt: 'Which stack do you prefer (e.g., nextjs-convex, nextjs-supabase, react-native-convex)?',
         required: false,
+        scope: 'summary',
     },
     {
         key: 'objectives',
@@ -58,6 +61,34 @@ const REQUIREMENTS: DocumentRequirement[] = [
         required: false,
     },
 ];
+
+function getDynamicRequirements(current: Partial<DiscoverySummary>): DocumentRequirement[] {
+    const reqs: DocumentRequirement[] = [...BASE_REQUIREMENTS];
+    const stack = (current.stackSuggestion || '').toLowerCase();
+    if (stack.includes('react-native')) {
+        reqs.push({
+            key: 'extras',
+            label: 'Mobile targets',
+            type: 'string',
+            prompt: 'Target platforms? (iOS, Android, both)',
+            required: false,
+            scope: 'extras',
+            extrasKey: 'mobileTargets',
+        });
+    }
+    if (stack.includes('nextjs')) {
+        reqs.push({
+            key: 'extras',
+            label: 'Auth strategy',
+            type: 'string',
+            prompt: 'Preferred auth strategy? (email, oauth, enterprise)',
+            required: false,
+            scope: 'extras',
+            extrasKey: 'auth',
+        });
+    }
+    return reqs;
+}
 
 export interface OrchestratorOptions {
     aiProvider: Provider;
@@ -92,7 +123,7 @@ async function generateQuestionWithAI(
 ): Promise<string | null> {
     try {
         if (!hasProviderKey(provider)) return null;
-        const outstanding = REQUIREMENTS.filter((r) => {
+        const outstanding = getDynamicRequirements(current).filter((r: DocumentRequirement) => {
             const value = current[r.key as keyof DiscoverySummary];
             if (r.type === 'string[]') return !Array.isArray(value) || (value as any[]).length === 0;
             return typeof value !== 'string' || (value as string).trim().length === 0;
@@ -150,8 +181,15 @@ export class ConversationOrchestrator {
     }
 
     assessCompleteness(current: Partial<DiscoverySummary>): { done: boolean; missing: DocumentRequirement[] } {
-        const missing = REQUIREMENTS.filter((r) => {
+        const requirements = getDynamicRequirements(current);
+        const missing = requirements.filter((r: DocumentRequirement) => {
             const val = current[r.key];
+            if (r.scope === 'extras') {
+                const extras = (current.extras as Record<string, unknown> | undefined) || {};
+                const eVal = r.extrasKey ? (extras as any)[r.extrasKey] : undefined;
+                if (r.type === 'string[]') return !Array.isArray(eVal) || (eVal as any[]).length === 0;
+                return typeof eVal !== 'string' || (eVal as string).trim().length === 0;
+            }
             if (r.type === 'string[]') return !Array.isArray(val) || (val as any[]).length === 0;
             return typeof val !== 'string' || (val as string).trim().length === 0;
         });
@@ -205,10 +243,20 @@ export class ConversationOrchestrator {
             if (hooks?.onTurn) await hooks.onTurn(aTurn);
 
             // Map answer into structured summary
-            if (requirement.type === 'string') {
-                (current as any)[requirement.key] = String(answer).trim();
-            } else if (requirement.type === 'string[]') {
-                (current as any)[requirement.key] = toArray(String(answer));
+            if (requirement.scope === 'extras') {
+                const extras: Record<string, unknown> = { ...(current.extras as Record<string, unknown> | undefined) };
+                if (requirement.type === 'string') {
+                    if (requirement.extrasKey) extras[requirement.extrasKey] = String(answer).trim();
+                } else if (requirement.type === 'string[]') {
+                    if (requirement.extrasKey) extras[requirement.extrasKey] = toArray(String(answer));
+                }
+                (current as any).extras = extras;
+            } else {
+                if (requirement.type === 'string') {
+                    (current as any)[requirement.key] = String(answer).trim();
+                } else if (requirement.type === 'string[]') {
+                    (current as any)[requirement.key] = toArray(String(answer));
+                }
             }
         }
 
