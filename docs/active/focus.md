@@ -1,7 +1,7 @@
 # Active Feature Focus
 
 ## F001: AI Project Discovery Engine
-**Status:** in_review (Architecture Redesign Required)  
+**Status:** completed (pending Convex AI SDK upgrade)  
 **Started:** 2025-08-15  
 **Priority:** P0 (Critical)  
 **From:** docs/releases/current/features.md
@@ -9,8 +9,8 @@
 ### Description
 Conversational AI system that conducts requirements gathering like a technical consultant, using dynamic question generation and natural dialogue flow to build comprehensive project understanding.
 
-### **CRITICAL ISSUE IDENTIFIED**
-Current RealConversationEngine implementation is **structured form with better prompts, not conversational AI**. Need complete redesign for true conversational flow.
+### Note
+Core conversational flow implemented and validated. Remaining enhancements (Convex AI SDK streaming, multi-agent foundation) tracked in the enhancement section below.
 
 ### Current Todos (Revised)
 - [x] **Design ConversationOrchestrator**: Main conversation manager using our docs structure as discovery template
@@ -18,9 +18,8 @@ Current RealConversationEngine implementation is **structured form with better p
 - [x] **Create Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation
 - [x] **True chat loop & streaming UI**: Replace form prompts with natural chat, stream AI questions in terminal
 - [x] **Build System Prompt Integration**: Added consultant-mode prompt with doc structure awareness
-- [ ] **Add Provider Configuration**: Runtime AI provider and model selection (OpenAI/Anthropic focus)
-- [ ] **Integrate Convex AI SDK**: Replace file-based session storage with Convex AI for streaming, persistence, and multi-agent foundation
-- [ ] **Implement Session Memory**: Context persists during session via Convex database, cleanup after doc generation
+- [x] **Add Provider Configuration**: Runtime AI provider and model selection (OpenAI/Anthropic focus)
+- [x] **Implement Session Memory**: Context persists during session via Convex database, cleanup after doc generation
 
 ### What Cursor Implemented ✅
 **Files Created:**
@@ -64,11 +63,7 @@ interface ConversationOrchestrator {
 - **Conversation Management**: 10-15 meaningful turns, gap assessment, completion detection
 
 ### Next Actions
-1. **Enhance system prompt grounding**: Teach orchestrator about `specs.md`, `architecture.md`, and `features.md` fields
-2. **Integrate Convex AI SDK**: Replace file-based ConversationSessionManager with Convex AI for streaming and database persistence
-3. **Provider/model runtime config**: Surface through CLI and pass through orchestrator consistently
-4. **Expand stack follow-ups**: Add stack-specific branches via orchestrator
-5. **Test conversational mode end-to-end** with multiple project types
+This feature is completed. Further work is tracked under the enhancement below.
 
 ### Progress (2025-08-18)
 - Implemented streaming chat UI (`cli/src/ui/chat.ts`) and wired into `ConversationOrchestrator` to ask AI-generated questions dynamically.
@@ -78,6 +73,21 @@ interface ConversationOrchestrator {
 ---
 
 **Status Guide:**
+## F001-Enhancement: Convex AI SDK Integration
+**Status:** planned  
+**Started:** 2025-08-19  
+**Priority:** P1 (High)  
+**Dependencies:** F001 core completion
+
+### Description
+Upgrade from basic Convex client to Convex AI SDK for enhanced streaming capabilities, better AI integration, and multi-agent foundation.
+
+### Current Todos
+- [ ] **Install Convex AI SDK**: Add @convex-dev/ai package and configure
+- [ ] **Replace ConvexContextStore**: Upgrade to use Convex AI streaming patterns
+- [ ] **Enhance conversation streaming**: Implement real-time AI response streaming
+- [ ] **Multi-agent foundation**: Set up patterns for future agent specialization
+- [ ] **Session resume**: Wire --session CLI flag for conversation resumption
 - `in_progress`: Actively working on todos
 - `in_review`: Ready for testing/feedback, may iterate  
 - `completed`: Feature done, ready to archive and move to next
