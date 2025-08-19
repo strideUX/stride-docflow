@@ -54,6 +54,13 @@ export class FileContextStore implements ContextStore {
         await fs.writeJSON(file, updated, { spaces: 2 });
         return updated;
     }
+
+    async delete(sessionId: string): Promise<void> {
+        const file = this.filePath(sessionId);
+        if (await fs.pathExists(file)) {
+            await fs.remove(file);
+        }
+    }
 }
 
 

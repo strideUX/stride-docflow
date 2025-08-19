@@ -8,6 +8,9 @@ import { NoopConversationEngine, RealConversationEngine } from '../conversation/
 import { getAvailableStacks } from '../templates/stack-registry.js';
 import { buildProjectDataFromSummary } from '../conversation/project-data.js';
 import { ConversationSessionManager } from '../conversation/session.js';
+import { ConversationOrchestrator } from '../conversation/orchestrator.js';
+import { ChatUI } from '../ui/chat.js';
+import { summarizeDiscovery } from '../conversation/summarizer.js';
 
 export const generateCommand = new Command('generate')
   .alias('gen')
@@ -28,30 +31,60 @@ export const generateCommand = new Command('generate')
     try {
       styledPrompts.intro(`${symbols.rocket} Starting project documentation generation`);
 
+      // Normalize and validate provider/model
+      const normalizeProvider = (p: string | undefined): 'openai' | 'anthropic' | 'local' => {
+        const v = String(p || '').toLowerCase();
+        if (v === 'openai' || v === 'anthropic' || v === 'local') return v;
+        styledPrompts.warning(`Unknown AI provider "${p}", defaulting to OpenAI`);
+        return 'openai';
+      };
+      const provider = normalizeProvider(options.aiProvider);
+      const defaultModel = provider === 'anthropic' ? 'claude-3-5-sonnet-20241022' : 'gpt-4o';
+      const model = (options.model && String(options.model).trim().length > 0) ? options.model : defaultModel;
+
       // Gather project requirements (conversational stub or form prompts)
       let projectData = null as any;
+      let createdSessionId: string | null = null;
       if (options.conversational) {
         const sessionManager = new ConversationSessionManager();
         let conv: any = null;
         if (options.session) {
           const loaded = await sessionManager.load(options.session);
           if (loaded) {
-            conv = loaded;
+            // Resume conversation from last saved state
+            const chat = new ChatUI();
+            const orchestrator = new ConversationOrchestrator({ aiProvider: provider, model });
+            const managed = await orchestrator.manageConversation(
+              (loaded.summary as any) || {},
+              (loaded.state.turns || []),
+              chat,
+              {
+                onTurn: async (turn) => {
+                  try { await sessionManager.appendTurn(loaded.state.sessionId, turn); } catch {}
+                },
+              }
+            );
+            chat.close();
+            const summary = await summarizeDiscovery(provider, options.idea, managed.summary, model);
+            const state = { sessionId: loaded.state.sessionId, phase: 'discovery', turns: managed.turns };
+            await sessionManager.createOrUpdate(state as any, summary as any);
+            conv = { state, summary };
           }
         }
 
         if (!conv) {
           const engine = new RealConversationEngine();
-          conv = await engine.start({ idea: options.idea, aiProvider: options.aiProvider, model: options.model });
+          conv = await engine.start({ idea: options.idea, aiProvider: provider, model });
           await sessionManager.createOrUpdate(conv.state, conv.summary as any);
+          createdSessionId = conv.state.sessionId;
         }
 
         // Build ProjectData directly from conversational summary without form prompts
         const stacks = await getAvailableStacks();
         projectData = buildProjectDataFromSummary(
           conv.summary,
-          options.aiProvider,
-          options.model,
+          provider,
+          model,
           stacks
         );
       } else {
@@ -76,8 +109,8 @@ export const generateCommand = new Command('generate')
       // Generate documentation with progress tracking
       const result = await generateDocs(projectData, {
         output: options.output,
-        aiProvider: options.aiProvider,
-        model: options.model,
+        aiProvider: provider,
+        model,
         research: options.research,
         dryRun: options.dryRun,
         reasoningEffort: options.reasoningEffort,
@@ -91,6 +124,17 @@ export const generateCommand = new Command('generate')
       if (result.warnings && result.warnings.length > 0) {
         console.log(`⚠️  ${result.warnings.length} warnings - check logs above`);
       }
+
+      // Cleanup session after successful generation (conversational mode)
+      try {
+        if (options.conversational) {
+          const sessionManager = new ConversationSessionManager();
+          const toDelete = options.session || createdSessionId;
+          if (toDelete) {
+            await sessionManager.delete(toDelete);
+          }
+        }
+      } catch {}
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

@@ -12,3 +12,6 @@ export declare const getSession: import("convex/server").RegisteredQuery<"public
     createdAt: string;
     updatedAt: string;
 } | null>>;
+export declare const deleteSession: import("convex/server").RegisteredMutation<"public", {
+    sessionId: string;
+}, Promise<void>>;

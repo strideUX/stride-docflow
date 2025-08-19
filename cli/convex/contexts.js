@@ -33,4 +33,16 @@ export const getSession = query({
         return existing || null;
     },
 });
+export const deleteSession = mutation({
+    args: { sessionId: v.string() },
+    handler: async (ctx, args) => {
+        const existing = await ctx.db
+            .query('docflow_sessions')
+            .withIndex('by_sessionId', (q) => q.eq('sessionId', args.sessionId))
+            .first();
+        if (existing) {
+            await ctx.db.delete(existing._id);
+        }
+    },
+});
 //# sourceMappingURL=contexts.js.map

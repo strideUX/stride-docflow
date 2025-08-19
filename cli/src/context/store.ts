@@ -12,6 +12,7 @@ export interface ContextStore {
         sessionId: string,
         updater: (previous: Record<string, unknown>) => Record<string, unknown>
     ): Promise<SessionContext>;
+    delete(sessionId: string): Promise<void>;
 }
 
 export class InMemoryContextStore implements ContextStore {
@@ -48,6 +49,10 @@ export class InMemoryContextStore implements ContextStore {
         };
         this.store.set(sessionId, updated);
         return updated;
+    }
+
+    async delete(sessionId: string): Promise<void> {
+        this.store.delete(sessionId);
     }
 }
 

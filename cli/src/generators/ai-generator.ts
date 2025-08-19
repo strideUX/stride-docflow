@@ -419,7 +419,7 @@ async function generateWithOpenAI(
 		return { max_completion_tokens: 2000, temperature: 0.3 } as const;
 	};
 
-	const selectedModel = (model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-5-mini').trim();
+	const selectedModel = (model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o').trim();
 	const modelType = getModelType(selectedModel);
 	const baseParams = getOptimalParams(selectedModel);
 

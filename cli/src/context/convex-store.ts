@@ -60,6 +60,10 @@ export class ConvexContextStore implements ContextStore {
         }
         return updated;
     }
+
+    async delete(sessionId: string): Promise<void> {
+        await this.client.mutation(api.contexts.deleteSession as any, { sessionId } as any);
+    }
 }
 
 

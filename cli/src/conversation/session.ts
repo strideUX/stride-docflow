@@ -47,6 +47,10 @@ export class ConversationSessionManager {
         if (!state || !summary) return null;
         return { state, summary };
     }
+
+    async delete(sessionId: string): Promise<void> {
+        await this.store.delete(sessionId);
+    }
 }
 
 

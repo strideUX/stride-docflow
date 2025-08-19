@@ -17,7 +17,7 @@ Current RealConversationEngine implementation is **structured form with better p
 - [x] **Implement Dynamic Question Generation**: AI generates next question based on conversation history and gaps  
 - [x] **Create Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation
 - [x] **True chat loop & streaming UI**: Replace form prompts with natural chat, stream AI questions in terminal
-- [ ] **Build System Prompt Integration**: Extract requirements from our own docs structure (specs.md, architecture.md, etc.)
+- [x] **Build System Prompt Integration**: Added consultant-mode prompt with doc structure awareness
 - [ ] **Add Provider Configuration**: Runtime AI provider and model selection (OpenAI/Anthropic focus)
 - [ ] **Integrate Convex AI SDK**: Replace file-based session storage with Convex AI for streaming, persistence, and multi-agent foundation
 - [ ] **Implement Session Memory**: Context persists during session via Convex database, cleanup after doc generation
@@ -40,7 +40,7 @@ Current RealConversationEngine implementation is **structured form with better p
 
 **Technical Issues (Need Redesign):**
 - ✅ **Dynamic Flow Introduced**: Orchestrator now generates questions per gaps (interactive)
-- ⚠️ **System Prompt Depth**: Needs richer doc-structure grounding
+- ✅ **System Prompt Depth**: Consultant-mode system prompt added to orchestrator
 - ⚠️ **Session Memory**: Persisted context exists, but not yet wired into orchestrator lifecycle
 
 ### Required Architecture (New Direction)
