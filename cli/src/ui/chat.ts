@@ -21,7 +21,7 @@ export class ChatUI {
         });
     }
 
-    printAssistantHeader(label: string = 'AI'): void {
+    printAssistantHeader(label: string = 'DocFlow'): void {
         process.stdout.write(`\n${theme.fuchsia(`${label}: `)}`);
     }
 
