@@ -16,6 +16,7 @@ import { validateCommand } from './commands/validate.js';
 import { listTemplatesCommand } from './commands/list-templates.js';
 import { createCommand } from './commands/create.js';
 import { configCommand } from './commands/config.js';
+import { debugSessionCommand } from './commands/debug-session.js';
 
 // Handle Ctrl+C gracefully - force immediate exit
 let exitingInProgress = false;
@@ -66,6 +67,7 @@ program.addCommand(validateCommand);
 program.addCommand(listTemplatesCommand);
 program.addCommand(createCommand);
 program.addCommand(configCommand);
+program.addCommand(debugSessionCommand);
 
 // Parse arguments
 program.parse();

@@ -28,7 +28,7 @@ export async function streamQuestionViaConvex(
             process.env.DOCFLOW_CONVEX_ADMIN_URL;
         if (!url) return null;
         const client = new ConvexClient(String(url));
-        const res = await client.action(api.messages.streamAssistant, {
+        const res = await client.action((api as any).docflow.messages.streamAssistant, {
             sessionId: opts.sessionId,
             system: opts.system,
             user: opts.user,

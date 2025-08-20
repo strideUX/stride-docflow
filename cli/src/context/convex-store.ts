@@ -20,7 +20,7 @@ export class ConvexContextStore implements ContextStore {
     }
 
     async get(sessionId: string): Promise<SessionContext | null> {
-        const rec = await this.client.query(api.contexts.getSession, { sessionId });
+        const rec = await this.client.query((api as any).docflow.contexts.getSession, { sessionId } as any);
         if (!rec) return null;
         return {
             id: rec.sessionId as string,
@@ -32,7 +32,7 @@ export class ConvexContextStore implements ContextStore {
 
     async set(session: SessionContext): Promise<void> {
         const { __appendTurn, agentId, ...data } = (session.data || {}) as any;
-        await this.client.mutation(api.contexts.upsertSession, {
+        await this.client.mutation((api as any).docflow.contexts.upsertSession, {
             sessionId: session.id,
             data,
             ...(agentId ? { agentId } : {}),
@@ -43,11 +43,11 @@ export class ConvexContextStore implements ContextStore {
         const existing = await this.get(sessionId);
         const nextDataRaw = updater(existing?.data || {});
         const { __appendTurn, __appendTurnChunk, agentId, ...nextData } = (nextDataRaw || {}) as any;
-        await this.client.mutation(api.contexts.upsertSession, { sessionId, data: nextData, ...(agentId ? { agentId } : {}) } as any);
+        await this.client.mutation((api as any).docflow.contexts.upsertSession, { sessionId, data: nextData, ...(agentId ? { agentId } : {}) } as any);
         // If updater appended a turn, also push to messages
         const maybeTurn = __appendTurn;
         if (maybeTurn && maybeTurn.role && maybeTurn.content) {
-            await this.client.mutation(api.messages.appendMessage, {
+            await this.client.mutation((api as any).docflow.messages.appendMessage, {
                 sessionId,
                 role: String(maybeTurn.role) as any,
                 content: String(maybeTurn.content),
@@ -58,7 +58,7 @@ export class ConvexContextStore implements ContextStore {
         }
         const maybeChunk = __appendTurnChunk;
         if (maybeChunk && maybeChunk.role && maybeChunk.content) {
-            await this.client.mutation(api.messages.appendMessage, {
+            await this.client.mutation((api as any).docflow.messages.appendMessage, {
                 sessionId,
                 role: String(maybeChunk.role) as any,
                 content: String(maybeChunk.content),
@@ -76,7 +76,7 @@ export class ConvexContextStore implements ContextStore {
     }
 
     async delete(sessionId: string): Promise<void> {
-        await this.client.mutation(api.contexts.deleteSession as any, { sessionId } as any);
+        await this.client.mutation((api as any).docflow.contexts.deleteSession as any, { sessionId } as any);
     }
 }
 

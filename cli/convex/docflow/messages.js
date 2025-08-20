@@ -1,9 +1,8 @@
 import { v } from 'convex/values';
-import { action, mutation, query } from './_generated/server';
-import { api } from './_generated/api';
+import { action, mutation, query } from '../_generated/server';
+import { api } from '../_generated/api';
 import { OpenAI } from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
-
 export const appendMessage = mutation({
     args: {
         sessionId: v.string(),
@@ -35,14 +34,13 @@ export const appendMessage = mutation({
             .withIndex('by_sessionId', (q) => q.eq('sessionId', args.sessionId))
             .first();
         if (sess) {
-            const turns = Array.isArray((sess as any).data?.turns) ? (sess as any).data.turns : [];
+            const turns = Array.isArray(sess.data?.turns) ? sess.data.turns : [];
             const nextTurn = { role: args.role, content: args.content, timestamp: args.timestamp, ...(args.agentId ? { agentId: args.agentId } : {}), ...(args.chunk ? { chunk: true } : {}) };
             const next = { turns: [...turns, nextTurn] };
             await ctx.db.patch(sess._id, { data: next, updatedAt: now });
         }
     },
 });
-
 export const listMessages = query({
     args: { sessionId: v.string() },
     handler: async (ctx, args) => {
@@ -50,11 +48,10 @@ export const listMessages = query({
             .query('docflow_sessions')
             .withIndex('by_sessionId', (q) => q.eq('sessionId', args.sessionId))
             .first();
-        const turns = sess ? ((sess as any).data?.turns || []) : [];
+        const turns = sess ? (sess.data?.turns || []) : [];
         return turns;
     },
 });
-
 // Server-side streaming action (placeholder): integrate with agent SDK later
 export const streamAssistant = action({
     args: {
@@ -68,16 +65,20 @@ export const streamAssistant = action({
     handler: async (ctx, args) => {
         try {
             const nowIso = () => new Date().toISOString();
+            // Track lightweight agent order in session data (no full agent thread yet)
+            const sess = await ctx.runQuery(api.contexts.getSession, { sessionId: args.sessionId });
+            let agentOrder = Number((sess?.data?.agentOrder) || 0);
+            const order = agentOrder + 1;
             if (args.provider === 'anthropic') {
-                const anthropic = new (Anthropic as any)({ apiKey: process.env.ANTHROPIC_API_KEY! });
+                const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
                 const stream = await anthropic.messages.create({
                     model: args.model || 'claude-3-5-sonnet-20241022',
                     max_tokens: 200,
                     system: args.system,
                     messages: [{ role: 'user', content: args.user }],
                     stream: true,
-                } as any);
-                for await (const event of stream as any) {
+                });
+                for await (const event of stream) {
                     if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
                         const text = event.delta.text || '';
                         if (text) {
@@ -88,13 +89,15 @@ export const streamAssistant = action({
                                 timestamp: nowIso(),
                                 ...(args.agentId ? { agentId: args.agentId } : {}),
                                 chunk: true,
-                            } as any);
+                            });
                         }
                     }
                 }
-                return { ok: true } as const;
-            } else if (args.provider === 'openai') {
-                const openai = new (OpenAI as any)({ apiKey: process.env.OPENAI_API_KEY! });
+                await ctx.runMutation(api.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
+                return { ok: true };
+            }
+            else if (args.provider === 'openai') {
+                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                 const modelName = args.model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o';
                 const isO1 = typeof modelName === 'string' && modelName.startsWith('o1-');
                 if (isO1) {
@@ -103,7 +106,7 @@ export const streamAssistant = action({
                         model: modelName,
                         messages: [{ role: 'user', content: `${args.system}\n\n${args.user}` }],
                         max_tokens: 200,
-                    } as any);
+                    });
                     const content = resp.choices?.[0]?.message?.content || '';
                     if (content) {
                         await ctx.runMutation(api.messages.appendMessage, {
@@ -113,9 +116,10 @@ export const streamAssistant = action({
                             timestamp: nowIso(),
                             ...(args.agentId ? { agentId: args.agentId } : {}),
                             chunk: false,
-                        } as any);
+                        });
+                        await ctx.runMutation(api.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
                     }
-                    return { ok: true } as const;
+                    return { ok: true };
                 }
                 const stream = await openai.chat.completions.create({
                     model: modelName,
@@ -126,8 +130,8 @@ export const streamAssistant = action({
                     temperature: 0.2,
                     max_tokens: 200,
                     stream: true,
-                } as any);
-                for await (const part of stream as any) {
+                });
+                for await (const part of stream) {
                     const delta = part.choices?.[0]?.delta?.content || '';
                     if (delta) {
                         await ctx.runMutation(api.messages.appendMessage, {
@@ -137,16 +141,17 @@ export const streamAssistant = action({
                             timestamp: nowIso(),
                             ...(args.agentId ? { agentId: args.agentId } : {}),
                             chunk: true,
-                        } as any);
+                        });
                     }
                 }
-                return { ok: true } as const;
+                await ctx.runMutation(api.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
+                return { ok: true };
             }
-            return { ok: false } as const;
-        } catch {
-            return { ok: false } as const;
+            return { ok: false };
+        }
+        catch {
+            return { ok: false };
         }
     },
 });
-
-
+//# sourceMappingURL=messages.js.map
