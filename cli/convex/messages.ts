@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { action, mutation, query } from './_generated/server';
 
 export const appendMessage = mutation({
     args: {
@@ -49,6 +49,22 @@ export const listMessages = query({
             .first();
         const turns = sess ? ((sess as any).data?.turns || []) : [];
         return turns;
+    },
+});
+
+// Server-side streaming action (placeholder): integrate with agent SDK later
+export const streamAssistant = action({
+    args: {
+        sessionId: v.string(),
+        system: v.string(),
+        user: v.string(),
+        provider: v.union(v.literal('openai'), v.literal('anthropic'), v.literal('local')),
+        model: v.optional(v.string()),
+        agentId: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        // TODO: Use @convex-dev/agent once agent defined. For now, no-op.
+        return { ok: false } as const;
     },
 });
 
