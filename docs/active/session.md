@@ -147,3 +147,18 @@ The development team has everything needed to begin implementing the conversatio
 ---
 
 *This session handoff ensures continuity for the next development phase. All context and decisions are preserved in the project documentation.*
+
+## 15:41 - WrapSession: Convex AI SDK Integration Progress
+**What we accomplished:**
+- Completed F001 core and implemented Convex streaming path with @convex-dev/agent integration.
+- Namespaced Convex modules under `convex/docflow/` and updated clients to `api.docflow.*`.
+- Added CLI `--debug` diagnostics and `debug:session` command for demos.
+
+**Current state:**
+- Conversational mode streams via Convex action first; falls back to direct provider if disabled.
+- Session resume is wired; session turns are persisted and printable for review.
+
+**Next steps:**
+1. Review streaming UX in terminal and confirm chunk persistence in Convex.
+2. Optionally add CLI to inspect agent thread messages for richer details.
+3. Run end-to-end tests across OpenAI/Anthropic models and verify debug output.

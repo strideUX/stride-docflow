@@ -100,3 +100,6 @@ Upgrade from basic Convex client to Convex AI SDK for enhanced streaming capabil
 - Orchestrator attempts Convex streaming first; falls back to provider streaming if disabled/unavailable.
 - Removed temporary env hack by threading `sessionId` through orchestrator APIs.
 - Added `--debug` flag to `generate` for provider/model/convex diagnostics during demos.
+ - Namespaced Convex functions under `convex/docflow/` and updated clients to `api.docflow.*` to avoid component collisions.
+ - Integrated @convex-dev/agent in the Convex action: per-session agent thread creation, server-side `streamText` with DeltaStreamer, and session `agentOrder` tracking.
+ - CLI debug command added: `docflow debug:session --id <sessionId> [--limit N]` prints recent persisted turns for demos.
