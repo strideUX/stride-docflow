@@ -31,18 +31,19 @@ export class ConvexContextStore implements ContextStore {
     }
 
     async set(session: SessionContext): Promise<void> {
-        const { __appendTurn, ...data } = (session.data || {}) as any;
+        const { __appendTurn, agentId, ...data } = (session.data || {}) as any;
         await this.client.mutation(api.contexts.upsertSession, {
             sessionId: session.id,
             data,
-        });
+            ...(agentId ? { agentId } : {}),
+        } as any);
     }
 
     async update(sessionId: string, updater: (previous: Record<string, unknown>) => Record<string, unknown>): Promise<SessionContext> {
         const existing = await this.get(sessionId);
         const nextDataRaw = updater(existing?.data || {});
-        const { __appendTurn, ...nextData } = (nextDataRaw || {}) as any;
-        await this.client.mutation(api.contexts.upsertSession, { sessionId, data: nextData });
+        const { __appendTurn, __appendTurnChunk, agentId, ...nextData } = (nextDataRaw || {}) as any;
+        await this.client.mutation(api.contexts.upsertSession, { sessionId, data: nextData, ...(agentId ? { agentId } : {}) } as any);
         // If updater appended a turn, also push to messages
         const maybeTurn = __appendTurn;
         if (maybeTurn && maybeTurn.role && maybeTurn.content) {
@@ -51,6 +52,19 @@ export class ConvexContextStore implements ContextStore {
                 role: String(maybeTurn.role) as any,
                 content: String(maybeTurn.content),
                 timestamp: String(maybeTurn.timestamp || new Date().toISOString()),
+                ...(agentId ? { agentId: String(agentId) } : {}),
+                chunk: false,
+            });
+        }
+        const maybeChunk = __appendTurnChunk;
+        if (maybeChunk && maybeChunk.role && maybeChunk.content) {
+            await this.client.mutation(api.messages.appendMessage, {
+                sessionId,
+                role: String(maybeChunk.role) as any,
+                content: String(maybeChunk.content),
+                timestamp: String(maybeChunk.timestamp || new Date().toISOString()),
+                ...(agentId ? { agentId: String(agentId) } : {}),
+                chunk: true,
             });
         }
         const updated = await this.get(sessionId);

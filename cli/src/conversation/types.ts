@@ -9,4 +9,10 @@ export interface DiscoverySummary {
     extras?: Record<string, unknown>;
 }
 
+export interface AgentDescriptor {
+    id: string;
+    name: string;
+    role: 'discovery';
+}
+
 

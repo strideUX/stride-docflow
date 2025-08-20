@@ -35,7 +35,14 @@ export class ConversationSessionManager {
                 ? { ...current, turns: [...(current.turns || []), turn] }
                 : undefined;
             // Ephemeral marker understood by ConvexContextStore to also append to messages
-            return { ...prev, state: updatedState, __appendTurn: turn } as any;
+            return { ...prev, state: updatedState, __appendTurn: turn, ...(turn.agentId ? { agentId: turn.agentId } : {}) } as any;
+        });
+    }
+
+    async appendAssistantChunk(sessionId: string, content: string, agentId?: string): Promise<void> {
+        const now = new Date().toISOString();
+        await this.store.update(sessionId, (prev) => {
+            return { ...prev, __appendTurnChunk: { role: 'assistant', content, timestamp: now, ...(agentId ? { agentId } : {}) }, ...(agentId ? { agentId } : {}) } as any;
         });
     }
 

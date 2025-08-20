@@ -7,6 +7,7 @@ export interface ConversationTurn {
     role: 'system' | 'user' | 'assistant';
     content: string;
     timestamp: string;
+    agentId?: string;
 }
 
 export interface ConversationState {
@@ -57,6 +58,7 @@ import { parseIdeaWithAI } from '../generators/ai-parser.js';
 import { summarizeDiscovery, summarizeDiscoveryWithOpenAI } from './summarizer.js';
 import { ConversationSessionManager } from './session.js';
 import { ConversationOrchestrator, OrchestratorHooks } from './orchestrator.js';
+import { createDiscoveryAgent } from './agent.js';
 import { ChatUI } from '../ui/chat.js';
 
 function toArray(text?: string): string[] {
@@ -102,7 +104,8 @@ export class RealConversationEngine implements ConversationEngine {
         }
 
         // Orchestrated dynamic conversation based on gaps
-        const orchestrator = new ConversationOrchestrator({ aiProvider: input.aiProvider, model: input.model });
+        const agent = createDiscoveryAgent();
+        const orchestrator = new ConversationOrchestrator({ aiProvider: input.aiProvider, model: input.model, agent: agent.descriptor });
         const seed: Partial<DiscoverySummary> = {
             description: parsed.description || input.idea,
             objectives: parsed.objectives || [],
@@ -123,7 +126,13 @@ export class RealConversationEngine implements ConversationEngine {
             (seed as any) || {}
         );
 
-        const chat = new ChatUI();
+        const chat = new ChatUI({
+            onAssistantChunk: async (text: string) => {
+                try {
+                    await sessionManager.appendAssistantChunk(sessionId, text, agent.descriptor.id);
+                } catch {}
+            },
+        });
         const managed = await orchestrator.manageConversation(seed, turns, chat, {
             onTurn: async (turn) => {
                 try {

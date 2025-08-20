@@ -1,8 +1,9 @@
 import { OpenAI } from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
-import { DiscoverySummary } from './types.js';
+import { DiscoverySummary, AgentDescriptor } from './types.js';
 import type { ConversationTurn } from './engine.js';
 import { ChatUI } from '../ui/chat.js';
+import { ConversationSessionManager } from './session.js';
 
 export type Provider = 'openai' | 'anthropic' | 'local';
 
@@ -560,9 +561,12 @@ function heuristicExtract(answer: string, current: Partial<DiscoverySummary>): P
 
 export class ConversationOrchestrator {
     private options: OrchestratorOptions;
+    private agent: AgentDescriptor | null = null;
 
-    constructor(options: OrchestratorOptions) {
-        this.options = { ...options, maxTurns: options.maxTurns ?? 12 };
+    constructor(options: OrchestratorOptions & { agent?: AgentDescriptor }) {
+        const { agent, ...rest } = options as any;
+        this.options = { ...rest, maxTurns: rest.maxTurns ?? 12 };
+        this.agent = agent || null;
     }
 
     assessCompleteness(current: Partial<DiscoverySummary>): { done: boolean; missing: DocumentRequirement[] } {
@@ -613,6 +617,7 @@ export class ConversationOrchestrator {
                 role: 'assistant',
                 content: question,
                 timestamp: new Date().toISOString(),
+                ...(this.agent ? { agentId: this.agent.id } : {}),
             };
             turns.push(qTurn);
             if (hooks?.onTurn) await hooks.onTurn(qTurn);

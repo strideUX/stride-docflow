@@ -7,6 +7,8 @@ export const appendMessage = mutation({
         role: v.union(v.literal('system'), v.literal('user'), v.literal('assistant')),
         content: v.string(),
         timestamp: v.string(),
+        agentId: v.optional(v.string()),
+        chunk: v.optional(v.boolean()),
     },
     handler: async (ctx, args) => {
         // Ensure session exists
@@ -31,7 +33,8 @@ export const appendMessage = mutation({
             .first();
         if (sess) {
             const turns = Array.isArray((sess as any).data?.turns) ? (sess as any).data.turns : [];
-            const next = { turns: [...turns, { role: args.role, content: args.content, timestamp: args.timestamp }] };
+            const nextTurn = { role: args.role, content: args.content, timestamp: args.timestamp, ...(args.agentId ? { agentId: args.agentId } : {}), ...(args.chunk ? { chunk: true } : {}) };
+            const next = { turns: [...turns, nextTurn] };
             await ctx.db.patch(sess._id, { data: next, updatedAt: now });
         }
     },

@@ -74,7 +74,7 @@ This feature is completed. Further work is tracked under the enhancement below.
 
 **Status Guide:**
 ## F001-Enhancement: Convex AI SDK Integration
-**Status:** planned  
+**Status:** in_progress  
 **Started:** 2025-08-19  
 **Priority:** P1 (High)  
 **Dependencies:** F001 core completion
@@ -87,7 +87,7 @@ Upgrade from basic Convex client to Convex AI SDK for enhanced streaming capabil
 - [ ] **Replace ConvexContextStore**: Upgrade to use Convex AI streaming patterns
 - [ ] **Enhance conversation streaming**: Implement real-time AI response streaming
 - [ ] **Multi-agent foundation**: Set up patterns for future agent specialization
-- [ ] **Session resume**: Wire --session CLI flag for conversation resumption
+- [x] **Session resume**: Wire --session CLI flag for conversation resumption
 - `in_progress`: Actively working on todos
 - `in_review`: Ready for testing/feedback, may iterate  
 - `completed`: Feature done, ready to archive and move to next

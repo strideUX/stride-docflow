@@ -11,6 +11,7 @@ import { ConversationSessionManager } from '../conversation/session.js';
 import { ConversationOrchestrator } from '../conversation/orchestrator.js';
 import { ChatUI } from '../ui/chat.js';
 import { summarizeDiscovery } from '../conversation/summarizer.js';
+import { createDiscoveryAgent } from '../conversation/agent.js';
 
 export const generateCommand = new Command('generate')
   .alias('gen')
@@ -52,8 +53,13 @@ export const generateCommand = new Command('generate')
           const loaded = await sessionManager.load(options.session);
           if (loaded) {
             // Resume conversation from last saved state
-            const chat = new ChatUI();
-            const orchestrator = new ConversationOrchestrator({ aiProvider: provider, model });
+            const chat = new ChatUI({
+              onAssistantChunk: async (text: string) => {
+                try { await sessionManager.appendAssistantChunk(loaded.state.sessionId, text, 'discovery-default'); } catch {}
+              }
+            });
+            const agent = createDiscoveryAgent();
+            const orchestrator = new ConversationOrchestrator({ aiProvider: provider, model, agent: agent.descriptor });
             const managed = await orchestrator.manageConversation(
               (loaded.summary as any) || {},
               (loaded.state.turns || []),
@@ -69,6 +75,7 @@ export const generateCommand = new Command('generate')
             const state = { sessionId: loaded.state.sessionId, phase: 'discovery', turns: managed.turns };
             await sessionManager.createOrUpdate(state as any, summary as any);
             conv = { state, summary };
+            styledPrompts.note(`Resumed conversational session: ${chalk.cyan(loaded.state.sessionId)}\nTo continue later: docflow generate --conversational --session ${loaded.state.sessionId}`, 'Session');
           }
         }
 
@@ -77,6 +84,7 @@ export const generateCommand = new Command('generate')
           conv = await engine.start({ idea: options.idea, aiProvider: provider, model });
           await sessionManager.createOrUpdate(conv.state, conv.summary as any);
           createdSessionId = conv.state.sessionId;
+          styledPrompts.note(`Created conversational session: ${chalk.cyan(createdSessionId)}\nResume anytime with:\n  docflow generate --conversational --session ${createdSessionId}`, 'Session');
         }
 
         // Build ProjectData directly from conversational summary without form prompts
@@ -125,16 +133,7 @@ export const generateCommand = new Command('generate')
         console.log(`⚠️  ${result.warnings.length} warnings - check logs above`);
       }
 
-      // Cleanup session after successful generation (conversational mode)
-      try {
-        if (options.conversational) {
-          const sessionManager = new ConversationSessionManager();
-          const toDelete = options.session || createdSessionId;
-          if (toDelete) {
-            await sessionManager.delete(toDelete);
-          }
-        }
-      } catch {}
+      // Keep sessions by default to support resumption/audit. Add a future flag to opt-in cleanup.
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

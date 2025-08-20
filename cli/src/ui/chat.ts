@@ -3,8 +3,12 @@ import { theme } from './theme.js';
 
 export class ChatUI {
     private rl: readline.Interface;
+    private onAssistantChunk?: (text: string) => void | Promise<void>;
+    private onAssistantEnd?: () => void | Promise<void>;
 
-    constructor() {
+    constructor(opts?: { onAssistantChunk?: (text: string) => void | Promise<void>; onAssistantEnd?: () => void | Promise<void> }) {
+        this.onAssistantChunk = opts?.onAssistantChunk;
+        this.onAssistantEnd = opts?.onAssistantEnd;
         this.rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
@@ -27,10 +31,16 @@ export class ChatUI {
 
     appendAssistantChunk(text: string): void {
         process.stdout.write(text);
+        if (this.onAssistantChunk) {
+            try { void this.onAssistantChunk(text); } catch {}
+        }
     }
 
     endAssistantMessage(): void {
         process.stdout.write('\n');
+        if (this.onAssistantEnd) {
+            try { void this.onAssistantEnd(); } catch {}
+        }
     }
 
     async askYesNo(question: string, defaultYes: boolean = true): Promise<boolean> {
