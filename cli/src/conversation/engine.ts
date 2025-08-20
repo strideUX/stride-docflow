@@ -126,9 +126,6 @@ export class RealConversationEngine implements ConversationEngine {
             (seed as any) || {}
         );
 
-        // Expose session id for orchestrator (via env, minimal plumbing)
-        process.env.DOCFLOW_SESSION_ID = sessionId;
-
         const chat = new ChatUI({
             onAssistantChunk: async (text: string) => {
                 try {
@@ -136,7 +133,7 @@ export class RealConversationEngine implements ConversationEngine {
                 } catch {}
             },
         });
-        const managed = await orchestrator.manageConversation(seed, turns, chat, {
+        const managed = await orchestrator.manageConversation(seed, turns, chat, sessionId, {
             onTurn: async (turn) => {
                 try {
                     await sessionManager.appendTurn(sessionId, turn);

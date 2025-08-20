@@ -28,6 +28,7 @@ export const generateCommand = new Command('generate')
   .option('--accept-defaults', 'Auto-accept suggestions and confirmation where possible', false)
   .option('--research', 'Enable research mode with MCP and web search', true)
   .option('--dry-run', 'Show what would be generated without creating files', false)
+  .option('--debug', 'Show debug info during conversational flow', false)
   .action(async (options) => {
     try {
       styledPrompts.intro(`${symbols.rocket} Starting project documentation generation`);
@@ -42,6 +43,12 @@ export const generateCommand = new Command('generate')
       const provider = normalizeProvider(options.aiProvider);
       const defaultModel = provider === 'anthropic' ? 'claude-3-5-sonnet-20241022' : 'gpt-4o';
       const model = (options.model && String(options.model).trim().length > 0) ? options.model : defaultModel;
+      const useConvex = String(process.env.DOCFLOW_USE_CONVEX_AI || '').trim() === '1';
+      if (options.debug) {
+        styledPrompts.info(`Debug: provider=${provider}, model=${model}, useConvexAI=${useConvex}`);
+        const convexUrl = process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL || process.env.EXPO_PUBLIC_CONVEX_URL || process.env.DOCFLOW_CONVEX_ADMIN_URL;
+        styledPrompts.info(`Debug: convexUrl=${convexUrl ? 'set' : 'unset'}`);
+      }
 
       // Gather project requirements (conversational stub or form prompts)
       let projectData = null as any;
@@ -53,7 +60,6 @@ export const generateCommand = new Command('generate')
           const loaded = await sessionManager.load(options.session);
           if (loaded) {
             // Resume conversation from last saved state
-            process.env.DOCFLOW_SESSION_ID = loaded.state.sessionId;
             const chat = new ChatUI({
               onAssistantChunk: async (text: string) => {
                 try { await sessionManager.appendAssistantChunk(loaded.state.sessionId, text, 'discovery-default'); } catch {}
@@ -65,6 +71,7 @@ export const generateCommand = new Command('generate')
               (loaded.summary as any) || {},
               (loaded.state.turns || []),
               chat,
+              loaded.state.sessionId,
               {
                 onTurn: async (turn) => {
                   try { await sessionManager.appendTurn(loaded.state.sessionId, turn); } catch {}

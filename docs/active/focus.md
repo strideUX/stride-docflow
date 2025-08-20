@@ -94,3 +94,9 @@ Upgrade from basic Convex client to Convex AI SDK for enhanced streaming capabil
 - Wired CLI to surface and retain session IDs; resume path verified.
 - Persisted streaming chunks to Convex via `messages.appendMessage` for future UI consumption.
 - Introduced feature-flagged Convex AI adapter stub; currently falls back to direct provider streaming.
+
+### Progress (2025-08-20)
+- Added server-side `messages.streamAssistant` action to stream tokens from Anthropic/OpenAI and persist chunks.
+- Orchestrator attempts Convex streaming first; falls back to provider streaming if disabled/unavailable.
+- Removed temporary env hack by threading `sessionId` through orchestrator APIs.
+- Added `--debug` flag to `generate` for provider/model/convex diagnostics during demos.

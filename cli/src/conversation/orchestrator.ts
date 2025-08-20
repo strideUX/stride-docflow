@@ -332,7 +332,8 @@ async function streamQuestionWithAI(
     model: string | undefined,
     requirement: DocumentRequirement,
     history: ConversationTurn[],
-    current: Partial<DiscoverySummary>
+    current: Partial<DiscoverySummary>,
+    sessionId?: string
 ): Promise<string> {
     const fallback = async (): Promise<string> => {
         const q = await generateQuestionWithAI(provider, model, requirement, history, current);
@@ -391,7 +392,7 @@ Guidelines:
         const convexAttempt = await streamQuestionViaConvex(chat, {
             provider,
             model,
-            sessionId: process.env.DOCFLOW_SESSION_ID || 'unknown',
+            sessionId: sessionId || 'unknown',
             system: system2,
             user: user2,
         });
@@ -621,6 +622,7 @@ export class ConversationOrchestrator {
         seed: Partial<DiscoverySummary>,
         history: ConversationTurn[],
         chat: ChatUI,
+        sessionId?: string,
         hooks?: OrchestratorHooks
     ): Promise<{ turns: ConversationTurn[]; summary: DiscoverySummary }> {
         const turns: ConversationTurn[] = [...history];
@@ -641,7 +643,8 @@ export class ConversationOrchestrator {
                 this.options.model,
                 gapToAsk,
                 turns,
-                current
+                current,
+                sessionId
             );
 
             const qTurn: ConversationTurn = {
