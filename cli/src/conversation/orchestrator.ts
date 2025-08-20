@@ -338,17 +338,6 @@ async function streamQuestionWithAI(
         const q = await generateQuestionWithAI(provider, model, requirement, history, current);
         const question = q || requirement.prompt;
         chat.printAssistantHeader('AI');
-        // Try Convex AI streaming first (feature-flagged), then fall back
-        const convexAttempt = await streamQuestionViaConvex(chat, {
-            provider,
-            model,
-            sessionId: 'ephemeral',
-            system,
-            user,
-        });
-        if (convexAttempt) {
-            return convexAttempt;
-        }
         chat.appendAssistantChunk(question);
         chat.endAssistantMessage();
         return question;
@@ -379,6 +368,36 @@ Guidelines:
         const user = `Current known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo}`;
 
         chat.printAssistantHeader('AI');
+        // Try Convex AI streaming first (feature-flagged), then fall back
+        const outstanding2 = computeOutstandingGaps(current, history).map((g) => ({
+            doc: g.doc,
+            label: g.label,
+            field: g.scope === 'extras' ? `extras.${g.extrasKey}` : String(g.key),
+            weight: g.weight,
+        }));
+        const system2 = `You are a senior technical consultant conducting a discovery interview to generate four documents:
+- specs.md: vision, objectives, target users, constraints
+- architecture.md: tech stack rationale, key components, platforms, auth, data, deployment, testing/CI
+- features.md: key features with priorities (P0, P1)
+- stack.md: chosen stack and integration rationale
+
+Guidelines:
+- Read the recent conversation and be curious. Ask smart follow-ups based on what the user actually said (e.g., if they say "mobile app", clarify platforms and deployment; if they say "minimal", ask what that means; if they mention testing, ask about testing and CI/CD).
+- Choose the SINGLE most impactful next question that will reduce the biggest information gap for the docs above. Do not ask multi-part lists.
+- Keep tone natural, consultant-like. Avoid generic phrasing.
+- Output ONLY the question text.`;
+        const convo2 = history.slice(-8).map((t) => `${t.role.toUpperCase()}: ${t.content}`).join('\n');
+        const user2 = `Current known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding2)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo2}`;
+        const convexAttempt = await streamQuestionViaConvex(chat, {
+            provider,
+            model,
+            sessionId: process.env.DOCFLOW_SESSION_ID || 'unknown',
+            system: system2,
+            user: user2,
+        });
+        if (convexAttempt) {
+            return convexAttempt;
+        }
 
         if (provider === 'anthropic') {
             const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });

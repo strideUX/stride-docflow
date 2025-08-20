@@ -3,8 +3,8 @@ import { theme } from './theme.js';
 
 export class ChatUI {
     private rl: readline.Interface;
-    private onAssistantChunk?: (text: string) => void | Promise<void>;
-    private onAssistantEnd?: () => void | Promise<void>;
+    private onAssistantChunk: ((text: string) => void | Promise<void>) | undefined;
+    private onAssistantEnd: (() => void | Promise<void>) | undefined;
 
     constructor(opts?: { onAssistantChunk?: (text: string) => void | Promise<void>; onAssistantEnd?: () => void | Promise<void> }) {
         this.onAssistantChunk = opts?.onAssistantChunk;

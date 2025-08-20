@@ -53,6 +53,7 @@ export const generateCommand = new Command('generate')
           const loaded = await sessionManager.load(options.session);
           if (loaded) {
             // Resume conversation from last saved state
+            process.env.DOCFLOW_SESSION_ID = loaded.state.sessionId;
             const chat = new ChatUI({
               onAssistantChunk: async (text: string) => {
                 try { await sessionManager.appendAssistantChunk(loaded.state.sessionId, text, 'discovery-default'); } catch {}

@@ -4,7 +4,7 @@ import { api } from '../../convex/_generated/api.js';
 
 export interface ConvexAIStreamOptions {
     provider: 'openai' | 'anthropic' | 'local';
-    model?: string;
+    model: string | undefined;
     sessionId: string;
     system: string;
     user: string;
@@ -33,8 +33,8 @@ export async function streamQuestionViaConvex(
             system: opts.system,
             user: opts.user,
             provider: opts.provider as any,
-            model: opts.model,
-            agentId: opts.agentId,
+            ...(opts.model ? { model: opts.model } : {}),
+            ...(opts.agentId ? { agentId: opts.agentId } : {}),
         } as any);
         if ((res as any)?.ok) {
             return '';

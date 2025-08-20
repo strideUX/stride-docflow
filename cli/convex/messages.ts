@@ -1,5 +1,8 @@
 import { v } from 'convex/values';
 import { action, mutation, query } from './_generated/server';
+import { api } from './_generated/api';
+import { OpenAI } from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 
 export const appendMessage = mutation({
     args: {
@@ -63,8 +66,86 @@ export const streamAssistant = action({
         agentId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        // TODO: Use @convex-dev/agent once agent defined. For now, no-op.
-        return { ok: false } as const;
+        try {
+            const nowIso = () => new Date().toISOString();
+            if (args.provider === 'anthropic') {
+                const anthropic = new (Anthropic as any)({ apiKey: process.env.ANTHROPIC_API_KEY! });
+                const stream = await anthropic.messages.create({
+                    model: args.model || 'claude-3-5-sonnet-20241022',
+                    max_tokens: 200,
+                    system: args.system,
+                    messages: [{ role: 'user', content: args.user }],
+                    stream: true,
+                } as any);
+                for await (const event of stream as any) {
+                    if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+                        const text = event.delta.text || '';
+                        if (text) {
+                            await ctx.runMutation(api.messages.appendMessage, {
+                                sessionId: args.sessionId,
+                                role: 'assistant',
+                                content: text,
+                                timestamp: nowIso(),
+                                ...(args.agentId ? { agentId: args.agentId } : {}),
+                                chunk: true,
+                            } as any);
+                        }
+                    }
+                }
+                return { ok: true } as const;
+            } else if (args.provider === 'openai') {
+                const openai = new (OpenAI as any)({ apiKey: process.env.OPENAI_API_KEY! });
+                const modelName = args.model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o';
+                const isO1 = typeof modelName === 'string' && modelName.startsWith('o1-');
+                if (isO1) {
+                    // Fallback non-streaming: single append
+                    const resp = await openai.chat.completions.create({
+                        model: modelName,
+                        messages: [{ role: 'user', content: `${args.system}\n\n${args.user}` }],
+                        max_tokens: 200,
+                    } as any);
+                    const content = resp.choices?.[0]?.message?.content || '';
+                    if (content) {
+                        await ctx.runMutation(api.messages.appendMessage, {
+                            sessionId: args.sessionId,
+                            role: 'assistant',
+                            content,
+                            timestamp: nowIso(),
+                            ...(args.agentId ? { agentId: args.agentId } : {}),
+                            chunk: false,
+                        } as any);
+                    }
+                    return { ok: true } as const;
+                }
+                const stream = await openai.chat.completions.create({
+                    model: modelName,
+                    messages: [
+                        { role: 'system', content: args.system },
+                        { role: 'user', content: args.user },
+                    ],
+                    temperature: 0.2,
+                    max_tokens: 200,
+                    stream: true,
+                } as any);
+                for await (const part of stream as any) {
+                    const delta = part.choices?.[0]?.delta?.content || '';
+                    if (delta) {
+                        await ctx.runMutation(api.messages.appendMessage, {
+                            sessionId: args.sessionId,
+                            role: 'assistant',
+                            content: delta,
+                            timestamp: nowIso(),
+                            ...(args.agentId ? { agentId: args.agentId } : {}),
+                            chunk: true,
+                        } as any);
+                    }
+                }
+                return { ok: true } as const;
+            }
+            return { ok: false } as const;
+        } catch {
+            return { ok: false } as const;
+        }
     },
 });
 

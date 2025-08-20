@@ -126,6 +126,9 @@ export class RealConversationEngine implements ConversationEngine {
             (seed as any) || {}
         );
 
+        // Expose session id for orchestrator (via env, minimal plumbing)
+        process.env.DOCFLOW_SESSION_ID = sessionId;
+
         const chat = new ChatUI({
             onAssistantChunk: async (text: string) => {
                 try {
