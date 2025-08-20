@@ -4,6 +4,7 @@ import { DiscoverySummary, AgentDescriptor } from './types.js';
 import type { ConversationTurn } from './engine.js';
 import { ChatUI } from '../ui/chat.js';
 import { ConversationSessionManager } from './session.js';
+import { streamQuestionViaConvex } from '../convex-ai/adapter.js';
 
 export type Provider = 'openai' | 'anthropic' | 'local';
 
@@ -337,6 +338,17 @@ async function streamQuestionWithAI(
         const q = await generateQuestionWithAI(provider, model, requirement, history, current);
         const question = q || requirement.prompt;
         chat.printAssistantHeader('AI');
+        // Try Convex AI streaming first (feature-flagged), then fall back
+        const convexAttempt = await streamQuestionViaConvex(chat, {
+            provider,
+            model,
+            sessionId: 'ephemeral',
+            system,
+            user,
+        });
+        if (convexAttempt) {
+            return convexAttempt;
+        }
         chat.appendAssistantChunk(question);
         chat.endAssistantMessage();
         return question;

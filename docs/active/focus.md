@@ -83,11 +83,14 @@ This feature is completed. Further work is tracked under the enhancement below.
 Upgrade from basic Convex client to Convex AI SDK for enhanced streaming capabilities, better AI integration, and multi-agent foundation.
 
 ### Current Todos
-- [ ] **Install Convex AI SDK**: Add @convex-dev/ai package and configure
+- [ ] **Install Convex AI SDK**: Add @convex-dev/agent (for agent runtime) and configure when enabling agents
 - [ ] **Replace ConvexContextStore**: Upgrade to use Convex AI streaming patterns
 - [ ] **Enhance conversation streaming**: Implement real-time AI response streaming
 - [ ] **Multi-agent foundation**: Set up patterns for future agent specialization
 - [x] **Session resume**: Wire --session CLI flag for conversation resumption
-- `in_progress`: Actively working on todos
-- `in_review`: Ready for testing/feedback, may iterate  
-- `completed`: Feature done, ready to archive and move to next
+
+### Progress (2025-08-19)
+- Added agent-ready fields (`agentId`, `chunk`) to Convex schema and functions.
+- Wired CLI to surface and retain session IDs; resume path verified.
+- Persisted streaming chunks to Convex via `messages.appendMessage` for future UI consumption.
+- Introduced feature-flagged Convex AI adapter stub; currently falls back to direct provider streaming.
