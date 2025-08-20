@@ -1,8 +1,8 @@
 import { v } from 'convex/values';
 import { action, mutation, query } from '../_generated/server';
 import { api } from '../_generated/api';
-import { OpenAI } from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
+import { Agent } from '@convex-dev/agent';
+import { components } from '../_generated/api';
 export const appendMessage = mutation({
     args: {
         sessionId: v.string(),
@@ -65,88 +65,34 @@ export const streamAssistant = action({
     handler: async (ctx, args) => {
         try {
             const nowIso = () => new Date().toISOString();
-            // Track lightweight agent order in session data (no full agent thread yet)
-            const sess = await ctx.runQuery(api.contexts.getSession, { sessionId: args.sessionId });
+            // Fetch session and map to agent thread
+            const sess = await ctx.runQuery(api.docflow.contexts.getSession, { sessionId: args.sessionId });
             let agentOrder = Number((sess?.data?.agentOrder) || 0);
             const order = agentOrder + 1;
-            if (args.provider === 'anthropic') {
-                const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-                const stream = await anthropic.messages.create({
-                    model: args.model || 'claude-3-5-sonnet-20241022',
-                    max_tokens: 200,
-                    system: args.system,
-                    messages: [{ role: 'user', content: args.user }],
-                    stream: true,
-                });
-                for await (const event of stream) {
-                    if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-                        const text = event.delta.text || '';
-                        if (text) {
-                            await ctx.runMutation(api.messages.appendMessage, {
-                                sessionId: args.sessionId,
-                                role: 'assistant',
-                                content: text,
-                                timestamp: nowIso(),
-                                ...(args.agentId ? { agentId: args.agentId } : {}),
-                                chunk: true,
-                            });
-                        }
-                    }
-                }
-                await ctx.runMutation(api.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
-                return { ok: true };
+            let agentThreadId = sess?.data?.agentThreadId;
+            const agent = new Agent(components.agent, {
+                name: args.agentId || 'docflow-discovery',
+                languageModel: undefined,
+                // We let provider/model be chosen via streamText args
+                saveStreamDeltas: true,
+            });
+            if (!agentThreadId) {
+                const { threadId } = await agent.createThread(ctx, { title: `Docflow ${args.sessionId}` });
+                agentThreadId = threadId;
+                await ctx.runMutation(api.docflow.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentThreadId, agentOrder: 0 } });
             }
-            else if (args.provider === 'openai') {
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-                const modelName = args.model || process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o';
-                const isO1 = typeof modelName === 'string' && modelName.startsWith('o1-');
-                if (isO1) {
-                    // Fallback non-streaming: single append
-                    const resp = await openai.chat.completions.create({
-                        model: modelName,
-                        messages: [{ role: 'user', content: `${args.system}\n\n${args.user}` }],
-                        max_tokens: 200,
-                    });
-                    const content = resp.choices?.[0]?.message?.content || '';
-                    if (content) {
-                        await ctx.runMutation(api.messages.appendMessage, {
-                            sessionId: args.sessionId,
-                            role: 'assistant',
-                            content,
-                            timestamp: nowIso(),
-                            ...(args.agentId ? { agentId: args.agentId } : {}),
-                            chunk: false,
-                        });
-                        await ctx.runMutation(api.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
-                    }
-                    return { ok: true };
-                }
-                const stream = await openai.chat.completions.create({
-                    model: modelName,
-                    messages: [
-                        { role: 'system', content: args.system },
-                        { role: 'user', content: args.user },
-                    ],
-                    temperature: 0.2,
-                    max_tokens: 200,
-                    stream: true,
-                });
-                for await (const part of stream) {
-                    const delta = part.choices?.[0]?.delta?.content || '';
-                    if (delta) {
-                        await ctx.runMutation(api.messages.appendMessage, {
-                            sessionId: args.sessionId,
-                            role: 'assistant',
-                            content: delta,
-                            timestamp: nowIso(),
-                            ...(args.agentId ? { agentId: args.agentId } : {}),
-                            chunk: true,
-                        });
-                    }
-                }
-                await ctx.runMutation(api.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
-                return { ok: true };
-            }
+            const { thread } = await agent.continueThread(ctx, { threadId: agentThreadId });
+            const modelName = args.model || (args.provider === 'anthropic' ? 'claude-3-5-sonnet-20241022' : (process.env.DOCFLOW_DEFAULT_MODEL || 'gpt-4o'));
+            const stream = await thread.streamText({
+                system: args.system,
+                prompt: args.user,
+                model: modelName,
+                providerOptions: { provider: args.provider },
+            }, { saveStreamDeltas: true });
+            // Consume stream server-side to drive DeltaStreamer
+            await stream.consumeStream();
+            await ctx.runMutation(api.docflow.contexts.upsertSession, { sessionId: args.sessionId, data: { ...(sess?.data || {}), agentOrder: order } });
+            return { ok: true };
             return { ok: false };
         }
         catch {
