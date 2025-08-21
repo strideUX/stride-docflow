@@ -386,8 +386,9 @@ Guidelines:
         const user = `USER PROJECT DESCRIPTION: ${(current.description as string) || ''}\nCurrent known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo}`;
 
         if (debug) {
-            styledPrompts.note(`System Prompt (question gen)\n---\n${system}`, 'Debug');
-            styledPrompts.note(`User Prompt (question gen)\n---\n${user}`, 'Debug');
+            // Compact debug output with blue header + muted body
+            styledPrompts.debugSection('User Prompt (question gen)', user);
+            styledPrompts.debugSection('System Prompt (question gen)', system);
         }
 
         chat.printAssistantHeader('DocFlow');
@@ -418,11 +419,11 @@ Guidelines:
         const convo2 = history.slice(-8).map((t) => `${t.role.toUpperCase()}: ${t.content}`).join('\n');
         const user2 = `USER PROJECT DESCRIPTION: ${(current.description as string) || ''}\nCurrent known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding2)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo2}`;
         if (debug) {
-            styledPrompts.info('Trying Convex streaming...',);
+            styledPrompts.debug('Trying Convex streaming...',);
         }
         const convexAttempt = await streamQuestionViaConvex(chat, {
             provider,
-            model,
+            model: model as string | undefined,
             sessionId: sessionId || 'unknown',
             system: system2,
             user: user2,
@@ -431,7 +432,7 @@ Guidelines:
             return convexAttempt;
         }
         if (debug) {
-            styledPrompts.info('Falling back to direct provider streaming.');
+            styledPrompts.debug('Falling back to direct provider streaming.');
         }
 
         if (provider === 'anthropic') {
@@ -969,7 +970,17 @@ export class ConversationOrchestrator {
             chat.endAssistantMessage();
 
             const projectName = await chat.promptUser('You');
-            current.name = String(projectName).trim() || suggestedName;
+            const trimmedName = String(projectName).trim();
+            const finalName = trimmedName || suggestedName;
+            current.name = finalName;
+
+            if (this.options.debug) {
+                styledPrompts.debug(`📝 Project Name Collection:`);
+                styledPrompts.debug(`  Raw input: "${projectName}"`);
+                styledPrompts.debug(`  Trimmed: "${trimmedName}"`);
+                styledPrompts.debug(`  Suggested fallback: "${suggestedName}"`);
+                styledPrompts.debug(`  Final current.name: "${current.name}"`);
+            }
 
             const nameTurn: ConversationTurn = {
                 role: 'user',
@@ -991,7 +1002,7 @@ export class ConversationOrchestrator {
         if (current.name) {
             summary.name = current.name as string;
             if (this.options.debug) {
-                styledPrompts.note(`Setting summary.name to: ${current.name}`, 'Debug');
+                styledPrompts.debug(`Setting summary.name to: ${current.name}`);
             }
         }
         if (current.stackSuggestion) {

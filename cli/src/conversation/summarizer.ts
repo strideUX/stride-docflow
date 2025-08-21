@@ -47,6 +47,7 @@ ${user}` }] : [
             stackSuggestion: parsed.stackSuggestion || partial.stackSuggestion,
             extras: { ...partial.extras },
         };
+        if (partial.name) (merged as any).name = partial.name;
         return merged;
     } catch {
         return partial;
@@ -90,6 +91,7 @@ Partial summary: ${JSON.stringify(partial)}`;
                 stackSuggestion: parsed.stackSuggestion || partial.stackSuggestion,
                 extras: { ...partial.extras },
             } as DiscoverySummary;
+            if (partial.name) (merged as any).name = partial.name;
             return merged;
         }
         // default to OpenAI

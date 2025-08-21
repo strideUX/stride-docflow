@@ -113,9 +113,9 @@ export const generateCommand = new Command('generate')
         
         // DEBUG: Check if project name is coming through
         if (options.debug) {
-          styledPrompts.note(`Summary received: ${JSON.stringify(conv.summary, null, 2)}`, 'Debug');
-          styledPrompts.note(`Project name from summary: ${conv.summary?.name || 'undefined'}`, 'Debug');
-          styledPrompts.note(`Final project name: ${projectData.name}`, 'Debug');
+          styledPrompts.debug(`summary.name=${conv.summary?.name || 'undefined'}`);
+          styledPrompts.debug(`projectData.name=${projectData.name}`);
+          styledPrompts.debug(`summary=${JSON.stringify(conv.summary)}`);
         }
         
         // Always use project slug in DOCFLOW_PROJECTS_DIR unless user specified explicit path

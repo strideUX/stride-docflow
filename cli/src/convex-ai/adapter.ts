@@ -4,7 +4,7 @@ import { api } from '../../convex/_generated/api.js';
 
 export interface ConvexAIStreamOptions {
     provider: 'openai' | 'anthropic' | 'local';
-    model: string | undefined;
+    model: string | undefined; // accept undefined explicitly due to exactOptionalPropertyTypes
     sessionId: string;
     system: string;
     user: string;
@@ -15,32 +15,33 @@ export async function streamQuestionViaConvex(
     chat: ChatUI,
     opts: ConvexAIStreamOptions
 ): Promise<string | null> {
-    // Feature flag to enable Convex AI path when backend action is ready
+    // Re-enable Convex streaming now that deployment is fixed
     const useConvex = String(process.env.DOCFLOW_USE_CONVEX_AI || '').trim() === '1';
     if (!useConvex) return null;
 
-    // Call placeholder server action for now; return null to fallback until implemented
     try {
-        const url =
-            process.env.CONVEX_URL ||
-            process.env.NEXT_PUBLIC_CONVEX_URL ||
-            process.env.EXPO_PUBLIC_CONVEX_URL ||
-            process.env.DOCFLOW_CONVEX_ADMIN_URL;
+        const url = process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL || process.env.EXPO_PUBLIC_CONVEX_URL || process.env.DOCFLOW_CONVEX_ADMIN_URL;
         if (!url) return null;
         const client = new ConvexClient(String(url));
-        const res = await client.action((api as any).docflow.messages.streamAssistant, {
+
+        // Call the namespaced Convex action with detailed error logging
+        console.log('🔄 Attempting Convex streaming...');
+        const res = await client.action(api.docflow.messages.streamAssistant, {
             sessionId: opts.sessionId,
             system: opts.system,
             user: opts.user,
             provider: opts.provider as any,
-            ...(opts.model ? { model: opts.model } : {}),
-            ...(opts.agentId ? { agentId: opts.agentId } : {}),
+            model: opts.model as string | undefined,
+            agentId: opts.agentId,
         } as any);
+
+        console.log('✅ Convex streaming response:', res);
         if ((res as any)?.ok) {
-            return '';
+            return ''; // Return empty string as content is streamed via callbacks
         }
         return null;
-    } catch {
+    } catch (error) {
+        console.error('❌ Convex streaming error:', error);
         return null;
     }
 }
