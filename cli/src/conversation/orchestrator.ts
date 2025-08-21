@@ -5,6 +5,7 @@ import type { ConversationTurn } from './engine.js';
 import { ChatUI } from '../ui/chat.js';
 import { ConversationSessionManager } from './session.js';
 import { streamQuestionViaConvex } from '../convex-ai/adapter.js';
+import { styledPrompts } from '../ui/styled-prompts.js';
 
 export type Provider = 'openai' | 'anthropic' | 'local';
 
@@ -242,6 +243,7 @@ export interface OrchestratorOptions {
     aiProvider: Provider;
     model?: string | undefined;
     maxTurns?: number | undefined;
+    debug?: boolean | undefined;
 }
 
 export interface OrchestratorHooks {
@@ -278,7 +280,8 @@ async function generateQuestionWithAI(
             weight: g.weight,
         }));
 
-        const system = `You are a senior technical consultant conducting a discovery interview to generate four documents:
+        const system = `You are a senior technical consultant conducting a discovery interview to generate four documents for the USER'S project. Do NOT describe this tool or its repository. Ignore any existing docs in this codebase.
+The documents are:
 - specs.md: vision, objectives, target users, constraints
 - architecture.md: tech stack rationale, key components, platforms, auth, data, deployment, testing/CI
 - features.md: key features with priorities (P0, P1)
@@ -333,12 +336,13 @@ async function streamQuestionWithAI(
     requirement: DocumentRequirement,
     history: ConversationTurn[],
     current: Partial<DiscoverySummary>,
-    sessionId?: string
+    sessionId?: string,
+    debug?: boolean
 ): Promise<string> {
     const fallback = async (): Promise<string> => {
         const q = await generateQuestionWithAI(provider, model, requirement, history, current);
         const question = q || requirement.prompt;
-        chat.printAssistantHeader('AI');
+        chat.printAssistantHeader('DocFlow');
         chat.appendAssistantChunk(question);
         chat.endAssistantMessage();
         return question;
@@ -354,7 +358,8 @@ async function streamQuestionWithAI(
             weight: g.weight,
         }));
 
-        const system = `You are a senior technical consultant conducting a discovery interview to generate four documents:
+        const system = `You are a senior technical consultant conducting a discovery interview to generate four documents for the USER'S project. Do NOT describe this tool or its repository. Ignore any existing docs in this codebase.
+The documents are:
 - specs.md: vision, objectives, target users, constraints
 - architecture.md: tech stack rationale, key components, platforms, auth, data, deployment, testing/CI
 - features.md: key features with priorities (P0, P1)
@@ -366,9 +371,14 @@ Guidelines:
 - Keep tone natural, consultant-like. Avoid generic phrasing.
 - Output ONLY the question text.`;
         const convo = history.slice(-8).map((t) => `${t.role.toUpperCase()}: ${t.content}`).join('\n');
-        const user = `Current known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo}`;
+        const user = `USER PROJECT DESCRIPTION: ${(current.description as string) || ''}\nCurrent known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo}`;
 
-        chat.printAssistantHeader('AI');
+        if (debug) {
+            styledPrompts.note(`System Prompt (question gen)\n---\n${system}`, 'Debug');
+            styledPrompts.note(`User Prompt (question gen)\n---\n${user}`, 'Debug');
+        }
+
+        chat.printAssistantHeader('DocFlow');
         // Try Convex AI streaming first (feature-flagged), then fall back
         const outstanding2 = computeOutstandingGaps(current, history).map((g) => ({
             doc: g.doc,
@@ -376,7 +386,8 @@ Guidelines:
             field: g.scope === 'extras' ? `extras.${g.extrasKey}` : String(g.key),
             weight: g.weight,
         }));
-        const system2 = `You are a senior technical consultant conducting a discovery interview to generate four documents:
+        const system2 = `You are a senior technical consultant conducting a discovery interview to generate four documents for the USER'S project. Do NOT describe this tool or its repository. Ignore any existing docs in this codebase.
+The documents are:
 - specs.md: vision, objectives, target users, constraints
 - architecture.md: tech stack rationale, key components, platforms, auth, data, deployment, testing/CI
 - features.md: key features with priorities (P0, P1)
@@ -388,7 +399,10 @@ Guidelines:
 - Keep tone natural, consultant-like. Avoid generic phrasing.
 - Output ONLY the question text.`;
         const convo2 = history.slice(-8).map((t) => `${t.role.toUpperCase()}: ${t.content}`).join('\n');
-        const user2 = `Current known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding2)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo2}`;
+        const user2 = `USER PROJECT DESCRIPTION: ${(current.description as string) || ''}\nCurrent known fields (partial JSON): ${JSON.stringify(current)}\nOutstanding gaps: ${JSON.stringify(outstanding2)}\nRequirement to ask about now: ${requirement.label}\nConversation so far:\n${convo2}`;
+        if (debug) {
+            styledPrompts.info('Trying Convex streaming...',);
+        }
         const convexAttempt = await streamQuestionViaConvex(chat, {
             provider,
             model,
@@ -398,6 +412,9 @@ Guidelines:
         });
         if (convexAttempt) {
             return convexAttempt;
+        }
+        if (debug) {
+            styledPrompts.info('Falling back to direct provider streaming.');
         }
 
         if (provider === 'anthropic') {

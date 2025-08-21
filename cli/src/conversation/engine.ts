@@ -20,6 +20,7 @@ export interface ConversationInput {
     idea?: string;
     aiProvider: Provider;
     model?: string;
+    debug?: boolean;
 }
 
 export interface ConversationOutput {
@@ -74,7 +75,7 @@ export class RealConversationEngine implements ConversationEngine {
         const now = new Date().toISOString();
         const sessionId = `conv-${Math.random().toString(36).slice(2, 10)}`;
         const turns: ConversationTurn[] = [
-            { role: 'system', content: 'Starting discovery conversation', timestamp: now },
+            { role: 'system', content: 'Starting discovery conversation for the USER\'S project. Ignore this tool\'s own docs; focus only on the user\'s idea.', timestamp: now },
         ];
         const sessionManager = new ConversationSessionManager();
 
@@ -105,7 +106,7 @@ export class RealConversationEngine implements ConversationEngine {
 
         // Orchestrated dynamic conversation based on gaps
         const agent = createDiscoveryAgent();
-        const orchestrator = new ConversationOrchestrator({ aiProvider: input.aiProvider, model: input.model, agent: agent.descriptor });
+        const orchestrator = new ConversationOrchestrator({ aiProvider: input.aiProvider, model: input.model, agent: agent.descriptor, debug: input.debug });
         const seed: Partial<DiscoverySummary> = {
             description: parsed.description || input.idea,
             objectives: parsed.objectives || [],

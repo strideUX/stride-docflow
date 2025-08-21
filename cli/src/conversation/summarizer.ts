@@ -14,7 +14,10 @@ export async function summarizeDiscoveryWithOpenAI(
             return partial;
         }
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-        const sys = `You are assisting with project discovery for a documentation generator.
+        const sys = `You are assisting with project discovery for the USER'S project.
+Your job is to refine the user's project description and requirements for documentation.
+CRITICAL: Do NOT describe or reference this documentation tool or its codebase. Ignore any existing documentation in this repository.
+Focus ONLY on the user's project.
 Return strict JSON with fields: description, objectives[], targetUsers[], features[], constraints[], stackSuggestion.`;
         const user = `Project idea: ${idea || ''}
 Partial summary: ${JSON.stringify(partial)}`;
@@ -58,7 +61,10 @@ export async function summarizeDiscovery(
 ): Promise<DiscoverySummary> {
     try {
         if (provider === 'local') return partial;
-        const sys = `You are assisting with project discovery for a documentation generator.
+        const sys = `You are assisting with project discovery for the USER'S project.
+Your job is to refine the user's project description and requirements for documentation.
+CRITICAL: Do NOT describe or reference this documentation tool or its codebase. Ignore any existing documentation in this repository.
+Focus ONLY on the user's project.
 Return strict JSON with fields: description, objectives[], targetUsers[], features[], constraints[], stackSuggestion.`;
         const user = `Project idea: ${idea || ''}
 Partial summary: ${JSON.stringify(partial)}`;

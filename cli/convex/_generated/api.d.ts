@@ -8,10 +8,8 @@
  * @module
  */
 
-import type * as contexts from "../contexts.js";
 import type * as docflow_contexts from "../docflow/contexts.js";
 import type * as docflow_messages from "../docflow/messages.js";
-import type * as messages from "../messages.js";
 
 import type {
   ApiFromModules,
@@ -28,10 +26,8 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  contexts: typeof contexts;
   "docflow/contexts": typeof docflow_contexts;
   "docflow/messages": typeof docflow_messages;
-  messages: typeof messages;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

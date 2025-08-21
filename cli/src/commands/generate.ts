@@ -66,7 +66,7 @@ export const generateCommand = new Command('generate')
               }
             });
             const agent = createDiscoveryAgent();
-            const orchestrator = new ConversationOrchestrator({ aiProvider: provider, model, agent: agent.descriptor });
+            const orchestrator = new ConversationOrchestrator({ aiProvider: provider, model, agent: agent.descriptor, debug: !!options.debug });
             const managed = await orchestrator.manageConversation(
               (loaded.summary as any) || {},
               (loaded.state.turns || []),
@@ -89,7 +89,7 @@ export const generateCommand = new Command('generate')
 
         if (!conv) {
           const engine = new RealConversationEngine();
-          conv = await engine.start({ idea: options.idea, aiProvider: provider, model });
+          conv = await engine.start({ idea: options.idea, aiProvider: provider, model, debug: !!options.debug });
           await sessionManager.createOrUpdate(conv.state, conv.summary as any);
           createdSessionId = conv.state.sessionId;
           styledPrompts.note(`Created conversational session: ${chalk.cyan(createdSessionId)}\nResume anytime with:\n  docflow generate --conversational --session ${createdSessionId}`, 'Session');
