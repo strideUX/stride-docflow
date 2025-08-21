@@ -625,6 +625,12 @@ function heuristicExtract(answer: string, current: Partial<DiscoverySummary>): P
     if (lower.includes('ci/cd') || lower.includes('cicd') || lower.includes('pipeline')) {
         (extras as any).ciCd = (extras as any).ciCd || 'GitHub Actions';
     }
+    if (lower.includes('convex')) {
+        // Don't override if we already have a React Native choice
+        if (!(update as any).stackSuggestion || !(update as any).stackSuggestion.includes('react-native')) {
+            (update as any).stackSuggestion = (update as any).stackSuggestion || 'nextjs-convex';
+        }
+    }
     if (Object.keys(extras).length > 0) (update as any).extras = extras;
     return update;
 }
