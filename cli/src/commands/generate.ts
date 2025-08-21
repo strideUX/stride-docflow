@@ -18,7 +18,7 @@ export const generateCommand = new Command('generate')
   .description('Generate project documentation')
   .option('-i, --idea <text>', 'Project idea to expand into documentation')
   .option('-s, --stack <name>', 'Technology stack (nextjs-convex, nextjs-supabase, react-native-convex)')
-  .option('-o, --output <path>', 'Output directory', process.env.DOCFLOW_PROJECTS_DIR || './project-docs')
+  .option('-o, --output <path>', 'Output directory')
   .option('--ai-provider <provider>', 'AI provider (openai, anthropic, local)', 'openai')
   .option('--model <model>', 'AI model to use')
   .option('--reasoning-effort <effort>', 'GPT-5 reasoning effort (minimal, low, medium, high)', 'minimal')
@@ -48,6 +48,13 @@ export const generateCommand = new Command('generate')
         styledPrompts.info(`Debug: provider=${provider}, model=${model}, useConvexAI=${useConvex}`);
         const convexUrl = process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL || process.env.EXPO_PUBLIC_CONVEX_URL || process.env.DOCFLOW_CONVEX_ADMIN_URL;
         styledPrompts.info(`Debug: convexUrl=${convexUrl ? 'set' : 'unset'}`);
+      }
+
+      // REQUIRED: Ensure DOCFLOW_PROJECTS_DIR is set
+      if (!process.env.DOCFLOW_PROJECTS_DIR) {
+        styledPrompts.error('DOCFLOW_PROJECTS_DIR environment variable is required');
+        p.cancel('Set DOCFLOW_PROJECTS_DIR in your .env file to specify where projects should be saved');
+        process.exit(1);
       }
 
       // Gather project requirements (conversational stub or form prompts)
@@ -104,10 +111,16 @@ export const generateCommand = new Command('generate')
           stacks
         );
         
-        // Update output path to use project slug if using default output
-        if (!options.output || options.output === (process.env.DOCFLOW_PROJECTS_DIR || './project-docs')) {
-          const baseDir = process.env.DOCFLOW_PROJECTS_DIR || process.cwd();
-          options.output = `${baseDir}/${projectData.projectSlug}`;
+        // DEBUG: Check if project name is coming through
+        if (options.debug) {
+          styledPrompts.note(`Summary received: ${JSON.stringify(conv.summary, null, 2)}`, 'Debug');
+          styledPrompts.note(`Project name from summary: ${conv.summary?.name || 'undefined'}`, 'Debug');
+          styledPrompts.note(`Final project name: ${projectData.name}`, 'Debug');
+        }
+        
+        // Always use project slug in DOCFLOW_PROJECTS_DIR unless user specified explicit path
+        if (!options.output) {
+          options.output = `${process.env.DOCFLOW_PROJECTS_DIR}/${projectData.projectSlug}`;
         }
       } else {
         projectData = await projectPrompts.gatherProjectData(options);
@@ -141,6 +154,8 @@ export const generateCommand = new Command('generate')
 
       console.log(`\n🎉 ${chalk.green('Project Generated Successfully!')}`);
       console.log(`📁 Location: ${chalk.cyan(result.outputPath)}`);
+      console.log(`📂 Project Name: ${chalk.cyan(projectData.name)}`);
+      console.log(`📂 Project Directory: ${chalk.cyan(projectData.projectSlug)}`);
       console.log(`📋 Primary Reference: ${chalk.yellow('docs/releases/current/index.md')}`);
       console.log(`📊 ${result.filesGenerated.length} documentation files created`);
       if (result.warnings && result.warnings.length > 0) {

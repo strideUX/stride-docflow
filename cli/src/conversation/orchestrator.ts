@@ -988,6 +988,12 @@ export class ConversationOrchestrator {
             constraints: (current.constraints as string[] | undefined) || [],
         };
         const summary: DiscoverySummary = { ...summaryBase };
+        if (current.name) {
+            summary.name = current.name as string;
+            if (this.options.debug) {
+                styledPrompts.note(`Setting summary.name to: ${current.name}`, 'Debug');
+            }
+        }
         if (current.stackSuggestion) {
             (summary as any).stackSuggestion = current.stackSuggestion as string;
         }
