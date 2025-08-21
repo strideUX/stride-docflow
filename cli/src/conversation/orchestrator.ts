@@ -820,6 +820,25 @@ async function confirmStackSelection(
     return 'nextjs-convex';
 }
 
+// Project name suggestion and confirmation
+function generateSuggestedName(current: Partial<DiscoverySummary>): string {
+    if (current.description) {
+        const desc = current.description.toLowerCase();
+        if (desc.includes('counter')) return 'Counter App';
+        if (desc.includes('todo')) return 'Todo App';
+        if (desc.includes('chat')) return 'Chat App';
+        if (desc.includes('blog')) return 'Blog App';
+        if (desc.includes('shop') || desc.includes('store')) return 'Shop App';
+        // Extract first meaningful word + "App"
+        const words = desc.split(' ').filter(w => w.length > 3 && !['app', 'the', 'and', 'for', 'with'].includes(w));
+        if (words.length > 0 && words[0]) {
+            const word = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+            return `${word} App`;
+        }
+    }
+    return 'My Project';
+}
+
 export class ConversationOrchestrator {
     private options: OrchestratorOptions;
     private agent: AgentDescriptor | null = null;
@@ -870,7 +889,12 @@ export class ConversationOrchestrator {
 
             // Compute adaptive gaps and pick the highest-weight question
             const gaps = computeOutstandingGaps(current, turns);
-            const gapToAsk = gaps[0] || missing[0]!;
+            const gapToAsk = gaps[0] || missing[0];
+            
+            if (!gapToAsk) {
+                // No more gaps to ask about, conversation is complete
+                break;
+            }
 
             // Generate a dynamic question (streamed to UI, fallback to default)
             const question = await streamQuestionWithAI(
@@ -934,6 +958,26 @@ export class ConversationOrchestrator {
             };
             turns.push(stackTurn);
             if (hooks?.onTurn) await hooks.onTurn(stackTurn);
+        }
+
+        // Project name confirmation step (final question with full context)
+        if (!current.name || current.name === 'Project App') {
+            const suggestedName = generateSuggestedName(current);
+            chat.printAssistantHeader('DocFlow');
+            chat.appendAssistantChunk(`Based on our conversation, I'd suggest naming this project: ${chalk.cyan(suggestedName)}\n\n`);
+            chat.appendAssistantChunk(`What would you like to name your project? (This will be used for the folder name and documentation)`);
+            chat.endAssistantMessage();
+
+            const projectName = await chat.promptUser('You');
+            current.name = String(projectName).trim() || suggestedName;
+
+            const nameTurn: ConversationTurn = {
+                role: 'user',
+                content: String(projectName),
+                timestamp: new Date().toISOString(),
+            };
+            turns.push(nameTurn);
+            if (hooks?.onTurn) await hooks.onTurn(nameTurn);
         }
 
         const summaryBase: DiscoverySummary = {

@@ -1,6 +1,6 @@
 export interface DiscoverySummary {
     name?: string;
-    description?: string;
+    description: string;
     objectives?: string[];
     targetUsers?: string[];
     features?: string[];

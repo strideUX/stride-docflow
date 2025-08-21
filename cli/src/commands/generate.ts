@@ -18,7 +18,7 @@ export const generateCommand = new Command('generate')
   .description('Generate project documentation')
   .option('-i, --idea <text>', 'Project idea to expand into documentation')
   .option('-s, --stack <name>', 'Technology stack (nextjs-convex, nextjs-supabase, react-native-convex)')
-  .option('-o, --output <path>', 'Output directory', './project-docs')
+  .option('-o, --output <path>', 'Output directory', process.env.DOCFLOW_PROJECTS_DIR || './project-docs')
   .option('--ai-provider <provider>', 'AI provider (openai, anthropic, local)', 'openai')
   .option('--model <model>', 'AI model to use')
   .option('--reasoning-effort <effort>', 'GPT-5 reasoning effort (minimal, low, medium, high)', 'minimal')
@@ -103,6 +103,12 @@ export const generateCommand = new Command('generate')
           model,
           stacks
         );
+        
+        // Update output path to use project slug if using default output
+        if (!options.output || options.output === (process.env.DOCFLOW_PROJECTS_DIR || './project-docs')) {
+          const baseDir = process.env.DOCFLOW_PROJECTS_DIR || process.cwd();
+          options.output = `${baseDir}/${projectData.projectSlug}`;
+        }
       } else {
         projectData = await projectPrompts.gatherProjectData(options);
       }
