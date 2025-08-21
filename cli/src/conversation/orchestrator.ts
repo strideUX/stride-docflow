@@ -6,6 +6,8 @@ import { ChatUI } from '../ui/chat.js';
 import { ConversationSessionManager } from './session.js';
 import { streamQuestionViaConvex } from '../convex-ai/adapter.js';
 import { styledPrompts } from '../ui/styled-prompts.js';
+import { getAvailableStacks, type TechStack } from '../templates/stack-registry.js';
+import chalk from 'chalk';
 
 export type Provider = 'openai' | 'anthropic' | 'local';
 
@@ -287,6 +289,11 @@ The documents are:
 - features.md: key features with priorities (P0, P1)
 - stack.md: chosen stack and integration rationale
 
+Available technology stacks:
+- nextjs-convex: Next.js 15+ with Convex for real-time web apps
+- nextjs-supabase: Next.js 15+ with Supabase for PostgreSQL-backed web apps  
+- react-native-convex: React Native with Expo and Convex for cross-platform mobile apps
+
 Guidelines:
 - Read the recent conversation and be curious. Ask smart follow-ups based on what the user actually said (e.g., if they say "mobile app", clarify platforms and deployment; if they say "minimal", ask what that means; if they mention testing, ask about testing and CI/CD).
 - Choose the SINGLE most impactful next question that will reduce the biggest information gap for the docs above. Do not ask multi-part lists.
@@ -365,6 +372,11 @@ The documents are:
 - features.md: key features with priorities (P0, P1)
 - stack.md: chosen stack and integration rationale
 
+Available technology stacks:
+- nextjs-convex: Next.js 15+ with Convex for real-time web apps
+- nextjs-supabase: Next.js 15+ with Supabase for PostgreSQL-backed web apps  
+- react-native-convex: React Native with Expo and Convex for cross-platform mobile apps
+
 Guidelines:
 - Read the recent conversation and be curious. Ask smart follow-ups based on what the user actually said (e.g., if they say "mobile app", clarify platforms and deployment; if they say "minimal", ask what that means; if they mention testing, ask about testing and CI/CD).
 - Choose the SINGLE most impactful next question that will reduce the biggest information gap for the docs above. Do not ask multi-part lists.
@@ -392,6 +404,11 @@ The documents are:
 - architecture.md: tech stack rationale, key components, platforms, auth, data, deployment, testing/CI
 - features.md: key features with priorities (P0, P1)
 - stack.md: chosen stack and integration rationale
+
+Available technology stacks:
+- nextjs-convex: Next.js 15+ with Convex for real-time web apps
+- nextjs-supabase: Next.js 15+ with Supabase for PostgreSQL-backed web apps  
+- react-native-convex: React Native with Expo and Convex for cross-platform mobile apps
 
 Guidelines:
 - Read the recent conversation and be curious. Ask smart follow-ups based on what the user actually said (e.g., if they say "mobile app", clarify platforms and deployment; if they say "minimal", ask what that means; if they mention testing, ask about testing and CI/CD).
@@ -591,6 +608,10 @@ function heuristicExtract(answer: string, current: Partial<DiscoverySummary>): P
         (update as any).stackSuggestion = 'react-native-convex';
         (extras as any).platforms = (extras as any).platforms || 'iOS and Android';
     }
+    if (lower.includes('expo')) {
+        (update as any).stackSuggestion = 'react-native-convex';
+        (extras as any).platforms = (extras as any).platforms || 'iOS and Android';
+    }
     if (lower.includes('next.js') || lower.includes('nextjs')) {
         (update as any).stackSuggestion = (update as any).stackSuggestion || 'nextjs-convex';
         (extras as any).platforms = (extras as any).platforms || 'Web';
@@ -608,14 +629,201 @@ function heuristicExtract(answer: string, current: Partial<DiscoverySummary>): P
     return update;
 }
 
+// Stack intelligence: Parse natural language to map to predefined stacks
+interface StackMatch {
+    stackName: string;
+    confidence: number;
+    reason: string;
+}
+
+async function inferStackFromNaturalLanguage(userInput: string, conversationHistory: ConversationTurn[]): Promise<StackMatch | null> {
+    const stacks = await getAvailableStacks();
+    const allText = `${userInput} ${conversationHistory.map(t => t.content).join(' ')}`.toLowerCase();
+    
+    const matches: StackMatch[] = [];
+    
+    for (const stack of stacks) {
+        let score = 0;
+        let reasons: string[] = [];
+        
+        // Frontend framework detection
+        if (allText.includes('react native') || allText.includes('expo')) {
+            if (stack.name === 'react-native-convex') score += 40;
+            else if (stack.name.includes('nextjs')) score += 0; // Explicitly exclude
+        }
+        if (allText.includes('next.js') || allText.includes('nextjs')) {
+            if (stack.name.includes('nextjs')) score += 40;
+            else if (stack.name.includes('react-native')) score += 0; // Explicitly exclude
+        }
+        
+        // Backend/database detection
+        if (allText.includes('convex')) {
+            if (stack.name.includes('convex')) score += 30;
+            else score += 0;
+        }
+        if (allText.includes('supabase')) {
+            if (stack.name.includes('supabase')) score += 30;
+            else score += 0;
+        }
+        
+        // Mobile vs web detection
+        if (allText.includes('mobile') || allText.includes('ios') || allText.includes('android') || allText.includes('app store')) {
+            if (stack.features.mobile) score += 20;
+            else score -= 10;
+        }
+        if (allText.includes('web') || allText.includes('website') || allText.includes('saas')) {
+            if (!stack.features.mobile) score += 20;
+            else score -= 10;
+        }
+        
+        // Additional context clues
+        if (allText.includes('cross-platform') || allText.includes('mobile app')) {
+            if (stack.features.mobile) score += 15;
+        }
+        if (allText.includes('real-time') || allText.includes('realtime') || allText.includes('collaborative')) {
+            if (stack.features.realtime) score += 10;
+        }
+        
+        if (score > 0) {
+            matches.push({
+                stackName: stack.name,
+                confidence: score,
+                reason: reasons.join(', ')
+            });
+        }
+    }
+    
+    // Return highest confidence match if it's strong enough
+    if (matches.length > 0) {
+        matches.sort((a, b) => b.confidence - a.confidence);
+        const best = matches[0];
+        if (best && best.confidence >= 50) { // Threshold for confident match
+            return best;
+        }
+    }
+    
+    return null;
+}
+
+// Enhanced stack confirmation flow
+async function confirmStackSelection(
+    chat: ChatUI,
+    inferredStack: StackMatch | null,
+    userInput: string,
+    debug?: boolean
+): Promise<string> {
+    const stacks = await getAvailableStacks();
+    
+    if (debug) {
+        styledPrompts.note(`Stack inference: ${inferredStack ? `${inferredStack.stackName} (confidence: ${inferredStack.confidence})` : 'no confident match'}`, 'Debug');
+    }
+    
+    if (inferredStack) {
+        const suggestedStack = stacks.find(s => s.name === inferredStack.stackName);
+        if (suggestedStack) {
+            chat.printAssistantHeader('DocFlow');
+            chat.appendAssistantChunk(`Based on your mention of "${userInput}", I believe you want the ${chalk.cyan(inferredStack.stackName)} stack.\n\n`);
+            chat.appendAssistantChunk(`Available stacks:\n`);
+            for (const stack of stacks) {
+                const marker = stack.name === inferredStack.stackName ? ' ← Suggested based on your input' : '';
+                chat.appendAssistantChunk(`• ${chalk.cyan(stack.name)} (${stack.description})${marker}\n`);
+            }
+            chat.appendAssistantChunk(`\nIs ${chalk.cyan(inferredStack.stackName)} correct, or would you prefer a different stack?`);
+            chat.endAssistantMessage();
+            
+            const answer = await chat.promptUser('You');
+            const lowerAnswer = String(answer).toLowerCase();
+            
+            // If user confirms or doesn't object, use suggested stack
+            if (lowerAnswer.includes('yes') || lowerAnswer.includes('correct') || lowerAnswer.includes('right') || 
+                lowerAnswer.includes('ok') || lowerAnswer.includes('sure') || lowerAnswer.includes('fine') ||
+                lowerAnswer.includes('good') || lowerAnswer.includes('perfect') || lowerAnswer.includes('exactly')) {
+                return inferredStack.stackName;
+            }
+            
+            // If user wants different stack, ask for preference
+            if (lowerAnswer.includes('different') || lowerAnswer.includes('no') || lowerAnswer.includes('wrong') ||
+                lowerAnswer.includes('prefer') || lowerAnswer.includes('want')) {
+                chat.printAssistantHeader('DocFlow');
+                chat.appendAssistantChunk(`Which stack would you prefer?\n\n`);
+                for (const stack of stacks) {
+                    chat.appendAssistantChunk(`• ${chalk.cyan(stack.name)}: ${stack.description}\n`);
+                }
+                chat.appendAssistantChunk(`\nPlease specify your preference.`);
+                chat.endAssistantMessage();
+                
+                const stackChoice = await chat.promptUser('You');
+                const choice = String(stackChoice).toLowerCase();
+                
+                // Try to match user's choice to available stacks
+                for (const stack of stacks) {
+                    if (choice.includes(stack.name.toLowerCase()) || 
+                        choice.includes(stack.name.replace('-', ' ')) ||
+                        stack.technologies.some(tech => choice.includes(tech.toLowerCase()))) {
+                        return stack.name;
+                    }
+                }
+                
+                // Fallback to asking for explicit choice
+                chat.printAssistantHeader('DocFlow');
+                chat.appendAssistantChunk(`I couldn't determine your exact preference. Please specify one of:\n`);
+                for (const stack of stacks) {
+                    chat.appendAssistantChunk(`• ${chalk.cyan(stack.name)}\n`);
+                }
+                chat.appendAssistantChunk(`\nWhich stack would you like to use?`);
+                chat.endAssistantMessage();
+                
+                const explicitChoice = await chat.promptUser('You');
+                const explicit = String(explicitChoice).toLowerCase();
+                
+                for (const stack of stacks) {
+                    if (explicit.includes(stack.name.toLowerCase())) {
+                        return stack.name;
+                    }
+                }
+                
+                // Final fallback to suggested stack
+                return inferredStack.stackName;
+            }
+        }
+    }
+    
+    // No confident inference or user wants different stack
+    chat.printAssistantHeader('DocFlow');
+    chat.appendAssistantChunk(`I need to understand your technology preferences better.\n\n`);
+    chat.appendAssistantChunk(`Available stacks:\n`);
+    for (const stack of stacks) {
+        chat.appendAssistantChunk(`• ${chalk.cyan(stack.name)}: ${stack.description}\n`);
+    }
+    chat.appendAssistantChunk(`\nWhich stack would you like to use for your project?`);
+    chat.endAssistantMessage();
+    
+    const choice = await chat.promptUser('You');
+    const lowerChoice = String(choice).toLowerCase();
+    
+    // Try to match user's choice
+    for (const stack of stacks) {
+        if (lowerChoice.includes(stack.name.toLowerCase()) || 
+            lowerChoice.includes(stack.name.replace('-', ' ')) ||
+            stack.technologies.some(tech => lowerChoice.includes(tech.toLowerCase()))) {
+            return stack.name;
+        }
+    }
+    
+    // Final fallback
+    return 'nextjs-convex';
+}
+
 export class ConversationOrchestrator {
     private options: OrchestratorOptions;
     private agent: AgentDescriptor | null = null;
+    private stacks: TechStack[] | null = null;
 
     constructor(options: OrchestratorOptions & { agent?: AgentDescriptor }) {
         const { agent, ...rest } = options as any;
         this.options = { ...rest, maxTurns: rest.maxTurns ?? 12 };
         this.agent = agent || null;
+        this.stacks = null;
     }
 
     assessCompleteness(current: Partial<DiscoverySummary>): { done: boolean; missing: DocumentRequirement[] } {
@@ -644,6 +852,11 @@ export class ConversationOrchestrator {
     ): Promise<{ turns: ConversationTurn[]; summary: DiscoverySummary }> {
         const turns: ConversationTurn[] = [...history];
         let current: Partial<DiscoverySummary> = { ...seed };
+        
+        // Load available stacks for intelligence
+        if (!this.stacks) {
+            this.stacks = await getAvailableStacks();
+        }
 
         for (let i = 0; i < (this.options.maxTurns as number); i++) {
             const { done, missing } = this.assessCompleteness(current);
@@ -661,7 +874,8 @@ export class ConversationOrchestrator {
                 gapToAsk,
                 turns,
                 current,
-                sessionId
+                sessionId,
+                this.options.debug
             );
 
             const qTurn: ConversationTurn = {
@@ -695,6 +909,25 @@ export class ConversationOrchestrator {
 
             // Early stop if we have enough for docs
             if (isEnoughForDocs(current)) break;
+        }
+        
+        // Stack confirmation step before finalizing
+        if (!current.stackSuggestion || current.stackSuggestion.trim().length === 0) {
+            const userInput = history.find(t => t.role === 'user')?.content || '';
+            const inferredStack = await inferStackFromNaturalLanguage(userInput, turns);
+            const confirmedStack = await confirmStackSelection(chat, inferredStack, userInput, this.options.debug);
+            
+            current.stackSuggestion = confirmedStack;
+            
+            // Add stack confirmation to conversation history
+            const stackTurn: ConversationTurn = {
+                role: 'assistant',
+                content: `Stack confirmed: ${confirmedStack}`,
+                timestamp: new Date().toISOString(),
+                ...(this.agent ? { agentId: this.agent.id } : {}),
+            };
+            turns.push(stackTurn);
+            if (hooks?.onTurn) await hooks.onTurn(stackTurn);
         }
 
         const summaryBase: DiscoverySummary = {
