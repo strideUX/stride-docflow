@@ -25,7 +25,7 @@ AI should recognize and capture when:
 - External blockers or dependencies are identified
 
 #### 2. Daily File Management
-- **Daily Pattern**: One file per day using format `/docs/notes/YYYY-MM-DD.md`
+- **Daily Pattern**: One file per day using format `/docflow/notes/YYYY-MM-DD.md`
 - **If Today's File Exists**: Append new timestamped section to existing file
 - **If Today's File Missing**: Create new file with session overview header and first entry
 - **Historical Files**: Never modify previous days' files - each day is preserved as historical record
@@ -61,7 +61,7 @@ End-of-session cleanup and documentation to ensure clean handoffs and fresh star
 - Focus only on significant decisions, architectural changes, or scope modifications
 
 #### 2. Update Active Work Status
-- Update `/docs/active/focus.md` with:
+- Update `/docflow/active/focus.md` with:
   - Current work item status
   - Next steps for continuation
   - Any new blockers or dependencies
@@ -78,7 +78,7 @@ End-of-session cleanup and documentation to ensure clean handoffs and fresh star
 - Document any temporary workarounds or incomplete implementations
 
 #### 5. Prepare Session Handoff
-- Update `/docs/active/session.md` with:
+- Update `/docflow/active/session.md` with:
   - What was accomplished this session
   - Current state and next priorities
   - Context needed for next session
@@ -92,7 +92,7 @@ End-of-session cleanup and documentation to ensure clean handoffs and fresh star
 ### Integration with Development Workflow
 
 #### Daily Development Sessions
-1. Start session by reviewing `/docs/active/focus.md` and latest notes
+1. Start session by reviewing `/docflow/active/focus.md` and latest notes
 2. Work on assigned tasks and features
 3. Before ending session, run WrapSession protocol for significant changes
 4. Update focus document with next session priorities
@@ -104,7 +104,7 @@ End-of-session cleanup and documentation to ensure clean handoffs and fresh star
 4. Update core project documentation if fundamental changes occur
 
 #### Handoff Sessions
-1. Create comprehensive session handoff in `/docs/active/session.md`
+1. Create comprehensive session handoff in `/docflow/active/session.md`
 2. Capture context in notes for future reference
 3. Ensure all decisions and changes are documented
 4. Provide clear next steps and priorities
@@ -135,8 +135,8 @@ Provide immediate, concise status and next actions when resuming development wor
 3. [Third option/alternative approach]
 
 ## 📋 Context Check
-- [ ] Active focus updated? (/docs/active/focus.md)
-- [ ] Latest notes reviewed? (/docs/notes/YYYY-MM-DD.md)  
+- [ ] Active focus updated? (/docflow/active/focus.md)
+- [ ] Latest notes reviewed? (/docflow/notes/YYYY-MM-DD.md)  
 - [ ] Any decisions pending documentation?
 
 ## 🚨 Alerts
@@ -145,9 +145,9 @@ Provide immediate, concise status and next actions when resuming development wor
 
 ### Implementation Steps
 When StartSession is requested:
-1. Check `/docs/active/focus.md` for current priorities
-2. Review latest `/docs/notes/` file for recent decisions
-3. Scan `/docs/releases/current/` for active feature status
+1. Check `/docflow/active/focus.md` for current priorities
+2. Review latest `/docflow/notes/` file for recent decisions
+3. Scan `/docflow/releases/current/` for active feature status
 4. Identify immediate blockers or dependencies
 5. Provide 1-3 specific, actionable next steps
 
@@ -155,7 +155,7 @@ When StartSession is requested:
 
 ### For AI Assistants
 **WrapSession System Prompt:**
-> "Please refer to WrapSession Protocol in /docs/project/workflows.md and follow the outlined process for capturing significant session decisions, changes, or insights."
+> "Please refer to WrapSession Protocol in /docflow/project/workflows.md and follow the outlined process for capturing significant session decisions, changes, or insights."
 
 **WrapSession Direct Invocation:**
 > "Please execute the WrapSession protocol to capture the key decisions and changes from our current discussion."
@@ -165,7 +165,7 @@ When StartSession is requested:
 
 ### Manual Process
 1. Check today's date: `YYYY-MM-DD`
-2. Open or create `/docs/notes/YYYY-MM-DD.md`
+2. Open or create `/docflow/notes/YYYY-MM-DD.md`
 3. Add timestamped entry using standard format
 4. Update cross-references as needed
 5. Commit changes to preserve context

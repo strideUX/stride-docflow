@@ -12,30 +12,30 @@ This is the Docflow CLI tool for generating AI-powered project documentation. Th
 
 - **Implemented**: Template-based documentation generation with AI content filling
 - **Status**: Planning conversational AI enhancement (v2.0)
-- **Documentation**: Complete project specs in `/docs/`
+- **Documentation**: Complete project specs in `/docflow/`
 
 ## Key Documentation
 
 ### Project Understanding
-- Read `/docs/project/specs.md` for high-level vision
-- Read `/docs/project/architecture.md` for technical design
-- Read `/docs/project/design.md` for UX patterns
+- Read `/docflow/project/specs.md` for high-level vision
+- Read `/docflow/project/architecture.md` for technical design
+- Read `/docflow/project/design.md` for UX patterns
 
 ### Current Development
-- Read `/docs/releases/current/index.md` for release plan
-- Read `/docs/releases/current/features.md` for detailed features
-- Read `/docs/active/focus.md` for current priorities
-- Read `/docs/notes/` for recent decisions and session context (check today's file first, then yesterday's if needed)
+- Read `/docflow/releases/current/index.md` for release plan
+- Read `/docflow/releases/current/features.md` for detailed features
+- Read `/docflow/active/focus.md` for current priorities
+- Read `/docflow/notes/` for recent decisions and session context (check today's file first, then yesterday's if needed)
 
 ### Workflow Protocols
-- Follow `/docs/project/workflows.md` for WrapSession, StartSession, and CaptureNote protocols
+- Follow `/docflow/project/workflows.md` for WrapSession, StartSession, and CaptureNote protocols
 - Follow Active Feature Lifecycle for systematic feature development
 
 ### Active Feature Management
-**ALWAYS check `/docs/active/focus.md` first** - this defines your current work priority
+**ALWAYS check `/docflow/active/focus.md` first** - this defines your current work priority
 
 #### Auto-Progression Logic
-1. **If focus.md is empty or feature completed**: Auto-pull next P0 feature from `/docs/releases/current/features.md`
+1. **If focus.md is empty or feature completed**: Auto-pull next P0 feature from `/docflow/releases/current/features.md`
 2. **Update feature status**: Change from `pending` → `active` in features.md  
 3. **Create focused todos**: Generate 3-5 specific, actionable todos in focus.md
 4. **Set status**: Mark as `in_progress` and begin systematic work
@@ -46,7 +46,7 @@ This is the Docflow CLI tool for generating AI-powered project documentation. Th
 - **completed**: User approved, ready to archive and move to next feature
 
 #### Documentation Updates
-- Update `/docs/active/focus.md` with progress after each work session
+- Update `/docflow/active/focus.md` with progress after each work session
 - Mark todos as ✅ immediately when completed  
 - Update features.md with current status and completed items
 - Use CaptureNote protocol for major decisions during development

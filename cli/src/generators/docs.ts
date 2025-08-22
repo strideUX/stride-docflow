@@ -213,17 +213,32 @@ async function getTemplateFiles(stackPath: string): Promise<TemplateFile[]> {
 
 	const templateFiles: TemplateFile[] = [];
 
+	// Map template relative path to output path with structural fixes
+	const mapOutputPath = (file: string, isStackTemplate: boolean): string => {
+		let out = file.replace('.template', '');
+		// 1) Cursor rules: cursor-rules/ → .cursor/rules/
+		out = out.replace(/^cursor-rules\//, '.cursor/rules/');
+		// 2) Docs root: docs/ → docflow/
+		out = out.replace(/^docs\//, 'docflow/');
+		// 3) Stack-level loose files: ensure they live under docflow/project/
+		if (isStackTemplate) {
+			if (out === 'stack.md') out = 'docflow/project/stack.md';
+			if (out === 'architecture.md') out = 'docflow/project/architecture.md';
+		}
+		return out;
+	};
+
 	// Process base templates
 	for (const file of baseFiles) {
-		// Skip if stack has override for this file
-		const stackOverride = stackFiles.find(sf => 
-			sf.replace('.template', '') === file.replace('.template', '')
+		// Skip if stack has override for this file (compare by mapped output path)
+		const hasOverride = stackFiles.some(sf => 
+			mapOutputPath(sf, true) === mapOutputPath(file, false)
 		);
-		if (stackOverride) continue;
+		if (hasOverride) continue;
 
 		templateFiles.push({
 			templatePath: path.join(baseTemplatesPath, file),
-			outputPath: file.replace('.template', ''),
+			outputPath: mapOutputPath(file, false),
 			isTemplate: file.endsWith('.template')
 		});
 	}
@@ -232,7 +247,7 @@ async function getTemplateFiles(stackPath: string): Promise<TemplateFile[]> {
 	for (const file of stackFiles) {
 		templateFiles.push({
 			templatePath: path.join(stackTemplatesPath, file),
-			outputPath: file.replace('.template', ''),
+			outputPath: mapOutputPath(file, true),
 			isTemplate: file.endsWith('.template')
 		});
 	}

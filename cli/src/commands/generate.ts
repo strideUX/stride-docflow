@@ -156,7 +156,7 @@ export const generateCommand = new Command('generate')
       console.log(`📁 Location: ${chalk.cyan(result.outputPath)}`);
       console.log(`📂 Project Name: ${chalk.cyan(projectData.name)}`);
       console.log(`📂 Project Directory: ${chalk.cyan(projectData.projectSlug)}`);
-      console.log(`📋 Primary Reference: ${chalk.yellow('docs/releases/current/index.md')}`);
+      console.log(`📋 Primary Reference: ${chalk.yellow('docflow/releases/current/index.md')}`);
       console.log(`📊 ${result.filesGenerated.length} documentation files created`);
       if (result.warnings && result.warnings.length > 0) {
         console.log(`⚠️  ${result.warnings.length} warnings - check logs above`);

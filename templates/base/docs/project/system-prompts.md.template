@@ -6,7 +6,7 @@
 
 **System Prompt Addition:**
 ```
-Please refer to WrapSession Protocol in /docs/project/workflows.md and follow the outlined process for capturing significant session decisions, changes, or insights in the appropriate daily notes file.
+Please refer to WrapSession Protocol in /docflow/project/workflows.md and follow the outlined process for capturing significant session decisions, changes, or insights in the appropriate daily notes file.
 ```
 
 **Direct Invocation Prompt:**
