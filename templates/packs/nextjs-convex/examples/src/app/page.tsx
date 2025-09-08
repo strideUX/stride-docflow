@@ -1,1 +1,1 @@
-// TODO: placeholder for {{FILENAME}}
+export default async function Page() { return Welcome to {{PROJECT_NAME}}; }

@@ -1,1 +1,5 @@
-// TODO: placeholder for {{FILENAME}}
+{
+“extends”: [“next/core-web-vitals”, “eslint:recommended”],
+“parserOptions”: { “ecmaVersion”: 2023, “sourceType”: “module” },
+“rules”: { “no-unused-vars”: [“warn”, { “argsIgnorePattern”: “^_” }] }
+}
