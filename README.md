@@ -5,8 +5,8 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 ## Quick Start
 
 - Copy `docflow/` into your repo.
-- Open `releases/current/index.md` and set the release name, goal, outcomes, and acceptance criteria.
-- Add 3–7 items to `releases/current/features.md` (F000, F001…), set initial statuses.
+- Open `iterations/current/index.md` and set the iteration goal, outcomes, and acceptance criteria.
+- Add 3–7 items to `iterations/current/features.md` (F000, F001…), set initial statuses.
 - Set today’s `active/focus.md` with concrete next steps.
 - Capture any key choices as ADRs under `decisions/` and update the index.
 - Start a dated note in `notes/` for context and decisions.
@@ -14,7 +14,7 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 
 ## Start Here
 
-- Router: `docflow/releases/current/index.md`
+- Router: `docflow/iterations/current/index.md`
   - Links to the active focus, session handoff, worklist, backlog, and decisions.
   - Defines the current release goal, outcomes, and acceptance criteria.
 
@@ -23,8 +23,8 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 1) Set Focus: `docflow/active/focus.md`
 - Capture the single most important item (e.g., F000) and list concrete next steps.
 
-2) Plan Work: `docflow/releases/current/features.md`
-- Track the worklist for the current release. Use the status flow: pending → in_progress → in_review → completed.
+2) Plan Work: `docflow/iterations/current/features.md`
+- Track the worklist for the current iteration. Use the status flow: pending → in_progress → in_review → completed.
 - Keep items small and reference templates where useful.
 
 3) Execute & Update
@@ -41,8 +41,8 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 
 ## Files & Folders
 
-- `releases/current/index.md`: Router and release scope (goal, outcomes, acceptance).
-- `releases/current/features.md`: Worklist for the active release; item IDs like F000, F001…
+- `iterations/current/index.md`: Router and iteration scope (goal, outcomes, acceptance).
+- `iterations/current/features.md`: Worklist for the active iteration; item IDs like F000, F001…
 - `backlog/features.md`: Future ideas/deferred work; use the item template.
 - `decisions/`: ADRs and index; each ADR is a small, link‑rich record.
 - `templates/adr.md`: Quick ADR scaffold.
@@ -53,7 +53,7 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 - `project/design.md`: UX flows and component patterns.
 - `project/architecture.md`: System overview and principles (vendor‑neutral).
 - `project/stack.md`: Stack standards/conventions (adjust per project).
-- `assets/system-prompts.md`: App‑level prompt/template assets (optional; keep drafts here until implemented in code).
+ 
 - `notes/`: Dated notes for decisions, milestones, and context.
 
 ## Status & Conventions
@@ -66,8 +66,8 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 ## How To Use For a New Project
 
 1) Duplicate the `docflow/` folder into your repo.
-2) Fill in `releases/current/index.md` with the release name, goals, and acceptance criteria.
-3) Add or prune items in `releases/current/features.md` and set your initial focus in `active/focus.md`.
+2) Fill in `iterations/current/index.md` with the iteration goals and acceptance criteria.
+3) Add or prune items in `iterations/current/features.md` and set your initial focus in `active/focus.md`.
 4) Capture any notable initial choices as ADRs under `decisions/` and index them.
 5) Keep `project/specs.md`, `project/design.md`, and `project/architecture.md` aligned as scope evolves.
 6) Use `notes/` for dated context and `active/session.md` for handoffs.
@@ -78,6 +78,6 @@ Docflow is a lightweight, project‑agnostic workflow you can duplicate and fill
 - Small, verifiable steps: prefer incremental updates and clear acceptance criteria.
 - Separation of concerns: specs ↔ design ↔ architecture ↔ implementation.
 - Type and quality: define inputs/outputs and validation at boundaries in your codebase.
-- Change management: keep the release router accurate; update ADRs and notes as decisions evolve.
+- Change management: keep the iteration router accurate; update ADRs and notes as decisions evolve.
 
 Tip: Treat Docflow docs as living, high‑signal artifacts. Keep them concise, current, and linked to the work.

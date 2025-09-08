@@ -1,3 +1,11 @@
+---
+schema: stack.v1
+id: stack
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+date: {{DATE}}
+---
+
 # Stack & Standards
 
 This document defines defaults and patterns for new projects. Adjust to your chosen stack, but keep standards consistent.
@@ -88,5 +96,5 @@ export async function extract({ input }: ExtractInput) {
 ```
 
 Prompt asset location (drafts before implementation):
-- Keep early prompt drafts under `docflow/assets/system-prompts.md`.
+- Capture early prompt drafts in `docflow/notes/YYYY-MM-DD.md`.
 - When implementing, colocate prompts with code (e.g., `src/lib/ai/prompts.ts`). Capture notable changes via daily notes or an ADR.

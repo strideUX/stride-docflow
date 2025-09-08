@@ -1,3 +1,11 @@
+---
+schema: design.v1
+id: design
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+date: {{DATE}}
+---
+
 # Design
 
 Describe UX principles, flows, and component patterns. Keep this document aligned with the product’s goals and accessible design standards.

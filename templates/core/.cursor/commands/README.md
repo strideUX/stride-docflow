@@ -11,9 +11,7 @@ Prefix commands with `df-` to avoid collisions with existing tools.
 - `/df-note "text"` – CaptureNote into `docflow/notes/YYYY-MM-DD.md`
 - `/df-adr "title"` – Create an ADR using template
 - `/df-feature "title"` – Add a backlog feature using template
-- `/df-promptsync "summary"` – Append to prompts changelog
 - `/df-wrap` – WrapSession: statuses, cleanup, handoff
-- `/df-status` – Summarize counts by status in current release
+- `/df-status` – Summarize counts by status in current iteration
 
 Each command file in this folder documents purpose, usage, file updates, and response format.
-

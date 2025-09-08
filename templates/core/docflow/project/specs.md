@@ -1,3 +1,11 @@
+---
+schema: spec.v1
+id: specs
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+date: {{DATE}}
+---
+
 # Project Specifications
 
 Use this document to define scope, success, and constraints for the current project. Keep it concise and actionable; link to ADRs for key decisions.
@@ -72,4 +80,4 @@ High‑level description of how the solution works. Include major workflows and 
 
 ---
 
-This specification guides architecture, design, features, and release planning.
+This specification guides architecture, design, features, and iteration planning.

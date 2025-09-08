@@ -25,7 +25,7 @@ Set up or synchronize the Docflow documentation system in any repository. Works 
   - `architecture.md` – high‑level components, data model (if known), integrations
   - `design.md` – conversation/UX stages, UI components, accessibility baseline
   - `stack.md` – coding standards and guidelines; framework‑agnostic
-- `docflow/releases/current/`
+- `docflow/iterations/current/`
   - `index.md` – goals, outcomes, acceptance criteria, router
   - `features.md` – initial worklist
 - `docflow/active/`
@@ -35,7 +35,7 @@ Set up or synchronize the Docflow documentation system in any repository. Works 
 - `docflow/decisions/README.md` – ADR index
 - `docflow/templates/` – item.md + adr.md
 - `docflow/notes/YYYY-MM-DD.md` – session notes (created on first note)
-- `docflow/assets/` – optional app assets (e.g., prompts) if relevant
+- `docflow/inbox/` – quick capture
 
 ## Interview (Blank Project)
 - Project name, purpose, audience, and primary goals
@@ -57,7 +57,7 @@ Set up or synchronize the Docflow documentation system in any repository. Works 
 2) Show plan: files to create/update
 3) For Blank: create scaffolds → run interview → populate drafts
 4) For Existing: analyze repo → generate drafts → confirm and refine
-5) Create initial release (Setup/Scaffolding as F000) and set active focus
+5) Create initial iteration (Setup/Scaffolding as F000) and set active focus
 6) Summarize next steps and offer `/df-start` or `/df-focus F000`
 
 ## Safety & Idempotence
@@ -71,4 +71,3 @@ Set up or synchronize the Docflow documentation system in any repository. Works 
 - Actions: [list of files to create/update]
 - Questions: [first 3 interview prompts]
 Reply with answers or 'skip' to accept defaults."
-

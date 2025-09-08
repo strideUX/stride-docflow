@@ -20,8 +20,8 @@ Template reference: see `docflow/templates/item.md`.
 ---
 id: FX01
 title: Example backlog idea
-status: Idea
-priority: Medium
+status: pending
+priority: P2
 complexity: M
 owner: unassigned
 dependencies: []

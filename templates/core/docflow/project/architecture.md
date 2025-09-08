@@ -1,3 +1,11 @@
+---
+schema: architecture.v1
+id: architecture
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+date: {{DATE}}
+---
+
 # Architecture Overview
 
 Describe the system at a high level and how it delivers the product’s core value. Keep this document vendor‑neutral and link to ADRs for technology choices.

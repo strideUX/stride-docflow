@@ -26,5 +26,5 @@ date: {{DATE}}
 - Risk → Mitigation
 
 ## Links
-- Worklist: `docflow/releases/current/features.md`
+- Worklist: `docflow/iterations/current/features.md`
 - Session: `docflow/active/session.md`

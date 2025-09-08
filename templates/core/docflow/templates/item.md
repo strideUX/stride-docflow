@@ -30,7 +30,7 @@ acceptance_criteria:
 - [ ] Acceptance criteria met
 - [ ] Tests updated/added (if applicable)
 - [ ] Docs updated (specs/design/stack/ADR if needed)
-- [ ] Release notes updated (if applicable)
+- [ ] Iteration notes updated (if applicable)
 - [ ] Session handoff updated
 
 ## Notes

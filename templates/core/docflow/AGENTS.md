@@ -26,7 +26,7 @@ year: {{YEAR}}
 ## Item Workflow
 - Create from `docflow/templates/item.md` with clear DoR/DoD.
 - Keep acceptance criteria testable; link to specs/ADRs.
-- Update `releases/current/features.md` status as work progresses.
+- Update `iterations/current/features.md` status as work progresses.
 
 ## Handoff
 - Keep `docflow/active/focus.md` and `docflow/active/session.md` current.

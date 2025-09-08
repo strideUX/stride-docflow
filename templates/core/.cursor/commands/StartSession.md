@@ -36,6 +36,6 @@ Provide immediate, concise status and next actions when resuming development wor
 When StartSession is requested:
 1. Check `docflow/active/focus.md` for current priorities
 2. Review latest `docflow/notes/` file for recent decisions
-3. Scan `docflow/releases/current/` for active feature status
+3. Scan `docflow/iterations/current/` for active feature status
 4. Identify immediate blockers or dependencies
 5. Provide 1-3 specific, actionable next steps

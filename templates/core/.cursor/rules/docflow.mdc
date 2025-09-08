@@ -7,19 +7,19 @@ alwaysApply: true
 # Docflow
 
 ## Project Documentation System
-Docflow is a lightweight, project-agnostic, release-based documentation and execution system. It favors simple markdown, clear status gates, and chat-executable commands.
+Docflow is a lightweight, project-agnostic, iteration-based documentation and execution system. It favors simple markdown, clear status gates, and chat-executable commands.
 
 - **docflow/project/** - Static project context (specs, architecture, design, stack)
-  - App-level assets (like prompts) live under `docflow/assets/*` until implemented in code
-- **docflow/releases/current/** - Active release work (index.md is your PRIMARY REFERENCE)
+- **docflow/iterations/current/** - Active iteration work (index.md is your PRIMARY REFERENCE)
 - **docflow/backlog/** - Future planning and ideas  
 - **docflow/active/** - Session management and current focus
 - **docflow/decisions/** - Architecture Decision Records (ADRs)
 - **docflow/templates/** - Standardized templates for items and ADRs
+ - **docflow/inbox/** - Quick capture queue (triage daily)
 
 ## Getting Started Protocol
 
-**ALWAYS START HERE:** Read `docflow/releases/current/index.md` for current state and priorities.
+**ALWAYS START HERE:** Read `docflow/iterations/current/index.md` for current state and priorities.
 
 1. Check current focus and active items
 2. Review session handoff in `docflow/active/session.md`
@@ -28,71 +28,68 @@ Docflow is a lightweight, project-agnostic, release-based documentation and exec
 
 ## File Navigation Priorities
 
-1. **docflow/releases/current/index.md** - Primary reference, current state
+1. **docflow/iterations/current/index.md** - Primary reference, current state
 2. **docflow/active/focus.md** - What's being worked on right now
 3. **docflow/active/session.md** - Session handoff and notes
-4. **docflow/releases/current/features.md** - Detailed item specs (MVP keeps one list)
+4. **docflow/iterations/current/features.md** - Iteration worklist (MVP keeps one list)
 5. **docflow/backlog/features.md** - Future ideas and deferred work
 6. **docflow/decisions/** - ADRs index and records
 7. **docflow/project/** - Static project context (specs, design, architecture, stack)
-8. **docflow/assets/** - App assets to implement later (e.g., system prompts)
+8. **docflow/inbox/** - Quick capture items awaiting triage
 
 ## Item Management Workflow
 
 ### Adding New Items Checklist
-- [ ] Add to appropriate backlog file first (features)
-- [ ] Assign complexity (XS/S/M/L/XL) and priority (High/Medium/Low)
-- [ ] Document dependencies/blockers if any
-- [ ] Only move to current release when fully defined and ready
-- [ ] Update releases/current/index.md router when moving to active
+- [ ] Capture in inbox or backlog first
+- [ ] Assign complexity (XS/S/M/L/XL) and priority (P0/P1/P2)
+- [ ] Document dependencies if any (F/C/B/S IDs)
+- [ ] Move to current iteration when near execution
+- [ ] Update iterations/current/index.md router if needed
 
 ### Starting Work Checklist  
-- [ ] Item exists in current release with status "Ready"
-- [ ] Move item status to "In Progress" in index.md
+- [ ] Item exists in current iteration worklist
+- [ ] Set status to "in_progress"
 - [ ] Update active/focus.md with current item details
-- [ ] Check dependencies are complete
+- [ ] Review dependencies and blockers
 - [ ] Begin implementation
 
 ### Real-time Progress Updates
-- [ ] Update item status in releases/current/index.md as progress is made
-- [ ] Move items through workflow: Idea → Planning → Ready → In Progress → In Review → Complete
+- [ ] Update item status in iterations/current/features.md as progress is made
+- [ ] Move items through workflow: pending → in_progress → in_review → completed
 - [ ] Update active/focus.md throughout session with current tasks
 - [ ] Document any new items discovered during implementation
 
 ### Scope/Requirement Changes Protocol
 When requirements change during implementation:
 - [ ] Pause development and assess impact
-- [ ] Update item definition in `releases/current/features.md` (and backlog if needed)
+- [ ] Update item definition in `iterations/current/features.md` (and backlog if needed)
 - [ ] Reassess complexity/priority if needed
 - [ ] Update dependencies if affected
 - [ ] Document change rationale in architecture.md if architectural
-- [ ] Update index.md if priority shifts
+- [ ] Update iteration index if priority shifts
 
 ## Status Workflow & Definitions
 
-- **Idea**: Rough concept, needs planning
-- **Planning**: Being defined and scoped  
-- **Ready**: Fully defined, ready for implementation
-- **In Progress**: Currently being worked on
-- **In Review**: Implemented, needs iteration/review  
-- **Complete**: Finished and verified
-- **Blocked**: Cannot proceed due to dependency
+- **pending**: Defined, queued for execution
+- **in_progress**: Currently being worked on
+- **in_review**: Implemented, needs review/iteration  
+- **completed**: Finished and verified
 
-## Bug Priority Handling
-- **Critical**: Drop everything, resolve immediately
-- **High**: Resolve at next logical stopping point
-- **Low**: Add to planned work
+## Bug Severity Handling
+- **S1 (critical)**: Drop everything, resolve immediately
+- **S2 (high)**: Resolve at next logical stopping point
+- **S3 (low)**: Add to planned work
 
 When bugs are found in "completed" features:
-1. Move the affected item back to "In Progress"
-2. Add a bug entry to `releases/current/features.md` (tag as Bug) or annotate the affected item
+1. Move the affected item back to "in_progress"
+2. Add a bug entry to `iterations/current/features.md` (type: bug) or annotate the affected item
 3. Resolve the bug before continuing new work
 
 ## Session Management
 
 ### During Development
 - Keep docflow/active/focus.md updated with current work
-- Update progress in releases/current/index.md in real-time
+- Update progress in iterations/current/features.md in real-time
 - Document decisions in docflow/active/session.md
 - Add new items to backlog or current release as discovered
 
@@ -100,7 +97,7 @@ When bugs are found in "completed" features:
 When asked to wrap up (e.g., "wrap up", "end session"), run the slash command `/df-wrap`.
 
 The command performs:
-- Update active item status in `releases/current/index.md`
+- Update active item status in `iterations/current/features.md`
 - Capture outstanding decisions/changes (use `/df-note` as needed)
 - Update `docflow/active/focus.md` with next steps and blockers
 - Update `docflow/active/session.md` with handoff notes
@@ -140,17 +137,17 @@ Command response format:
 
 ## Item Schema (Frontmatter + Sections)
 
-Frontmatter fields for each item (feature/bug/enhancement):
+Frontmatter fields for each item (feature/chore/bug/spike):
 - id: string (e.g., F001)
 - title: string
-- status: Idea | Planning | Ready | In Progress | In Review | Complete
-- priority: High | Medium | Low
+- type: feature | chore | bug | spike
+- status: pending | in_progress | in_review | completed
+- priority: P0 | P1 | P2
 - complexity: XS | S | M | L | XL
 - owner: string
 - dependencies: string[]
-- due?: date
 - links?: string[]
-- acceptance_criteria: string[]
+- acceptance_criteria?: string[]
 
 Sections:
 - Context
@@ -169,7 +166,7 @@ DoD Checklist:
 - [ ] Acceptance criteria met
 - [ ] Tests updated/added (if applicable)
 - [ ] Docs updated (specs/design/stack/ADR if needed)
-- [ ] Release notes updated (if applicable)
+- [ ] Iteration notes updated (if applicable)
 - [ ] Session handoff updated
 
 ## Slash Commands and Process Mapping

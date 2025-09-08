@@ -19,4 +19,4 @@ status: in_progress
 
 Notes:
 - Keep ADRs concise and vendor-neutral where possible.
-- Link to `project/specs.md`, `project/architecture.md`, and relevant release items.
+- Link to `project/specs.md`, `project/architecture.md`, and relevant iteration items.

@@ -1,20 +1,21 @@
 ---
-schema: release.index.v1
-id: release-current
+schema: iteration.index.v1
+id: iteration-current
 project: {{PROJECT_NAME}}
 owner: {{OWNER}}
 status: in_progress
-version: 0.1.0
+iter: {{ITER_NUM}}
 ---
 
-# Current Release: {{PROJECT_NAME}}
+# Current Iteration: {{PROJECT_NAME}}
 
 ## Router
 - Focus: `docflow/active/focus.md`
 - Session: `docflow/active/session.md`
-- Worklist: `docflow/releases/current/features.md`
+- Worklist: `docflow/iterations/current/features.md`
 - Backlog: `docflow/backlog/features.md`
 - Decisions: `docflow/decisions/`
+- Inbox: `docflow/inbox/capture.md`
 
 ## Goal
 One or two sentences describing the primary outcome.

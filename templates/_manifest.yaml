@@ -3,19 +3,37 @@ version: 1
 core:
   include:
     - docflow/AGENTS.md
+    - .cursor/rules/docflow.mdc
+    - .cursor/commands/ADR.md
+    - .cursor/commands/Bootstrap.md
+    - .cursor/commands/CaptureNote.md
+    - .cursor/commands/Feature.md
+    - .cursor/commands/Focus.md
+    - .cursor/commands/README.md
+    - .cursor/commands/StartSession.md
+    - .cursor/commands/Status.md
+    - .cursor/commands/WrapSession.md
     - docflow/active/focus.md
     - docflow/active/session.md
-    - docflow/releases/current/index.md
-    - docflow/releases/current/features.md
+    - docflow/README.md
+    - docflow/iterations/current/index.md
+    - docflow/iterations/current/features.md
+    - docflow/notes/{{DATE}}.md
+    - docflow/items/README.md
     - docflow/backlog/features.md
     - docflow/decisions/README.md
     - docflow/decisions/ADR-0001.md
+    - docflow/inbox/capture.md
     - docflow/templates/item.md
     - docflow/templates/adr.md
+    - docflow/templates/bug.md
+    - docflow/templates/spike.md
+    - docflow/agents/contract.md
+    - docflow/agents/checks.yaml
   ignore:
     - "**/.DS_Store"
     - "**/Thumbs.db"
-    - "**/.cursor/**"
+    - "**/.git/**"
     - "**/.gitkeep"
 
 packs:
@@ -61,9 +79,11 @@ tokens:
   NN:
     description: Sequence number (two digits)
     example: "01"
+  ITER_NUM:
+    description: Zero-padded iteration number
+    example: "01"
 
 render:
   filename_tokens: true
   overwrite: prompt   # prompt | force
   dry_run: true
-

@@ -8,8 +8,7 @@ Add a new feature to the backlog using the standard template.
 
 ## Process
 1) Create a new entry in `docflow/backlog/features.md` using `docflow/templates/item.md`
-2) Pre-fill frontmatter with status=Idea and owner=unassigned
+2) Pre-fill frontmatter with status=pending and owner=unassigned
 
 ## Response Format
 "➕ Backlog feature added: <title> (ID: TBD)"
-

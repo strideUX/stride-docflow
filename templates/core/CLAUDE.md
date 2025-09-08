@@ -9,7 +9,7 @@
 ## Operating Model
 
 - Start with the project’s primary documentation to understand scope and current priorities.
-- If using Docflow: start at `docflow/releases/current/index.md`.
+- If using Docflow: start at `docflow/iterations/current/index.md`.
 - If a project provides an explicit workflow (e.g., Docflow or similar), follow it and keep session/focus and status docs up to date.
 - Prefer incremental, verifiable steps; communicate next actions clearly.
 
