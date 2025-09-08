@@ -1,0 +1,16 @@
+schema: checks.v1
+id: ci-github-checks
+version: 1
+checks:
+  - id: workflows-present
+    title: GitHub workflows present
+    severity: warn
+    applies_to: [.github/workflows/*.yml]
+    description: Lint, typecheck, unit, and optional e2e workflows should exist.
+    fix: false
+  - id: scripts-referenced
+    title: Workflows reference package scripts
+    severity: info
+    applies_to: [.github/workflows/*.yml]
+    description: Ensure jobs call the correct npm/yarn/pnpm scripts.
+    fix: false

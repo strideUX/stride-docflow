@@ -1,0 +1,34 @@
+schema: checks.v1
+id: frontend-react-native-expo-checks
+version: 1
+checks:
+  - id: expo-config-present
+    title: Expo app config present
+    severity: error
+    applies_to: [app.json, app.config.ts]
+    description: Expo-managed projects require app.json or app.config.ts.
+    fix: false
+  - id: jest-config-present
+    title: Jest config present
+    severity: warn
+    applies_to: [jest.config.*]
+    description: Provide Jest config with RN presets and RN Testing Library.
+    fix: false
+  - id: rn-testing-library-installed
+    title: RN Testing Library installed
+    severity: warn
+    applies_to: [package.json]
+    description: @testing-library/react-native should be a dependency for component tests.
+    fix: false
+  - id: detox-config-optional
+    title: Detox config present when enabled
+    severity: info
+    applies_to: [detox.config.*]
+    description: Only required if ENABLE_DETOX=true.
+    fix: false
+  - id: module-resolver-alias
+    title: Path alias configured for @/*
+    severity: warn
+    applies_to: [tsconfig.json]
+    description: Define path aliases for better imports.
+    fix: false
