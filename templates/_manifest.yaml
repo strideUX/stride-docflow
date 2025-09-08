@@ -1,108 +1,16 @@
-version: 1
-
+schema: manifest.v1
 core:
   include:
-    - docflow/AGENTS.md
-    - .cursor/rules/docflow.mdc
-    - .cursor/commands/ADR.md
-    - .cursor/commands/Bootstrap.md
-    - .cursor/commands/CaptureNote.md
-    - .cursor/commands/Feature.md
-    - .cursor/commands/Focus.md
-    - .cursor/commands/README.md
-    - .cursor/commands/StartSession.md
-    - .cursor/commands/Status.md
-    - .cursor/commands/WrapSession.md
-    - docflow/active/focus.md
-    - docflow/active/session.md
-    - docflow/README.md
-    - docflow/iterations/current/index.md
-    - docflow/iterations/current/features.md
-    - docflow/notes/{{DATE}}.md
-    - docflow/items/README.md
-    - docflow/backlog/features.md
-    - docflow/decisions/README.md
-    - docflow/decisions/ADR-0001.md
-    - docflow/inbox/capture.md
-    - docflow/templates/item.md
-    - docflow/templates/adr.md
-    - docflow/templates/bug.md
-    - docflow/templates/spike.md
-    - docflow/agents/contract.md
-    - docflow/agents/checks.yaml
-    - docflow/project/packs.yaml
-  ignore:
-    - "**/.DS_Store"
-    - "**/Thumbs.db"
-    - "**/.git/**"
-    - "**/.gitkeep"
-
+    - "core/"
 packs:
-  frontend-nextjs:
-    path: packs/frontend-nextjs/v1.0.0
-    description: Next.js 15 + React 19 + Node 20+ (App Router, TS Strict)
-  frontend-react-native-expo:
-    path: packs/frontend-react-native-expo/v1.0.0
-    description: Expo SDK 54 + RN 0.81 + React 19 (Jest + RNTL)
-  backend-convex:
-    path: packs/backend-convex/v1.0.0
-    description: Convex functions + schema patterns
-  backend-supabase:
-    path: packs/backend-supabase/v1.0.0
-    description: Supabase migrations + RLS + typed client
-  qa-web:
-    path: packs/qa-web/v1.0.0
-    description: Vitest, RTL, Playwright testing patterns
-  qa-react-native:
-    path: packs/qa-react-native/v1.0.0
-    description: Jest, RN Testing Library, Detox (optional)
-  ci-github:
-    path: packs/ci-github/v1.0.0
-    description: GitHub Actions for lint, typecheck, unit, e2e, preview
-  quality-guild:
-    path: packs/quality-guild/v1.0.0
-    description: Team conventions, PR hygiene, DoR/DoD
-  profile-web-nextjs-convex:
-    path: packs/profile-web-nextjs-convex/v1.0.0
-    description: Bundle: frontend-nextjs + backend-convex + qa-web + ci-github
-  profile-mobile-rn-convex:
-    path: packs/profile-mobile-rn-convex/v1.0.0
-    description: Bundle: frontend-react-native-expo + backend-convex + qa-react-native + ci-github
-
+  nextjs-convex:
+    include:
+      - "packs/nextjs-convex/"
+shared:
+  ignore:
+    - "/.DS_Store"
+    - "/*.mdfrag"
+template_extensions: [".md", ".mdx", ".yml", ".yaml", ".json", ".mdc", ".ts", ".tsx", ".js"]
 tokens:
-  PROJECT_NAME:
-    description: Project display name
-    example: "Acme Portal"
-    required: true
-  PROJECT_SLUG:
-    description: Kebab-case repo slug
-    example: "acme-portal"
-    required: true
-  OWNER:
-    description: Owner or organization
-    example: "Acme Inc."
-    required: true
-  YEAR:
-    description: Current year
-    example: "2025"
-    required: true
-  DATE:
-    description: ISO date (YYYY-MM-DD)
-    example: "2025-01-01"
-  ID:
-    description: Generic identifier (feature/task ID)
-    example: "F001"
-  SLUG:
-    description: Short slug for items/files
-    example: "core-setup"
-  NN:
-    description: Sequence number (two digits)
-    example: "01"
-  ITER_NUM:
-    description: Zero-padded iteration number
-    example: "01"
-
-render:
-  filename_tokens: true
-  overwrite: prompt   # prompt | force
-  dry_run: true
+  required: ["PROJECT_NAME","PROJECT_SLUG"]
+  optional: ["OWNER","YEAR","DATE","ITER_NUM","ID","SLUG","NN"]
