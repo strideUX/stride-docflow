@@ -10,30 +10,30 @@ version: "2.1"
 <!-- STATIC -->
 This project uses a release-based doc-driven approach with structured task management:
 
-- **docs/project/** - Static project context (specs, architecture, design, stack)
-- **docs/releases/current/** - Active release work (index.md is your PRIMARY REFERENCE)
-- **docs/backlog/** - Future planning and ideas  
-- **docs/active/** - Session management and current focus
+- **docflow/project/** - Static project context (specs, architecture, design, stack)
+- **docflow/releases/current/** - Active release work (index.md is your PRIMARY REFERENCE)
+- **docflow/backlog/** - Future planning and ideas  
+- **docflow/active/** - Session management and current focus
 
 <!-- STATIC -->
 ## Getting Started Protocol
 
 <!-- STATIC -->
-**ALWAYS START HERE:** Read `docs/releases/current/index.md` for current state and priorities.
+**ALWAYS START HERE:** Read `docflow/releases/current/index.md` for current state and priorities.
 
 1. Check current focus and active items
-2. Review session handoff in `docs/active/session.md`
-3. Reference project context from `docs/project/` as needed
+2. Review session handoff in `docflow/active/session.md`
+3. Reference project context from `docflow/project/` as needed
 4. Update progress in real-time as work proceeds
 
 <!-- STATIC -->
 ## File Navigation Priorities
 
-1. **docs/releases/current/index.md** - Primary reference, current state
-2. **docs/active/focus.md** - What's being worked on right now
-3. **docs/active/session.md** - Session handoff and notes
-4. **docs/releases/current/[features|enhancements|bugs].md** - Detailed item specs
-5. **docs/project/** - Static project context when needed
+1. **docflow/releases/current/index.md** - Primary reference, current state
+2. **docflow/active/focus.md** - What's being worked on right now
+3. **docflow/active/session.md** - Session handoff and notes
+4. **docflow/releases/current/[features|enhancements|bugs].md** - Detailed item specs
+5. **docflow/project/** - Static project context when needed
 
 <!-- STATIC -->
 ## Item Management Workflow
@@ -99,9 +99,9 @@ When bugs are found in "completed" features:
 
 <!-- STATIC -->
 ### During Development
-- Keep docs/active/focus.md updated with current work
+- Keep docflow/active/focus.md updated with current work
 - Update progress in releases/current/index.md in real-time
-- Document decisions in docs/active/session.md
+- Document decisions in docflow/active/session.md
 - Add new items to backlog or current release as discovered
 
 <!-- STATIC -->
@@ -153,15 +153,15 @@ When user says "wrap up", "wrap session", "end session", or similar:
 ### Quality Gates
 - New implementations must match existing similar implementations
 - Component usage must be consistent with established patterns
-- Follow docs/project/design.md and docs/project/stack.md guidelines
-- Update docs/project/architecture.md when making technical decisions
+- Follow docflow/project/design.md and docflow/project/stack.md guidelines
+- Update docflow/project/architecture.md when making technical decisions
 
 <!-- STATIC -->
 ### External Documentation
 - **Reference Context7** for current library documentation and examples
 - **Check official docs** for Next.js, React, TypeScript, and chosen stack
 - **Follow project docs first**, then latest external best practices
-- **Maintain consistency** with established patterns in docs/project/stack.md
+- **Maintain consistency** with established patterns in docflow/project/stack.md
 
 <!-- DYNAMIC: [Project-specific context will be added during generation] -->
 <!-- DYNAMIC: [Technology stack and specific guidelines] -->
@@ -170,4 +170,4 @@ When user says "wrap up", "wrap session", "end session", or similar:
 ---
 
 <!-- STATIC -->
-*This workflow ensures consistent development practices, clear progress tracking, and seamless handoffs between sessions and AI assistants. The docs/releases/current/index.md file is your primary reference point - always start there.*
+*This workflow ensures consistent development practices, clear progress tracking, and seamless handoffs between sessions and AI assistants. The docflow/releases/current/index.md file is your primary reference point - always start there.*

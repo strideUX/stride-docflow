@@ -49,6 +49,18 @@ class ProjectPrompts {
   async gatherProjectData(options: any): Promise<ProjectData> {
     let data: Partial<ProjectData> = {};
 
+    // Seed defaults from conversational engine or callers
+    if (options && typeof options.seed === 'object' && options.seed) {
+      const seed = options.seed as Partial<ProjectData> & { stack?: string };
+      if (seed.name) data.name = seed.name;
+      if (seed.description) data.description = seed.description;
+      if (seed.objectives && seed.objectives.length) data.objectives = seed.objectives;
+      if (seed.targetUsers && seed.targetUsers.length) data.targetUsers = seed.targetUsers;
+      if (seed.features && seed.features.length) data.features = seed.features;
+      if (seed.constraints && seed.constraints.length) data.constraints = seed.constraints;
+      if (seed.stack) data.stack = seed.stack;
+    }
+
     // If idea is provided, parse it first
     if (options.idea) {
       const s = p.spinner();
@@ -89,6 +101,52 @@ class ProjectPrompts {
       value: s.name as any,
       hint: s.technologies.join(', ')
     }));
+
+    // Non-interactive fast path: accept defaults and AI seeds without prompting
+    if (options?.acceptDefaults === true) {
+      const description = (data.description && data.description.length >= 10)
+        ? data.description
+        : (typeof options.idea === 'string' && options.idea.length >= 10 ? options.idea : 'A project generated with Docflow.');
+      const chosenStack = (data.stack || options.stack || (stackOptions[0]?.value as string));
+      const answers = {
+        description,
+        name: data.name || 'Project App',
+        stack: chosenStack,
+        objectives: data.objectives || [],
+        targetUsers: data.targetUsers || [],
+        features: data.features || [],
+        constraints: data.constraints || [],
+        images: [] as PastedImage[],
+        designVibe: undefined,
+        lookAndFeel: undefined,
+        userFlows: [] as string[],
+        screens: [] as string[],
+        inspirations: undefined,
+        aiProvider: options.aiProvider || 'openai',
+      } as const;
+
+      const projectSlug = toProjectSlug(answers.name || 'project');
+      p.note(`Directory name: ${chalk.cyan(projectSlug)}`, '📁 Project folder');
+      const mergedData = {
+        ...data,
+        ...answers,
+        projectSlug,
+        designInput: {
+          vibe: answers.designVibe || undefined,
+          lookAndFeel: answers.lookAndFeel || undefined,
+          userFlows: answers.userFlows?.length ? answers.userFlows : undefined,
+          screens: answers.screens?.length ? answers.screens : undefined,
+          inspirations: answers.inspirations || undefined,
+          images: answers.images?.length ? answers.images : undefined
+        },
+        model: options.model
+      };
+      try {
+        return ProjectDataSchema.parse(mergedData);
+      } catch {
+        throw new Error('Failed to validate project data (non-interactive)');
+      }
+    }
 
     // Use Clack's group prompt for a beautiful flow
     const answers = await p.group({

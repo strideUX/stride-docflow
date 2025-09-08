@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Docflow CLI - Conversational AI Documentation Generator
 
 ## Project Context
@@ -8,21 +12,44 @@ This is the Docflow CLI tool for generating AI-powered project documentation. Th
 
 - **Implemented**: Template-based documentation generation with AI content filling
 - **Status**: Planning conversational AI enhancement (v2.0)
-- **Documentation**: Complete project specs in `/docs/`
+- **Documentation**: Complete project specs in `/docflow/`
 
 ## Key Documentation
 
 ### Project Understanding
-- Read `/docs/project/specs.md` for high-level vision
-- Read `/docs/project/architecture.md` for technical design
-- Read `/docs/project/design.md` for UX patterns
+- Read `/docflow/project/specs.md` for high-level vision
+- Read `/docflow/project/architecture.md` for technical design
+- Read `/docflow/project/design.md` for UX patterns
 
 ### Current Development
-- Read `/docs/releases/current/index.md` for release plan
-- Read `/docs/releases/current/features.md` for detailed features
-- Read `/docs/active/focus.md` for current priorities
-- Read `/docs/notes/2025-08-15.md` for major decisions and session context
-- Follow `/docs/project/workflows.md` for WrapSession protocol when capturing decisions
+- Read `/docflow/releases/current/index.md` for release plan
+- Read `/docflow/releases/current/features.md` for detailed features
+- Read `/docflow/active/focus.md` for current priorities
+- Read `/docflow/notes/` for recent decisions and session context (check today's file first, then yesterday's if needed)
+
+### Workflow Protocols
+- Follow `/docflow/project/workflows.md` for WrapSession, StartSession, and CaptureNote protocols
+- Follow Active Feature Lifecycle for systematic feature development
+
+### Active Feature Management
+**ALWAYS check `/docflow/active/focus.md` first** - this defines your current work priority
+
+#### Auto-Progression Logic
+1. **If focus.md is empty or feature completed**: Auto-pull next P0 feature from `/docflow/releases/current/features.md`
+2. **Update feature status**: Change from `pending` → `active` in features.md  
+3. **Create focused todos**: Generate 3-5 specific, actionable todos in focus.md
+4. **Set status**: Mark as `in_progress` and begin systematic work
+
+#### Feature Status Management
+- **in_progress**: Working through todos systematically
+- **in_review**: All todos complete, ready for user testing/feedback
+- **completed**: User approved, ready to archive and move to next feature
+
+#### Documentation Updates
+- Update `/docflow/active/focus.md` with progress after each work session
+- Mark todos as ✅ immediately when completed  
+- Update features.md with current status and completed items
+- Use CaptureNote protocol for major decisions during development
 
 ### Documentation Philosophy
 - Read the "Documentation Philosophy & Structure" section in `README.md`
@@ -91,17 +118,23 @@ cli/src/
 
 ## Implementation Priority
 
-**Phase 1: Conversation Engine (Weeks 1-3)**
+**Phase 1: Conversation Engine**
+- Complexity: High - New conversation architecture
+- Dependencies: None - Fresh implementation
 - Build conversation framework with context management
 - Implement project discovery workflow
 - Add user validation and refinement
 
-**Phase 2: Document Purpose System (Weeks 4-5)**
+**Phase 2: Document Purpose System**
+- Complexity: Medium - Template system replacement
+- Dependencies: Phase 1 context management
 - Replace templates with purpose-driven generation
 - Add stakeholder-specific content tailoring
 - Ensure cross-document consistency
 
-**Phase 3: Integration & Polish (Weeks 6-8)**
+**Phase 3: Integration & Polish**
+- Complexity: Medium - UX and performance optimization
+- Dependencies: Phases 1 & 2 complete
 - Connect conversation to documentation generation
 - Add iterative refinement capabilities
 - Optimize performance and user experience
@@ -125,7 +158,7 @@ For significant changes, scope modifications, or architectural decisions, add ti
 - `NOTE`: Important insights or design discoveries
 - `CHANGE`: Structural or process changes
 
-**Format:** Follow WrapSession Protocol in `/docs/project/workflows.md`
+**Format:** Follow CaptureNote Protocol in `/docs/project/workflows.md`
 
 **Quick Reference:**
 ```
@@ -135,5 +168,22 @@ For significant changes, scope modifications, or architectural decisions, add ti
 **Rationale:** Why this change/decision was made
 **Affects:** What systems/processes this impacts
 ```
+
+## StartSession Protocol
+
+When asked "where are we and what's next?", provide:
+
+**🎯 Current Status**
+- Phase: [Current development phase]
+- Priority: [P0/P1/P2] [Current high-priority task]
+- Blockers: [Any immediate blockers or dependencies]
+
+**⚡ Next Actions**
+1. [Immediate next task - specific and actionable]
+2. [Secondary task if first is blocked]
+3. [Third option/alternative approach]
+
+**🚨 Alerts**
+[Any urgent issues, breaking changes, or critical dependencies]
 
 When working on this project, always consider the conversational enhancement goals and refer to the comprehensive documentation in `/docs/` for context and requirements.

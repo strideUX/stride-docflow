@@ -22,7 +22,7 @@ docflow/
 ├── templates/              # Template system
 │   ├── base/              # Core templates
 │   └── stacks/            # Technology-specific
-└── docs/                  # Generated project docs
+└── docflow/               # Generated project docs
 ```
 
 ## 🚀 Quick Start
@@ -65,7 +65,7 @@ docflow generate --model gpt-5-mini --reasoning-effort minimal --verbosity mediu
 docflow list
 
 # Validate existing documentation
-docflow validate --path ./docs
+docflow validate --path ./docflow
 
 # Get help
 docflow --help
@@ -130,7 +130,7 @@ Each project gets a complete documentation suite following this philosophy:
 
 ```
 your-project/
-├── docs/
+├── docflow/
 │   ├── project/               # What the system IS
 │   │   ├── specs.md          # High-level vision & user stories
 │   │   ├── architecture.md   # Technical system design
@@ -156,10 +156,10 @@ your-project/
 ### Session Notes & Decision Records
 
 **Purpose**: Capture project evolution and decision-making process
-- **`/docs/notes/`**: Daily files tracking decisions, scope changes, and insights
+- **`/docflow/notes/`**: Daily files tracking decisions, scope changes, and insights
 - **Format**: Timestamped entries with type classification (DECISION RECORD, SCOPE CHANGE, INSIGHT, etc.)
 - **Integration**: Cross-referenced with active focus and session handoff documents
-- **Protocol**: Systematic WrapSession process documented in `/docs/project/workflows.md`
+- **Protocol**: Systematic WrapSession process documented in `/docflow/project/workflows.md`
 
 ### Key Benefits
 
@@ -283,7 +283,7 @@ docflow generate --stack nextjs-convex
 docflow generate --output my-project
 
 # Validate as you develop
-docflow validate --path my-project/docs
+docflow validate --path my-project/docflow
 
 # The generated docs evolve with your project
 ```

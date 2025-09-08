@@ -147,10 +147,25 @@ Options:
   -i, --idea <text>           Project idea to expand
   -s, --stack <name>          Technology stack
   -o, --output <path>         Output directory
-  --ai-provider <provider>    AI provider (openai, anthropic, local)
+  --ai-provider <provider>    AI provider (openai, anthropic, local) [default: openai]
   --model <model>             AI model to use
   --research                  Enable research mode
   --dry-run                   Preview without generating
+#### Provider configuration examples
+
+```bash
+# OpenAI default (gpt-4o if not specified)
+docflow generate --conversational --ai-provider openai
+
+# Anthropic with explicit model
+docflow generate --conversational --ai-provider anthropic --model claude-3-5-sonnet-20241022
+
+# OpenAI with explicit model
+docflow generate --conversational --ai-provider openai --model gpt-4o
+```
+
+If an unknown provider is passed, Docflow falls back to OpenAI and will warn you.
+
 ```
 
 ### List Templates
@@ -295,8 +310,20 @@ docflow create --stack react-native-convex --idea "my app" --output /path/to/cus
 OPENAI_API_KEY=your-openai-key
 ANTHROPIC_API_KEY=your-anthropic-key
 
+# Defaults
+DOCFLOW_DEFAULT_MODEL=gpt-4o
+DOCFLOW_REASONING_EFFORT=minimal
+DOCFLOW_VERBOSITY=medium
+
 # MCP (Model Context Protocol) Servers - Optional but recommended
 DOCFLOW_MCP_SERVERS='[{"name":"context7","command":"context7-mcp","args":["--port","3001"]},{"name":"grep","command":"mcp-grep"}]'
+
+# Convex (for conversation persistence)
+# One of these will be used. Prefer DOCFLOW_CONVEX_ADMIN_URL when running the CLI.
+DOCFLOW_CONVEX_ADMIN_URL=
+# CONVEX_URL=
+# NEXT_PUBLIC_CONVEX_URL=
+# EXPO_PUBLIC_CONVEX_URL=
 ```
 
 ## 🔧 MCP Configuration

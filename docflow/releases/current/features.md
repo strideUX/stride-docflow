@@ -7,30 +7,65 @@ This release introduces three major feature categories that transform Docflow fr
 ## Phase 1 Features: Conversation Engine
 
 ### F001: AI Project Discovery Engine
-**Status:** 📋 Planned  
+**Status:** ✅ Completed — Core conversational functionality delivered; pending Convex AI SDK upgrade  
 **Priority:** P0 - Critical  
-**Effort:** 2 weeks  
+**Complexity:** High - True conversational AI architecture  
+**Dependencies:** None  
 
 **Description:**  
-Intelligent conversation system that conducts deep project exploration through natural language interaction.
+Conversational AI system that conducts requirements gathering like a technical consultant, using dynamic question generation and natural dialogue flow to build comprehensive project understanding.
 
-**Acceptance Criteria:**
-- [ ] AI asks contextually relevant follow-up questions based on user responses
-- [ ] System builds comprehensive project understanding through iterative questioning
-- [ ] Conversation covers all essential project aspects: goals, users, constraints, scope
-- [ ] AI adapts questioning strategy based on project type and complexity
-- [ ] User can clarify or correct AI understanding at any point
+*Note: Core conversational workflow is complete. Next phase will upgrade to Convex AI SDK for streaming and multi-agent foundation.*
+
+**Completed Items:**
+- ✅ Conversation engine interfaces and type definitions
+- ✅ NoopConversationEngine scaffolding implementation
+- ✅ `--conversational` CLI flag integration
+- ✅ Context store interfaces with in-memory implementation
+- ✅ Unit test coverage for conversation engine structure
+- ✅ Non-breaking integration with existing command flow
+- ✅ RealConversationEngine initial implementation (needs redesign)
+- ✅ Provider Configuration: Runtime AI provider and model selection
+- ✅ Basic Convex Integration: Session storage using standard Convex client (upgrade to Convex AI SDK pending)
+- ✅ Session Memory: Context persistence during session via Convex database
+
+**ISSUE RESOLVED: Conversational flow implemented; moving to Convex AI SDK enhancement for streaming and multi-agent**
+
+**Revised Acceptance Criteria:**
+- [x] **True Conversation Flow**: AI generates dynamic follow-up questions based on user responses (not predefined prompts)
+- [x] **Consultant-Style Interview**: Technical requirements gathering with lighter tone, SME-guided questioning
+- [x] **Document-Driven Discovery**: AI knows it needs information to generate specs.md, architecture.md, features.md, stack.md
+- [x] **Provider Flexibility**: Configurable AI provider (OpenAI/Anthropic) with runtime model override
+- [x] **Conversation Management**: 10-15 meaningful turns, gap assessment, completion detection
+- [x] **Session Memory**: Context persists during session, dies after doc generation
+
+**Required Architecture Components:**
+- [x] **ConversationOrchestrator**: Main conversation manager using docs structure as discovery template
+- [x] **Dynamic Question Generator**: AI-powered next question generation based on conversation history
+- [x] **Discovery Gap Assessor**: Evaluates what information is still needed for complete documentation  
+- [x] **System Prompt Integration**: Use our own docs structure to define required information
+- [x] **Provider Configuration**: Runtime AI provider and model selection
+- [ ] **Convex AI Integration**: Replace file-based session storage with Convex AI SDK for streaming, persistence, and multi-agent foundation
 
 **Technical Implementation:**
-- Context-aware question generation using project domain knowledge
-- Progressive information building with validation checkpoints
-- Conversation state management with branching logic
-- Natural language understanding for user clarification and corrections
+- ✅ Basic conversation interfaces (extended with orchestrator)
+- ✅ CLI integration foundation
+- ✅ Conversational flow introduced via `ConversationOrchestrator`
+- ✅ Document requirements extraction from our own docs structure
+- [x] AI provider abstraction with runtime configuration
+- [ ] Convex AI SDK integration for message streaming and persistence
+- [x] Replace file-based ConversationSessionManager with Convex database storage
+
+**Meta Approach:**
+- Use this project to document itself with the conversational approach
+- Create feedback loop to refine conversation quality
+- Future evolution: Single orchestrator → Domain agents → Multi-agent collaboration
 
 ### F002: Context Management System
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1.5 weeks
+**Complexity:** High - Core state management  
+**Dependencies:** None (parallel with F001)
 
 **Description:**  
 Comprehensive system for managing conversation context, project understanding, and state persistence across sessions.
@@ -51,7 +86,8 @@ Comprehensive system for managing conversation context, project understanding, a
 ### F003: User Validation & Refinement
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1 week
+**Complexity:** Medium - UI and validation logic  
+**Dependencies:** F001 (conversation output), F002 (context state)
 
 **Description:**  
 Interactive system allowing users to review, validate, and refine AI understanding before proceeding to next phases.
@@ -74,7 +110,8 @@ Interactive system allowing users to review, validate, and refine AI understandi
 ### F004: Document Purpose Framework
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1 week
+**Complexity:** Medium - Template system replacement  
+**Dependencies:** None (new architecture)
 
 **Description:**  
 Replaces static templates with purpose-driven document definitions that understand stakeholder needs and document goals.
@@ -95,7 +132,8 @@ Replaces static templates with purpose-driven document definitions that understa
 ### F005: Architecture Decision Generator
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1.5 weeks
+**Complexity:** High - AI reasoning and decision logic  
+**Dependencies:** F001 (project understanding), F004 (purpose framework)
 
 **Description:**  
 AI system that proposes technical approaches and architectural decisions based on project specifications, with interactive refinement.
@@ -116,7 +154,8 @@ AI system that proposes technical approaches and architectural decisions based o
 ### F006: Stakeholder-Aware Content Generation
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1 week
+**Complexity:** Medium - Content adaptation algorithms  
+**Dependencies:** F004 (purpose framework)
 
 **Description:**  
 Content generation system that tailors documentation depth, technical level, and focus based on intended stakeholder audience.
@@ -139,7 +178,8 @@ Content generation system that tailors documentation depth, technical level, and
 ### F007: End-to-End Conversation Flow
 **Status:** 📋 Planned  
 **Priority:** P0 - Critical  
-**Effort:** 1.5 weeks
+**Complexity:** High - Full system integration  
+**Dependencies:** All Phase 1 & 2 features
 
 **Description:**  
 Seamless integration connecting conversation phases to final documentation generation with consistent user experience.
@@ -160,7 +200,8 @@ Seamless integration connecting conversation phases to final documentation gener
 ### F008: Iterative Refinement System
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1.5 weeks
+**Complexity:** High - Context-aware regeneration  
+**Dependencies:** F007 (end-to-end flow), F002 (context management)
 
 **Description:**  
 System enabling users to iteratively refine generated documentation while maintaining consistency and context awareness.
@@ -181,7 +222,8 @@ System enabling users to iteratively refine generated documentation while mainta
 ### F009: Performance Optimization & UX Polish
 **Status:** 📋 Planned  
 **Priority:** P1 - High  
-**Effort:** 1 week
+**Complexity:** Medium - Performance and UX improvements  
+**Dependencies:** F007 (end-to-end flow)
 
 **Description:**  
 Performance enhancements and user experience improvements for production-ready conversational documentation generation.
@@ -204,7 +246,8 @@ Performance enhancements and user experience improvements for production-ready c
 ### F010: Conversation Analytics & Insights
 **Status:** 📋 Planned  
 **Priority:** P2 - Medium  
-**Effort:** 0.5 weeks
+**Complexity:** Low - Data collection and analysis  
+**Dependencies:** F001 (conversation engine)
 
 **Description:**  
 Analytics system providing insights into conversation effectiveness and documentation quality.
@@ -218,7 +261,8 @@ Analytics system providing insights into conversation effectiveness and document
 ### F011: Template Migration & Compatibility
 **Status:** 📋 Planned  
 **Priority:** P2 - Medium  
-**Effort:** 0.5 weeks
+**Complexity:** Low - Backward compatibility layer  
+**Dependencies:** F004 (purpose framework)
 
 **Description:**  
 Migration path for existing template-based users and backward compatibility support.

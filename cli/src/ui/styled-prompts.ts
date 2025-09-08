@@ -28,6 +28,18 @@ export const styledPrompts = {
     p.log.warn(theme.fuchsia(message));
   },
   
+  debug: (message: string) => {
+    p.log.step(theme.textMuted(message));
+  },
+  
+  // Blue header + muted body, minimal spacing
+  debugSection: (header: string, body: string) => {
+    p.log.step(theme.electricBlue(header));
+    // Print body without extra blank lines
+    // eslint-disable-next-line no-console
+    console.log(theme.textMuted(body));
+  },
+  
   note: (message: string, title?: string) => {
     p.note(
       theme.text(message),

@@ -26,12 +26,12 @@ export async function validateProject(projectPath: string): Promise<ValidationRe
 
     // Validate required files
     const requiredFiles = [
-      'docs/releases/current/index.md',
-      'docs/project/specs.md',
-      'docs/project/stack.md',
-      'docs/project/architecture.md',
-      'docs/active/focus.md',
-      'docs/active/session.md'
+      'docflow/releases/current/index.md',
+      'docflow/project/specs.md',
+      'docflow/project/stack.md',
+      'docflow/project/architecture.md',
+      'docflow/active/focus.md',
+      'docflow/active/session.md'
     ];
 
     for (const file of requiredFiles) {
@@ -42,8 +42,8 @@ export async function validateProject(projectPath: string): Promise<ValidationRe
     }
 
     // Validate file contents
-    await validateIndexFile(path.join(projectPath, 'docs/releases/current/index.md'), issues, suggestions);
-    await validateSpecsFile(path.join(projectPath, 'docs/project/specs.md'), issues, suggestions);
+    await validateIndexFile(path.join(projectPath, 'docflow/releases/current/index.md'), issues, suggestions);
+    await validateSpecsFile(path.join(projectPath, 'docflow/project/specs.md'), issues, suggestions);
     await validateCursorRules(path.join(projectPath, '.cursor/rules'), issues, suggestions);
 
     // Check for broken links

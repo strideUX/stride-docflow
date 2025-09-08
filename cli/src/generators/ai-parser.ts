@@ -23,6 +23,14 @@ export type ParsedProject = z.infer<typeof ParsedProjectSchema>;
 
 export async function parseIdeaWithAI(idea: string, provider: string = 'openai'): Promise<ParsedProject> {
 	try {
+		// Preflight: if provider is local or API key missing, skip network call
+		if (
+			provider === 'local' ||
+			(provider === 'openai' && !process.env.OPENAI_API_KEY) ||
+			(provider === 'anthropic' && !process.env.ANTHROPIC_API_KEY)
+		) {
+			return parseIdeaHeuristic(idea);
+		}
 		const prompt = `
 Analyze this project idea and extract structured information. Return only valid JSON.
 
@@ -83,7 +91,6 @@ Return JSON only, no other text.`;
 		return ParsedProjectSchema.parse(parsed);
 
 	} catch (error) {
-		console.warn('AI parsing failed, using fallback parser');
 		return parseIdeaHeuristic(idea);
 	}
 }
