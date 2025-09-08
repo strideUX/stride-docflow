@@ -1,0 +1,69 @@
+version: 1
+
+core:
+  include:
+    - docflow/AGENTS.md
+    - docflow/active/focus.md
+    - docflow/active/session.md
+    - docflow/releases/current/index.md
+    - docflow/releases/current/features.md
+    - docflow/backlog/features.md
+    - docflow/decisions/README.md
+    - docflow/decisions/ADR-0001.md
+    - docflow/templates/item.md
+    - docflow/templates/adr.md
+  ignore:
+    - "**/.DS_Store"
+    - "**/Thumbs.db"
+    - "**/.cursor/**"
+    - "**/.gitkeep"
+
+packs:
+  web:
+    path: packs/web
+    description: Web stack scaffolding (frontend, UI, build)
+  api:
+    path: packs/api
+    description: API/backend scaffolding (routes, OpenAPI, tests)
+  qa:
+    path: packs/qa
+    description: Quality/validation scaffolding (lint, tests, coverage)
+  quality-guild:
+    path: packs/quality-guild
+    description: Team quality rituals (reviews, checklists, conventions)
+
+tokens:
+  PROJECT_NAME:
+    description: Project display name
+    example: "Acme Portal"
+    required: true
+  PROJECT_SLUG:
+    description: Kebab-case repo slug
+    example: "acme-portal"
+    required: true
+  OWNER:
+    description: Owner or organization
+    example: "Acme Inc."
+    required: true
+  YEAR:
+    description: Current year
+    example: "2025"
+    required: true
+  DATE:
+    description: ISO date (YYYY-MM-DD)
+    example: "2025-01-01"
+  ID:
+    description: Generic identifier (feature/task ID)
+    example: "F001"
+  SLUG:
+    description: Short slug for items/files
+    example: "core-setup"
+  NN:
+    description: Sequence number (two digits)
+    example: "01"
+
+render:
+  filename_tokens: true
+  overwrite: prompt   # prompt | force
+  dry_run: true
+

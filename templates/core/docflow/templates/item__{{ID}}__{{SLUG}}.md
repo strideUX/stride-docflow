@@ -14,10 +14,10 @@ acceptance_criteria:
 ---
 
 ## Context
-- What problem does this solve? Who is impacted?
+- …
 
 ## Plan
-- High-level steps
+- …
 
 ## Definition of Ready (DoR)
 - [ ] Scope and user impact are clear
@@ -34,4 +34,4 @@ acceptance_criteria:
 - [ ] Session handoff updated
 
 ## Notes
-- Implementation hints, decisions, follow-ups
+- …

@@ -15,17 +15,16 @@ links: []
 Proposed | Accepted | Deprecated | Superseded by ADR-XXX
 
 ## Context
-What is the issue that’s prompting this decision?
+- …
 
 ## Decision
-What change is being made and why?
+- …
 
 ## Consequences
-What becomes easier or harder?
+- …
 
 ## Alternatives Considered
-- Option A
-- Option B
+- …
 
 ## References
-- Links to specs, PRs, issues
+- …

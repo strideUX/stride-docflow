@@ -1,19 +1,27 @@
+---
+schema: session.v1
+id: session-{{DATE}}
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+status: in_progress
+date: {{DATE}}
+---
+
 # Session Handoff
 
-## What Was Accomplished
-- Initialized docflow structure and templates (specs, architecture, design, prompts, releases)
-- Set up release tracker (index + features)
-- Defined active focus and immediate next steps
+## Accomplished
+- …
 
 ## Current State
-- Documentation drafted and ready for review
-- Implementation not started
+- …
 
 ## Next Priorities
-1. Confirm initial scope and acceptance criteria
-2. Approve data model and key workflows
-3. Begin F001 (core UI/interaction)
+1. …
+2. …
+3. …
 
-## Blockers/Dependencies
-- Select core stack choices (framework, validation, persistence)
-- Confirm integration requirements (notifications, scheduling, etc.)
+## Blockers / Dependencies
+- …
+
+## Notes
+- Status flow: pending → in_progress → in_review → completed

@@ -1,13 +1,30 @@
-# Active Focus
+---
+schema: focus.v1
+id: focus-{{DATE}}
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+status: in_progress
+date: {{DATE}}
+---
 
-- Current Feature: F000 – Project scaffolding
-- Status: Ready
-- Next Steps:
-  - Initialize repository with TypeScript (strict), lint, format, and testing
-  - Create baseline app structure in `src/` with feature folders and absolute imports
-  - Add a basic health route/page and CI for lint/test/build
-  - Define environment variables and add `.env.example`
-  - Document bootstrap and run instructions in README
+# Daily Focus
 
-Notes:
-- Confirm local dev builds and tests pass before starting the next feature.
+- Area: <feature|chore|spike> — <short focus>
+- Owner: {{OWNER}}
+- Status: in_progress
+
+## Top 3 Outcomes
+- [ ] Outcome 1
+- [ ] Outcome 2
+- [ ] Outcome 3
+
+## Plan
+- Step 1
+- Step 2
+
+## Risks
+- Risk → Mitigation
+
+## Links
+- Worklist: `docflow/releases/current/features.md`
+- Session: `docflow/active/session.md`

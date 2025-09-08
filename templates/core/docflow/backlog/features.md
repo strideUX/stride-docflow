@@ -1,3 +1,12 @@
+---
+schema: backlog.v1
+id: backlog-features
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+statuses: [pending, in_progress, in_review, completed]
+items: []
+---
+
 # Backlog – Features
 
 Add future ideas and deferred work here using the item template.

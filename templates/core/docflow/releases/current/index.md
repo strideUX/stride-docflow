@@ -1,33 +1,30 @@
-# Current Release: <Name / Version>
-
-## Router
-
-- Active Focus: see `docflow/active/focus.md`
-- Session Handoff: see `docflow/active/session.md`
-- Worklist: see `docflow/releases/current/features.md`
-- Backlog: see `docflow/backlog/features.md`
-- Decisions: see `docflow/decisions/`
-
-## Goal
-
-State the primary outcome of this release in one or two sentences. Example: “Deliver an MVP that validates the core value proposition and enables early user feedback.”
-
-## Outcomes
-
-- Outcome 1: <measurable, user-facing or operational>
-- Outcome 2: <measurable, user-facing or operational>
-- Outcome 3: <optional>
-
-## Acceptance Criteria
-
-- Criterion 1: <clear, testable>
-- Criterion 2: <clear, testable>
-- Criterion 3: <clear, testable>
-
-Notes:
-- Keep criteria specific and verifiable.
-- Link detailed items to `features.md` and relevant ADRs.
-
+---
+schema: release.index.v1
+id: release-current
+project: {{PROJECT_NAME}}
+owner: {{OWNER}}
+status: in_progress
+version: 0.1.0
 ---
 
-Track individual features and statuses in `features.md`.
+# Current Release: {{PROJECT_NAME}}
+
+## Router
+- Focus: `docflow/active/focus.md`
+- Session: `docflow/active/session.md`
+- Worklist: `docflow/releases/current/features.md`
+- Backlog: `docflow/backlog/features.md`
+- Decisions: `docflow/decisions/`
+
+## Goal
+One or two sentences describing the primary outcome.
+
+## Outcomes
+- Outcome 1 (measurable)
+- Outcome 2 (measurable)
+- Outcome 3 (optional)
+
+## Acceptance Criteria
+- Criterion 1 (testable)
+- Criterion 2 (testable)
+- Criterion 3 (testable)
