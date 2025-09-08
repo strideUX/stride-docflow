@@ -7,6 +7,9 @@ title: Supabase Backend – SQL + RLS
 description: Opinionated Supabase setup with migrations, RLS patterns, and typed client usage.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  node: 20+
+  react: 19
 ---
 
 # Purpose
@@ -47,4 +50,3 @@ Provide safe defaults for schema migrations, RLS, and typed queries using the Su
 # Compatibility
 - Node: ">=20"
 - React (for client apps): ">=19" (if applicable)
-

@@ -7,6 +7,10 @@ title: Profile – Web (Next.js + Convex)
 description: Convenience bundle composing frontend-nextjs, backend-convex, qa-web, ci-github.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  framework: Next.js 15
+  react: 19
+  node: 20+
 depends_on:
   - frontend-nextjs@1.0.0
   - backend-convex@1.0.0
@@ -31,4 +35,3 @@ One-command setup for the common web baseline you use most.
 
 # Notes
 - Consider an ADR for auth provider selection and data modeling choices
-

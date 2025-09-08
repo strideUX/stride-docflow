@@ -8,7 +8,26 @@ date: {{DATE}}
 
 # Stack & Standards
 
-This document defines defaults and patterns for new projects. Adjust to your chosen stack, but keep standards consistent.
+This document defines project-specific technology choices and standards. Keep it concise and reference the selected packs and their versions.
+
+## Selected Packs (managed by CLI)
+
+- Frontend: <pack-id>@<version>
+- Backend: <pack-id>@<version>
+- QA: <pack-id>@<version>
+- CI: <pack-id>@<version>
+- Profile (optional): <profile-id>@<version>
+
+Notes:
+- The CLI will populate this section on init/update; keep deviations documented below.
+
+## Deviations & Overrides
+
+- Describe any deviations from pack defaults. Link ADRs for significant changes.
+
+## Open Decisions
+
+- Track unanswered technology choices here until resolved via ADR.
 
 ## Platforms & Core Libraries (choose per project)
 

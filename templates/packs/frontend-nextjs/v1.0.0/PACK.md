@@ -7,6 +7,10 @@ title: Next.js (App Router) – TypeScript Strict
 description: Opinionated Next.js app setup with server-first defaults, TS strict, ESLint, optional Tailwind, and testing patterns.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  framework: Next.js 15
+  react: 19
+  node: 20+
 params:
   ENABLE_TAILWIND: true
   ENABLE_PLAYWRIGHT: true

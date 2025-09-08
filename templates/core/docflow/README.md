@@ -88,6 +88,8 @@ Tokens render in both filenames and contents:
 - decisions/README.md (adr.index.v1): ADR index
 - templates/*.md: canonical skeletons (items, bugs, spikes, ADRs)
 - agents/{contract.md, checks.yaml}: agent rules and checks (for automation)
+- packs/README.md: available stacks and profiles to choose from
+- project/packs.yaml: selected packs and versions (managed by CLI)
 - AGENTS.md (guide.v1): coding standards, documentation rules, ADR conventions
 
 ## Workflow
@@ -155,4 +157,10 @@ Tokens render in both filenames and contents:
 - Keep indexes tiny: router + pointers + counts
 - Push detail to leaf docs (items, bugs, spikes, ADRs, notes)
 - Use links + dependencies for agent navigation without heavy context loads
+## Pack Flow
 
+- Select packs or a profile (frontend, backend, QA, CI) during initialization.
+- The CLI writes selections to `project/packs.yaml` and mirrors them in `project/stack.md` under “Selected Packs”.
+- Scaffold files from each selected pack’s `files/` directory; optional files controlled by pack params.
+- Use `checks.yaml` from each pack to audit setup; agents propose fixes when mismatches are detected.
+- On upgrades, update `project/packs.yaml`, scaffold changes with review, and log an ADR if significant.

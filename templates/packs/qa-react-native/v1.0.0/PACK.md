@@ -7,6 +7,9 @@ title: QA – React Native (Jest, RN Testing Library, Detox)
 description: Testing patterns for React Native projects.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  react_native: 0.81
+  expo_sdk: 54
 ---
 
 # Purpose
@@ -27,4 +30,3 @@ Provide reliable testing guidance suitable for mobile apps.
 
 # Checks (Agent)
 - Config presence; predictable test naming; Detox gated by param
-

@@ -7,6 +7,8 @@ title: CI – GitHub Actions
 description: Modular GitHub Actions for lint, typecheck, unit, e2e, and preview.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  node: 20+
 ---
 
 # Purpose
@@ -24,4 +26,3 @@ Ship a minimal, fast CI pipeline that scales with packs.
 
 # Checks (Agent)
 - Workflows present; jobs reference correct package scripts
-

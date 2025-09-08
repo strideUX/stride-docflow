@@ -7,6 +7,8 @@ title: QA – Web (Vitest, RTL, Playwright)
 description: Testing patterns and configs for web apps.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  react: 19
 ---
 
 # Purpose
@@ -29,4 +31,3 @@ Define a practical test pyramid and conventions for web projects.
 
 # Checks (Agent)
 - Presence of configs; e2e tagged; MSW used where appropriate
-

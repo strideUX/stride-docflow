@@ -20,18 +20,7 @@ checks:
     applies_to: [tsconfig.json]
     description: Define baseUrl and paths for @/* → src/* (or project root).
     fix: false
-  - id: testing-configs
-    title: Vitest and RTL config present
-    severity: warn
-    applies_to: [vitest.config.*]
-    description: Provide Vitest config for unit tests and ensure RTL deps are present.
-    fix: false
-  - id: playwright-config-optional
-    title: Playwright config present when enabled
-    severity: info
-    applies_to: [playwright.config.*]
-    description: Only required if ENABLE_PLAYWRIGHT=true.
-    fix: false
+  # Testing configs live in qa-web pack; do not enforce here.
   - id: server-actions-schema
     title: Server Actions use schema validation
     severity: warn

@@ -7,6 +7,9 @@ title: Convex Backend – Functions and Data Modeling
 description: Structured Convex setup with schema patterns, server functions, and testing guidance.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  node: 20+
+  react: 19
 ---
 
 # Purpose
@@ -48,4 +51,3 @@ Provide consistent organization for Convex functions, schemas, and auth, with si
 # Compatibility
 - Node: ">=20"
 - React (for client apps): ">=19"
-

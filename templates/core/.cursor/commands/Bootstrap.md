@@ -28,6 +28,7 @@ Set up or synchronize the Docflow documentation system in any repository. Works 
 - `docflow/iterations/current/`
   - `index.md` – goals, outcomes, acceptance criteria, router
   - `features.md` – initial worklist
+- `docflow/project/packs.yaml` – selected packs and versions
 - `docflow/active/`
   - `focus.md` – current item + next steps
   - `session.md` – handoff notes
@@ -54,11 +55,12 @@ Set up or synchronize the Docflow documentation system in any repository. Works 
 
 ## Process
 1) Detect mode and confirm with you
-2) Show plan: files to create/update
-3) For Blank: create scaffolds → run interview → populate drafts
-4) For Existing: analyze repo → generate drafts → confirm and refine
-5) Create initial iteration (Setup/Scaffolding as F000) and set active focus
-6) Summarize next steps and offer `/df-start` or `/df-focus F000`
+2) Select packs (frontend/backend/qa/ci or profile) and pin versions
+3) Show plan: files to create/update
+4) For Blank: create scaffolds → run interview → populate drafts → scaffold packs
+5) For Existing: analyze repo → generate drafts → confirm and refine → scaffold packs
+6) Create initial iteration (Setup/Scaffolding as F000) and set active focus
+7) Summarize next steps and offer `/df-start` or `/df-focus F000`
 
 ## Safety & Idempotence
 - Never overwrite existing files without confirmation

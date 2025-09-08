@@ -7,6 +7,10 @@ title: React Native (Expo) – TypeScript Strict
 description: Opinionated Expo app with TS, ESLint, testing (Jest + RN Testing Library), optional Detox.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  expo_sdk: 54
+  react_native: 0.81
+  react: 19
 params:
   ENABLE_DETOX: false
 compatibility:

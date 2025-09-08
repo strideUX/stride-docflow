@@ -7,6 +7,8 @@ title: Quality Guild – Team Conventions
 description: Shared conventions for reviews, PR hygiene, naming, and DoD.
 owner: {{OWNER}}
 date: {{DATE}}
+targets:
+  applies_to: [web, mobile]
 ---
 
 # Purpose
@@ -22,4 +24,3 @@ Create consistent team practices that improve clarity and quality without heavy 
 
 # Checks (Agent)
 - Presence of PR template; DoD fields in items; ADR linkage
-
