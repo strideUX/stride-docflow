@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “CI/CD”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "CI/CD"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-CI/CD
+# CI/CD
 
 Pipelines
 

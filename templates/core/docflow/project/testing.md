@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Testing Strategy”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Testing Strategy"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Testing Strategy
+# Testing Strategy
 
 Layers
 

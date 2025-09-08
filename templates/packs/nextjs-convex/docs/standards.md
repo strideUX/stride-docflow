@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Next.js + Convex Architecture Standards”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Next.js + Convex Architecture Standards"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Next.js + Convex Architecture Standards
+# Next.js + Convex Architecture Standards
 
 Reusable standards for all Next.js/Convex projects
 
@@ -12,6 +14,7 @@ Reusable standards for all Next.js/Convex projects
 
 Required Directory Layout
 
+```
 src/
 ├── app/                          # Next.js App Router
 │   ├── (auth)/                   # Auth route group
@@ -39,13 +42,16 @@ src/
 │   └── [provider-name].tsx
 └── styles/                       # Additional styles
 └── [component].module.css
+```
 
+```
 convex/                           # Convex backend
 ├── _generated/                   # Generated files
 ├── schema.ts                     # Database schema
 ├── [table].ts                    # Table queries/mutations
 ├── auth.ts                       # Auth functions
 └── lib/                          # Shared backend logic
+```
 
 2. Naming Conventions
 
@@ -58,7 +64,7 @@ Files & Folders
 
 Code Entities
  • Components: PascalCase (UserProfile)
- • Hooks: camelCase with “use” prefix (useAuthState)
+ • Hooks: camelCase with "use" prefix (useAuthState)
  • Types/Interfaces: PascalCase (UserProfile, IUserData)
  • Functions: camelCase (formatDate)
  • Constants: UPPER_SNAKE_CASE (MAX_RETRIES)

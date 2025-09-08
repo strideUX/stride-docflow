@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Convex Patterns”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Convex Patterns"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Convex Patterns
+# Convex Patterns
 
 Schema
  • convex/schema.ts is the source of truth; validators via v.*

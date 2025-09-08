@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Architecture”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Architecture"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Architecture
+# Architecture
 
 System Diagram (conceptual)
 

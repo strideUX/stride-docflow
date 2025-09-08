@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Environment & Secrets”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Environment & Secrets"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Environment & Secrets
+# Environment & Secrets
 
 Required Environment Variables
 

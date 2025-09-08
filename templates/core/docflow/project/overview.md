@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Project Overview”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Project Overview"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Project Overview
+# Project Overview
 
 This document summarizes the project’s purpose, scope, and constraints.
 

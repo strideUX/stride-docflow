@@ -1,11 +1,14 @@
+---
 schema: guide.v1
-title: “Folder Structure (Reference)”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Folder Structure (Reference)"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Folder Structure (Reference)
+# Folder Structure (Reference)
 
+```
 src/app/… (App Router, layouts, routes)
 src/components/… (ui, forms, layouts, features)
 src/hooks/… (custom hooks)
@@ -18,3 +21,4 @@ convex/schema.ts (database schema)
 convex/domains/.ts (per-domain queries/mutations)
 convex/auth.ts (auth functions)
 convex/lib/ (shared backend helpers)
+```

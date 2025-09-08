@@ -1,10 +1,12 @@
+---
 schema: guide.v1
-title: “Conventions”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Conventions"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
+---
 
-Conventions
+# Conventions
 
 Code
  • Language & version pinned; enforce formatter and linter
