@@ -1,0 +1,22 @@
+schema: checks.v1
+id: quality-guild-checks
+version: 1
+checks:
+  - id: pr-template-present
+    title: PR template present
+    severity: info
+    applies_to: [.github/pull_request_template.md]
+    description: Provide a PR template aligned to team conventions.
+    fix: false
+  - id: items-dod-checklist
+    title: Items include DoD fields
+    severity: info
+    applies_to: [docflow/**]
+    description: Ensure item docs retain DoD checklists.
+    fix: false
+  - id: adr-linkage
+    title: ADRs linked from items when decisions made
+    severity: info
+    applies_to: [docflow/**]
+    description: Encourage decision traceability via ADR links.
+    fix: false

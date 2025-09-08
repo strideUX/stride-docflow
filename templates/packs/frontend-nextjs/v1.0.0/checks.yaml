@@ -1,0 +1,29 @@
+schema: checks.v1
+id: frontend-nextjs-checks
+version: 1
+checks:
+  - id: next-config-present
+    title: next.config.ts exists
+    severity: error
+    applies_to: [next.config.ts]
+    description: Next.js 15 projects should use a typed next.config.ts.
+    fix: false
+  - id: eslint-core-web-vitals
+    title: ESLint extends next/core-web-vitals
+    severity: warn
+    applies_to: [.eslintrc*, eslint.config.*]
+    description: Ensure ESLint config extends next/core-web-vitals for React 19.
+    fix: false
+  - id: tsconfig-paths
+    title: tsconfig path alias for @/*
+    severity: warn
+    applies_to: [tsconfig.json]
+    description: Define baseUrl and paths for @/* → src/* (or project root).
+    fix: false
+  # Testing configs live in qa-web pack; do not enforce here.
+  - id: server-actions-schema
+    title: Server Actions use schema validation
+    severity: warn
+    applies_to: [app/**, src/**]
+    description: Validate inputs at boundaries (e.g., Zod) for Server Actions.
+    fix: false

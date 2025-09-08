@@ -1,0 +1,10 @@
+schema: checks.v1
+id: profile-mobile-rn-convex-checks
+version: 1
+checks:
+  - id: required-packs-present
+    title: Required packs present
+    severity: error
+    applies_to: [docflow/**]
+    description: Ensure frontend-react-native-expo, backend-convex, qa-react-native, ci-github were applied with pinned versions.
+    fix: false
