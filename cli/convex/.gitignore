@@ -1,6 +1,0 @@
-# Compiled output (Convex handles compilation)
-*.js
-*.js.map
-!_generated/
-# Type declaration artifacts
-*.d.ts
