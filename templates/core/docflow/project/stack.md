@@ -8,62 +8,65 @@ date: {{DATE}}
 
 # Stack & Standards
 
-This document defines project-specific technology choices and standards. Keep it concise and reference the selected packs and their versions.
+This document declares the selected packs (framework choices) and the project’s standards. It links to pack standards and records any deviations or decisions.
 
 ## Selected Packs (managed by CLI)
 
-- Frontend: <pack-id>@<version>
-- Backend: <pack-id>@<version>
-- QA: <pack-id>@<version>
-- CI: <pack-id>@<version>
-- Profile (optional): <profile-id>@<version>
+- Profile: profile-web-nextjs-convex@1.0.0
+- Frontend: frontend-nextjs@1.0.0
+- Backend: backend-convex@1.0.0
+- QA: qa-web@1.0.0
+- CI: ci-github@1.0.0
 
-Notes:
-- The CLI will populate this section on init/update; keep deviations documented below.
+Source of truth: see `docflow/project/packs.yaml`. Update via CLI; record major changes in an ADR.
 
-## Deviations & Overrides
+## Framework Standards
 
-- Describe any deviations from pack defaults. Link ADRs for significant changes.
+- Next.js (frontend-nextjs): see pack guides under `templates/packs/frontend-nextjs/v1.0.0/guides/`.
+  - When scaffolded by CLI, these are copied to `docflow/project/stack/frontend-nextjs/guides/`.
+- Convex (backend-convex): `templates/packs/backend-convex/v1.0.0/guides/`.
+- QA (qa-web): `templates/packs/qa-web/v1.0.0/guides/`.
+- CI (ci-github): `templates/packs/ci-github/v1.0.0/guides/`.
 
-## Open Decisions
+Examples live in each pack’s `examples/` folder and are copied alongside guides.
 
-- Track unanswered technology choices here until resolved via ADR.
+## Architecture Principles
 
-## Platforms & Core Libraries (choose per project)
-
-- Web framework: e.g., Next.js / Remix / SvelteKit
-  - Prefer server‑first rendering and progressive streaming where possible.
-  - Colocate server endpoints with features; keep client/server boundaries explicit.
-- Validation: Zod (or similar) for runtime schemas at boundaries.
-- State/data: lightweight client state; server as source of truth.
-- Styles: Tailwind CSS or a consistent alternative; avoid ad‑hoc style drift.
-
-## Project Structure (example)
-
-Prefer a `src/` root to keep the repository tidy and support absolute imports.
-
-- `src/app/` routes and layouts (or equivalent)
-- `src/components/` UI components (feature and UI subfolders)
-- `src/hooks/` custom hooks
-- `src/lib/` utilities, adapters, providers
-- `src/types/` shared types per domain
-- `src/styles/` global styles
-- `server/` backend code (if separate), or feature‑scoped `api/` routes
-
-Absolute imports & alias:
-- Configure `tsconfig.json` with `baseUrl: "."` and `paths` for `@/*` → `src/*`.
+- Server-first (web); client for interactivity only.
+- Clear boundaries: UI ↔ Actions ↔ Data ↔ Domain.
+- Validate inputs at boundaries (Zod or equivalent).
+- Deterministic side effects; explicit cache semantics.
 
 ## Conventions
 
-- TypeScript strict: enabled; explicit types on public exports
-- Exports: prefer named exports for shared modules
-- Errors: never swallow; return helpful messages; log to server
-- Env vars: read only on server; never expose secrets to the client
-- Data fetching: be explicit about cache semantics
+- TypeScript strict; named exports for shared modules.
+- Kebab-case files; `@/*` → `src/*` alias.
+- Never expose secrets to client bundles.
 
-Naming conventions:
-- Files: kebab-case (e.g., `user-profile.tsx`, `use-auth-state.ts`)
-- Components/classes/types/enums: PascalCase; hooks: `use` + camelCase; constants/env vars: UPPER_SNAKE_CASE
+## Security & Auth
+
+- Web: session cookies `httpOnly`, `secure`, `sameSite=strict`; protect routes via middleware.
+- Mobile: keep secrets server-side; use secure storage sparingly; validate deep links.
+- Record provider-specific choices via ADRs.
+
+## Testing Strategy
+
+- Web: Vitest + RTL; Playwright for key journeys; MSW for network.
+- Mobile: Jest + RN Testing Library; Detox optional.
+- Coverage targets defined in QA pack configs.
+
+## CI & Quality
+
+- GitHub Actions: lint, typecheck, unit, e2e; fast caches.
+- PR template: link items/ADRs; enforce DoR/DoD discipline.
+
+## Deviations & Overrides
+
+- Note deviations from pack defaults here; link to ADRs for significant changes.
+
+## Open Decisions
+
+- Track technology choices to resolve; promote to ADR when decided.
 
 Component rules:
 - Single responsibility; well‑typed props; avoid inline styles
