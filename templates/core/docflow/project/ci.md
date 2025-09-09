@@ -8,14 +8,31 @@ version: 1
 
 # CI/CD
 
+Make the happy path easy and safe to follow.
+
 Pipelines
 
-Lint → Typecheck → Tests → Build. Block merges on failures.
+Typical flow:
+```txt
+lint → typecheck → unit → integration → build → deploy
+```
+
+Block merges on any failure.
 
 Branch & PR Policy
+	•	Small, frequent PRs; draft early
+	•	Descriptive titles: type(scope): subject
+	•	Link to docflow item IDs (e.g., F123) and ADRs when relevant
 
-Draft early, small diffs, descriptive titles. Require green checks.
+Environments & Releases
+	•	Iteration-based delivery; archive when outcomes met
+	•	Tag releases (e.g., v0.1.0) or iteration snapshots (e.g., iter-03)
+	•	Keep changelog scoped and factual
 
-Release
+Protections
+	•	Required checks on main
+	•	Enforce code owners where it matters (security-sensitive areas)
 
-Iteration-based; archive when outcomes met. Keep changelog scoped and factual.
+Rollbacks
+	•	Keep rollback steps documented (runtime + data)
+	•	Automate where reasonable; verify post-rollback health

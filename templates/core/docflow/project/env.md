@@ -8,16 +8,25 @@ version: 1
 
 # Environment & Secrets
 
-Required Environment Variables
+Centralize what must exist to run {{PROJECT_NAME}} across environments.
 
-List required variables here. Packs may extend this section with stack-specific variables.
-
+## Required Environment Variables
+Document all variables needed to boot the system. Packs may extend this section.
+```txt
+# Example
+APP_BASE_URL=
+LOG_LEVEL=info
+```
 Secret Management
+	•	Local: .env.local (never committed)
+	•	CI/CD: provider secrets manager
+	•	Production: managed secret store with RBAC and rotation policy
 
-Local: .env.local (never committed)
-CI/CD: provider secrets manager
-Production: managed secret store; strict RBAC
+Configuration Strategy
+	•	Prefer env vars for secrets and endpoints
+	•	Validate on startup and fail fast with clear error messages
+	•	Keep NEXT_PUBLIC_ (or equivalents) limited to truly public config
 
-Config Strategy
-
-Prefer environment variables for secrets and endpoints. Validate at startup; fail fast with clear errors.
+Migration & Rotation
+	•	How to rotate keys without downtime
+	•	How to add/remove variables safely

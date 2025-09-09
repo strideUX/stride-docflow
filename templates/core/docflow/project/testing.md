@@ -8,19 +8,26 @@ version: 1
 
 # Testing Strategy
 
-Layers
+Deliver confidence with the minimum effective test suite.
 
-Unit tests: pure functions; deterministic
-Integration: service boundaries; I/O and schema checks
-E2E: critical user journeys; smoke paths
+Layers & Scope
+	•	Unit: pure logic; fast and deterministic
+	•	Integration: service boundaries (DB, queues, auth); contract and schema checks
+	•	E2E/Smoke: critical user journeys; minimal but reliable
 
 Tooling
+	•	Test runner and utils:
+	•	Coverage baseline: threshold(s) meaningful to this codebase
+	•	Snapshot policy: only for stable UI or data shapes
 
-Test runner:
-Coverage target:
-Snapshot policy: minimal and stable
+Data & Fixtures
+	•	Keep fixtures small and explicit
+	•	Prefer builders/factories for readability
 
 Performance Baselines
+	•	Web: LCP/CLS thresholds; test on CI with budgets if applicable
+	•	API: p95 latency targets for hot endpoints
 
-Web: TTFB/LCP/CLS targets if applicable
-Backend: p95 latency, throughput
+CI Integration
+	•	Run unit + integration on PRs; E2E on main or nightly as needed
+	•	Fail the build on flaky tests until addressed

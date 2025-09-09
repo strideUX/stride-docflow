@@ -8,36 +8,33 @@ version: 1
 
 # Project Overview
 
-This document summarizes the project's purpose, scope, and constraints.
+A concise summary of {{PROJECT_NAME}} that orients new contributors quickly.
 
-Purpose
+## Purpose
+State the core problem, target users, and the impact in 2–3 sentences.
 
-Describe the core problem, the audience, and expected impact in 2–3 sentences.
+## Scope
+**In scope**
+- Area 1
+- Area 2
 
-Scope
+**Out of scope**
+- Explicit exclusions that reduce ambiguity
 
-In scope:
- • Major area 1
- • Major area 2
+## Success Criteria
+List measurable outcomes (business or user outcomes, not tasks).
+- Outcome 1 (metric + target)
+- Outcome 2 (metric + target)
 
-Out of scope:
- • Excluded item 1
- • Excluded item 2
+## High-Level Architecture
+Briefly summarize the system at a glance:
+- **Frontend**: main framework, responsibilities
+- **Backend**: main runtime(s), responsibilities
+- **Data**: primary stores, retention, compliance notes
+- **Integrations**: upstream/downstream systems
 
-Success Criteria
- • Outcome 1 (measurable)
- • Outcome 2 (measurable)
-
-High-Level Architecture
-
-Frontend: technology, key responsibilities
-Backend: technology, key responsibilities
-Data: main stores, retention, compliance notes
-Integrations: upstream/downstream systems
-
-Links
-
-Repo:
-Staging:
-Production:
-Docs Router: docflow/iterations/current/index.md
+## Links
+- Repo:
+- Staging:
+- Production:
+- Docs Router: `docflow/iterations/current/index.md`

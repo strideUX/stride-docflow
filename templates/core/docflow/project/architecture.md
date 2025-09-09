@@ -8,17 +8,23 @@ version: 1
 
 # Architecture
 
-System Diagram (conceptual)
+Keep this document short. Durable choices go into ADRs; diagrams/POCs live in feature docs.
 
-Outline boundaries and data flow. Keep this section brief; link to ADRs when making durable decisions.
+## System Diagram (Conceptual)
+Describe boundaries, data flow, and external systems in a few bullets. Link to a diagram if available.
 
-Domain Model
+## Domain Model
+List core entities and their key relationships. Avoid implementation detail; promote to ADRs if structure changes.
 
-List core entities and relationships; avoid over-detailing. Promote to ADR when structure changes.
+## Operational Concerns
+- **Observability**: logs, metrics, tracing; which tools and minimum signals
+- **Deployment**: environments, rollout strategy, IaC pointers (if any)
+- **Backups/Recovery**: scope, frequency, and restore testing cadence
+- **Feature Flags**: where flags live and the safe-rollout policy
 
-Operational Concerns
+## Performance Budgets
+- **Web**: target TTFB/LCP/CLS, largest page(s) size budget
+- **API**: p95 latency, throughput expectations
 
-Observability: logging/metrics/tracing overview
-Deployment: target environments, rollout strategy
-Backups/Recovery: scope and frequency
-Feature Flags: where they live and how to use them
+## Security & Privacy
+List the primary trust boundaries and sensitive data classes. Link to ADRs and security docs for details.
