@@ -18,15 +18,15 @@ APP_BASE_URL=
 LOG_LEVEL=info
 ```
 Secret Management
-	•	Local: .env.local (never committed)
-	•	CI/CD: provider secrets manager
-	•	Production: managed secret store with RBAC and rotation policy
+- Local: .env.local (never committed)
+- CI/CD: provider secrets manager
+- Production: managed secret store with RBAC and rotation policy
 
 Configuration Strategy
-	•	Prefer env vars for secrets and endpoints
-	•	Validate on startup and fail fast with clear error messages
-	•	Keep NEXT_PUBLIC_ (or equivalents) limited to truly public config
+- Prefer env vars for secrets and endpoints
+- Validate on startup and fail fast with clear error messages
+- Keep NEXT_PUBLIC_ (or equivalents) limited to truly public config
 
 Migration & Rotation
-	•	How to rotate keys without downtime
-	•	How to add/remove variables safely
+- How to rotate keys without downtime
+- How to add/remove variables safely

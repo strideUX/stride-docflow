@@ -20,19 +20,19 @@ lint → typecheck → unit → integration → build → deploy
 Block merges on any failure.
 
 Branch & PR Policy
-	•	Small, frequent PRs; draft early
-	•	Descriptive titles: type(scope): subject
-	•	Link to docflow item IDs (e.g., F123) and ADRs when relevant
+- Small, frequent PRs; draft early
+- Descriptive titles: type(scope): subject
+- Link to docflow item IDs (e.g., F123) and ADRs when relevant
 
 Environments & Releases
-	•	Iteration-based delivery; archive when outcomes met
-	•	Tag releases (e.g., v0.1.0) or iteration snapshots (e.g., iter-03)
-	•	Keep changelog scoped and factual
+- Iteration-based delivery; archive when outcomes met
+- Tag releases (e.g., v0.1.0) or iteration snapshots (e.g., iter-03)
+- Keep changelog scoped and factual
 
 Protections
-	•	Required checks on main
-	•	Enforce code owners where it matters (security-sensitive areas)
+- Required checks on main
+- Enforce code owners where it matters (security-sensitive areas)
 
 Rollbacks
-	•	Keep rollback steps documented (runtime + data)
-	•	Automate where reasonable; verify post-rollback health
+- Keep rollback steps documented (runtime + data)
+- Automate where reasonable; verify post-rollback health
