@@ -6,7 +6,7 @@ owner: "{{OWNER}}"
 version: 1
 ---
 
-Performance & Security
+# Performance & Security
 
 Performance
 	•	RSC-first: prefer Server Components; keep client components minimal.

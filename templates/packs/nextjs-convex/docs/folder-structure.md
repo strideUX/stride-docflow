@@ -6,7 +6,7 @@ owner: "{{OWNER}}"
 version: 1
 ---
 
-Folder Structure (Reference)
+# Folder Structure (Reference)
 ```txt
 src/app/                # App Router (layouts, routes, handlers)
 src/components/         # ui, forms, layouts, features

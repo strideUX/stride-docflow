@@ -6,7 +6,7 @@ owner: "{{OWNER}}"
 version: 1
 ---
 
-Convex Patterns
+# Convex Patterns
 
 Schema
 	•	convex/schema.ts is the single source of truth.
