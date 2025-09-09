@@ -28,3 +28,12 @@ List core entities and their key relationships. Avoid implementation detail; pro
 
 ## Security & Privacy
 List the primary trust boundaries and sensitive data classes. Link to ADRs and security docs for details.
+
+## Stack Standards
+For implementation standards and patterns, see the applicable pack docs:
+- `templates/packs/nextjs-convex/docs/standards.md`
+- `templates/packs/nextjs-convex/docs/convex-patterns.md`
+- `templates/packs/nextjs-convex/docs/folder-structure.md`
+- `templates/packs/nextjs-convex/docs/perf-security.md`
+
+If a different stack is used, replace these links with the relevant pack and keep this section.

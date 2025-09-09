@@ -27,3 +27,12 @@ Team rules that make code and docs predictable across projects.
 ## Reviews
 - PRs small and focused; include context + screenshots for UI
 - Block on failing checks; request review from relevant owners
+
+## Stack Standards
+For implementation standards and patterns, see the applicable pack docs:
+- `templates/packs/nextjs-convex/docs/standards.md`
+- `templates/packs/nextjs-convex/docs/convex-patterns.md`
+- `templates/packs/nextjs-convex/docs/folder-structure.md`
+- `templates/packs/nextjs-convex/docs/perf-security.md`
+
+If a different stack is used, replace these links with the relevant pack and keep this section.
