@@ -8,7 +8,7 @@ version: 1
 
 # Project Overview
 
-This document summarizes the project’s purpose, scope, and constraints.
+This document summarizes the project's purpose, scope, and constraints.
 
 Purpose
 
