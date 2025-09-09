@@ -1,191 +1,75 @@
----
-description: Docflow - Project-Agnostic Documentation System
+⸻
+
+description: “Docflow — Cursor Rules”
 globs:
+include:
+- “docflow/”
+- “templates/”
+- “.cursor/**”
 alwaysApply: true
----
 
-# Docflow
+Docflow Rules (Operation-Based)
 
-## Project Documentation System
-Docflow is a lightweight, project-agnostic, iteration-based documentation and execution system. It favors simple markdown, clear status gates, and chat-executable commands.
+Purpose
 
-- **docflow/project/** - Static project context (specs, architecture, design, stack)
-- **docflow/iterations/current/** - Active iteration work (index.md is your PRIMARY REFERENCE)
-- **docflow/backlog/** - Future planning and ideas  
-- **docflow/active/** - Session management and current focus
-- **docflow/decisions/** - Architecture Decision Records (ADRs)
-- **docflow/templates/** - Standardized templates for items and ADRs
- - **docflow/inbox/** - Quick capture queue (triage daily)
+Standardize edits and responses so the doc-driven workflow is coherent for humans and agents.
 
-## Getting Started Protocol
+Scope
 
-**ALWAYS START HERE:** Read `docflow/iterations/current/index.md` for current state and priorities.
+Only read/write inside these roots by default:
+	•	docflow/**
+	•	templates/**
+	•	.cursor/**
 
-1. Check current focus and active items
-2. Review session handoff in `docflow/active/session.md`
-3. Reference project context from `docflow/project/` as needed
-4. Use slash commands to run processes; update progress in real-time
+Vocabulary
+	•	Status: pending → in_progress → in_review → completed
+	•	IDs: F### feature, C### chore, B### bug, S### spike, ADR-YYYY-MM-DD-NN-slug
+	•	Iterations: docflow/iterations/current/ and numbered archives (01, 02, …)
 
-## File Navigation Priorities
+File Priority (when summarizing)
+	1.	docflow/iterations/current/index.md
+	2.	docflow/iterations/current/features.md
+	3.	docflow/active/focus.md
+	4.	docflow/active/session.md
+	5.	docflow/project/*
+	6.	docflow/decisions/*
 
-1. **docflow/iterations/current/index.md** - Primary reference, current state
-2. **docflow/active/focus.md** - What's being worked on right now
-3. **docflow/active/session.md** - Session handoff and notes
-4. **docflow/iterations/current/features.md** - Iteration worklist (MVP keeps one list)
-5. **docflow/backlog/features.md** - Future ideas and deferred work
-6. **docflow/decisions/** - ADRs index and records
-7. **docflow/project/** - Static project context (specs, design, architecture, stack)
-8. **docflow/inbox/** - Quick capture items awaiting triage
+Allowed Operations (no command coupling)
+	•	Discover: Summarize current goal, top priorities, blockers.
+	•	Capture: Append a note to docflow/notes/YYYY-MM-DD.md.
+	•	Plan: Add or update items in iterations/current/features.md or backlog/features.md.
+	•	Focus: Set one item as active (update active/focus.md + mark in_progress).
+	•	Promote: Create per-item file (e.g., items/F123-slug.md) and add promoted: true + file: in worklist entry.
+	•	Decide: Create ADR file and index entry.
+	•	Handoff: Append to active/session.md with accomplished/next/blockers.
+	•	Iterate: Bootstrap or archive an iteration (current → NN).
 
-## Item Management Workflow
+Edit Rules
+	•	Preserve YAML front-matter and tokens like “{{PROJECT_NAME}}”.
+	•	Use the canonical status values.
+	•	Never delete ADR history; supersede with a new ADR if changed.
+	•	Notes are append-only for a given day file.
+	•	If a target file is missing, create it with minimal valid front-matter.
 
-### Adding New Items Checklist
-- [ ] Capture in inbox or backlog first
-- [ ] Assign complexity (XS/S/M/L/XL) and priority (P0/P1/P2)
-- [ ] Document dependencies if any (F/C/B/S IDs)
-- [ ] Move to current iteration when near execution
-- [ ] Update iterations/current/index.md router if needed
+Response Shapes
 
-### Starting Work Checklist  
-- [ ] Item exists in current iteration worklist
-- [ ] Set status to "in_progress"
-- [ ] Update active/focus.md with current item details
-- [ ] Review dependencies and blockers
-- [ ] Begin implementation
+Success
+	•	One sentence summary
+	•	Paths touched (bulleted)
+	•	Next actions (1–3 bullets)
 
-### Real-time Progress Updates
-- [ ] Update item status in iterations/current/features.md as progress is made
-- [ ] Move items through workflow: pending → in_progress → in_review → completed
-- [ ] Update active/focus.md throughout session with current tasks
-- [ ] Document any new items discovered during implementation
+Failure
+	•	What failed (one sentence)
+	•	Likely cause(s) (bulleted)
+	•	Exact next step
 
-### Scope/Requirement Changes Protocol
-When requirements change during implementation:
-- [ ] Pause development and assess impact
-- [ ] Update item definition in `iterations/current/features.md` (and backlog if needed)
-- [ ] Reassess complexity/priority if needed
-- [ ] Update dependencies if affected
-- [ ] Document change rationale in architecture.md if architectural
-- [ ] Update iteration index if priority shifts
+Safety
+	•	Do not modify files outside Scope.
+	•	Do not write binary content.
+	•	Prefer small diffs; avoid mass rewrites unless explicitly requested.
 
-## Status Workflow & Definitions
-
-- **pending**: Defined, queued for execution
-- **in_progress**: Currently being worked on
-- **in_review**: Implemented, needs review/iteration  
-- **completed**: Finished and verified
-
-## Bug Severity Handling
-- **S1 (critical)**: Drop everything, resolve immediately
-- **S2 (high)**: Resolve at next logical stopping point
-- **S3 (low)**: Add to planned work
-
-When bugs are found in "completed" features:
-1. Move the affected item back to "in_progress"
-2. Add a bug entry to `iterations/current/features.md` (type: bug) or annotate the affected item
-3. Resolve the bug before continuing new work
-
-## Session Management
-
-### During Development
-- Keep docflow/active/focus.md updated with current work
-- Update progress in iterations/current/features.md in real-time
-- Document decisions in docflow/active/session.md
-- Add new items to backlog or current release as discovered
-
-### Wrap Session (via `/df-wrap`)
-When asked to wrap up (e.g., "wrap up", "end session"), run the slash command `/df-wrap`.
-
-The command performs:
-- Update active item status in `iterations/current/features.md`
-- Capture outstanding decisions/changes (use `/df-note` as needed)
-- Update `docflow/active/focus.md` with next steps and blockers
-- Update `docflow/active/session.md` with handoff notes
-- Clean up and organize: progress indicators and any session summary
-
-Reference: `.cursor/commands/WrapSession.md` for full steps and expected output.
-
-Command response format:
-"🔄 Wrapping up session...
-✅ [Major accomplishments]
-📝 Updated progress: [specific updates]
-🐛 [Any bugs found or issues]
-⏭️ Next session focus: [clear priority]
-📋 [Any blockers or notes needed]
-✨ Session complete!"
-
-## Implementation Standards
-
-### Pattern-First Development
-- **ALWAYS analyze existing patterns before creating new ones**
-- **NEVER invent new layouts when similar pages exist**
-- **COPY and adapt proven structures rather than innovating**
-- **MATCH component usage, styling, and patterns from reference examples**
-
-### Quality Gates
-- New implementations must match existing similar implementations
-- Component usage must be consistent with established patterns
-- Follow docflow/project/design.md and docflow/project/stack.md guidelines
-- Update docflow/project/architecture.md when making technical decisions
-
-### External Documentation
-- **Reference Context7** for current library documentation and examples
-- **Check official docs** for Next.js, React, TypeScript, and chosen stack
-- **Follow project docs first**, then latest external best practices
-- **Maintain consistency** with established patterns in docflow/project/stack.md
-
-
-## Item Schema (Frontmatter + Sections)
-
-Frontmatter fields for each item (feature/chore/bug/spike):
-- id: string (e.g., F001)
-- title: string
-- type: feature | chore | bug | spike
-- status: pending | in_progress | in_review | completed
-- priority: P0 | P1 | P2
-- complexity: XS | S | M | L | XL
-- owner: string
-- dependencies: string[]
-- links?: string[]
-- acceptance_criteria?: string[]
-
-Sections:
-- Context
-- Definition of Ready (DoR)
-- Definition of Done (DoD)
-- Notes
-
-DoR Checklist:
-- [ ] Scope and user impact are clear
-- [ ] Acceptance criteria listed
-- [ ] Dependencies resolved or planned
-- [ ] Designs/architecture references linked (if applicable)
-- [ ] Risks identified and mitigations noted
-
-DoD Checklist:
-- [ ] Acceptance criteria met
-- [ ] Tests updated/added (if applicable)
-- [ ] Docs updated (specs/design/stack/ADR if needed)
-- [ ] Iteration notes updated (if applicable)
-- [ ] Session handoff updated
-
-## Slash Commands and Process Mapping
-
-Docflow uses slash commands to make the workflow executable in chat. Commands live under `.cursor/commands` and are project-agnostic.
-
-Recommended command names are prefixed to avoid collisions:
-- `/df-bootstrap` → Initialize or sync Docflow in this repo (blank or existing)
-- `/df-start` → Start a session (reads index; prepares focus)
-- `/df-focus <ID>` → Set active item and update focus/index
-- `/df-note "text"` → CaptureNote in `docflow/notes/YYYY-MM-DD.md`
-- `/df-adr "title"` → Create an ADR in `docflow/decisions/`
-- `/df-feature "title"` → Add a backlog feature using template
-- `/df-wrap` → Run WrapSession; update statuses and handoff
-- `/df-status` → Summarize counts by status from current release
-
-Each command document defines: purpose, usage, file updates, and response format.
-
-Notes:
-- For prompt/policy/config changes: use `/df-note` for lightweight logging, or `/df-adr` if the change is structural.
-
-*Docflow ensures consistent practices, clear progress tracking, and seamless handoffs. `docflow/releases/current/index.md` is the primary reference—always start there.*
+ACCEPTANCE
+	•	Project docs have the “Stack Standards” section once each (if previously missing).
+	•	Next.js + Convex README exists.
+	•	rules/docflow.mdc replaced with the operation-based content above.
+	•	No other files changed.
