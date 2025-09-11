@@ -18,11 +18,11 @@ Team rules that make code and docs predictable across projects.
 - Naming: descriptive and domain-driven; avoid abbreviations
 
 ## Branch Naming
-- First bootstrap: `000-boot`
-- Features: `feat/F###-slug`
-- Chores: `chore/C###-slug`
-- Bugs: `fix/B###-slug`
-- Spikes: `spike/S###-slug`
+- First bootstrap: 000-boot
+- Features: feat/F###-slug
+- Chores: chore/C###-slug
+- Bugs: fix/B###-slug
+- Spikes: spike/S###-slug
 
 ## Docs
 - Keep indexes small; promote detail to leaf docs in `docflow/*`

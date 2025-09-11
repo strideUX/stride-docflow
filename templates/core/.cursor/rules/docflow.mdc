@@ -1,124 +1,110 @@
 ---
-description: "Docflow — Workflow Rules (operation-based)"
+description: "Docflow — Workflow Rules (runtime projects)"
 globs:
   include:
     - "docflow/**"
-    - "templates/**"
     - ".cursor/**"
 alwaysApply: true
 ---
-# Docflow Workflow Rules
+# Docflow Workflow Rules (Runtime)
 
-## Purpose
-Provide one, durable source of truth for how work is captured, planned, executed, reviewed, and archived—independent of any specific command, agent, or CLI.
+Modifying this ruleset requires an accepted ADR recorded under docflow/decisions/.
 
-## Scope
-Read/write is limited to:
-- docflow/**
-- templates/**
-- .cursor/**
-Never modify files outside this scope.
+## Workflow Scope
+Read/write rules apply only to workflow artifacts:
+- `docflow/**`
+- `.cursor/**`
+This ruleset governs how we capture/plan/handoff and how those files are edited. It does not prohibit normal application code edits outside these paths.
+
+## Code Edits Outside Scope
+Code changes outside workflow paths are allowed (e.g., src/**, app/**, convex/**). Follow the stack pack standards (see docflow/project/architecture.md → Stack Standards).
 
 ## Vocabulary & IDs
 - Status: pending → in_progress → in_review → completed
 - Types: feature (F###), chore (C###), bug (B###), spike (S###)
 - ADR: ADR-YYYY-MM-DD-NN-slug
-- Iterations: `docflow/iterations/current/` then archived as `docflow/iterations/NN/` (zero-padded)
+- Iterations: docflow/iterations/current/ → archived to docflow/iterations/NN/ (zero-padded)
 
-## File Topology (authoritative locations)
-- Router:            `docflow/iterations/current/index.md`
-- Worklist (truth):  `docflow/iterations/current/features.md`
-- Backlog:           `docflow/backlog/features.md`
-- Active focus:      `docflow/active/focus.md`
-- Session handoff:   `docflow/active/session.md`
-- Items (promoted):  `docflow/items/<ID>-<slug>.md`
-- Bugs:              `docflow/bugs/<ID>-<slug>.md`
-- Spikes:            `docflow/spikes/<ID>-<slug>.md`
-- Notes:             `docflow/notes/YYYY-MM-DD.md`
-- ADR index/docs:    `docflow/decisions/README.md` + `docflow/decisions/<ADR-ID>.md`
+## File Topology (authoritative)
+- Router:            docflow/iterations/current/index.md
+- Worklist (truth):  docflow/iterations/current/features.md
+- Backlog:           docflow/backlog/features.md
+- Inbox:             docflow/inbox/capture.md
+- Focus:             docflow/active/focus.md
+- Session:           docflow/active/session.md
+- Items:             docflow/items/<ID>-<slug>.md
+- Bugs:              docflow/bugs/<ID>-<slug>.md
+- Spikes:            docflow/spikes/<ID>-<slug>.md
+- Notes:             docflow/notes/YYYY-MM-DD.md
+- ADRs:              docflow/decisions/README.md, docflow/decisions/<ADR-ID>.md
 
-> **Invariant**: An item exists **either** in the backlog **or** in the current worklist—never both.
+> Invariant: An item lives either in the backlog or in the current worklist—never both.
 
 ## Tokens & Front-matter
-- Preserve tokens: `{{PROJECT_NAME}} {{PROJECT_SLUG}} {{OWNER}} {{DATE}} {{ITER_NUM}} {{ID}} {{SLUG}}`
-- All docflow files must start with valid YAML front-matter; ASCII quotes only.
+- Preserve tokens: {{PROJECT_NAME}} {{PROJECT_SLUG}} {{OWNER}} {{DATE}} {{ITER_NUM}} {{ID}} {{SLUG}}
+- All docflow files start with valid YAML front-matter; ASCII quotes only.
 
-## Status Machine (allowed transitions)
-- `pending → in_progress` (work starts)
-- `in_progress → in_review` (developer/agent believes it’s done)
-- `in_review → completed` (accepted)
-- `in_review → in_progress` (changes requested)
-- `in_progress → pending` (explicit de-scope/park)
-
-> Tools **must not** invent other statuses or transitions.
+## Status Machine
+- pending → in_progress → in_review → completed
+- Backsteps: in_review → in_progress, in_progress → pending
+- Spikes: pending ↔ in_progress ↔ concluded (spike state is separate; worklist still uses the main statuses as needed)
 
 ## Iteration Lifecycle
-- **Bootstrap**: If `iterations/current/` is missing, create:
-  - `index.md` (iteration.index.v1) with goal/outcomes/acceptance
-  - `features.md` (worklist.v1) empty list
-  - `active/focus.md` + `active/session.md` (focus.v1/session.v1)
-- **Work-in-progress**: Keep the worklist small; prioritize P0; mark dependencies `[IDs]`.
-- **Archive**: When outcomes are met or a boundary is reached, move `current/` to `iterations/NN/` and create a fresh `current/`.
+- Bootstrap if iterations/current/ missing:
+  - index.md (iteration.index.v1) with goal/outcomes/acceptance
+  - features.md (worklist.v1) with empty items: []
+  - active/focus.md and active/session.md (focus.v1 / session.v1)
+- Work-in-progress: keep worklist small; prioritize P0; track dependencies: [IDs].
+- Archive: move current/ to iterations/NN/ and create fresh current/.
 
-## ID Allocation
-- Next ID for a type is `max(existing IDs of that type) + 1` zero-padded to 3 digits.
-- IDs are never reused.
+## IDs
+- Next ID per type = max(existing) + 1, zero-padded to 3 digits; never reuse.
 
 ## Promotion Policy
-- Start items inline in worklist/backlog.
-- **Promote** to a per-file doc when any of:
-  - body grows beyond ~80–120 lines,
-  - requires deep context or multiple contributors,
-  - needs acceptance criteria/DoD beyond a short inline block.
+- Start inline in worklist/backlog.
+- Promote to per-file when:
+  - body > ~80–120 lines, or
+  - deep context / multiple contributors, or
+  - acceptance criteria beyond a short inline block.
 - On promotion:
-  - create `docflow/items|bugs|spikes/<ID>-<slug>.md`,
-  - add `promoted: true` and `file: <relative path>` to the entry in the worklist/backlog.
+  - create docflow/items|bugs|spikes/<ID>-<slug>.md,
+  - set promoted: true and file: <relative path> in the list entry.
 
-## Capture & Handoff
-- **Notes**: append bullet with timestamp to `notes/YYYY-MM-DD.md` (create if missing).
-- **Focus**: `active/focus.md` states today’s item & next 2–3 steps.
-- **Session**: append to `active/session.md` with accomplished/next/blockers (timestamped).
-
-## ADR Policy
-- Use ADR for durable design/architecture decisions or tradeoffs.
-- Never rewrite history; supersede with a new ADR and mark relationships in both.
-
-## File Integrity Rules
-- Never remove YAML front-matter; preserve unknown keys.
-- Keep directory trees and code fenced in docs.
-- Do not write binary blobs.
-- Keep diffs minimal; prefer append/update over wholesale rewrite.
-
-## Priorities When Summarizing ("Where are we?")
-1) `iterations/current/index.md` → goals/outcomes
-2) `iterations/current/features.md` → status/priority/owners/dependencies
-3) `active/focus.md` → today’s focus
-4) `active/session.md` → latest blockers/handoff
-5) per-item files if `promoted: true`
-6) ADRs only if the summary requires decision context
+## Minimal Spike Policy
+- Purpose: exploration container; no timebox required.
+- Creation: docflow/spikes/S###-<slug>.md + a worklist entry { id, type: spike, status, promoted: true, file }.
+- Front-matter: id, title, state (pending|in_progress|concluded), owner, links: [].
+- Body sections: # Title, ## Notes, ## Recommendation, ## Follow-ups.
+- Wrap: set state: concluded; if applicable create follow-up F###/C### or an ADR.
 
 ## Allowed Operations (command-agnostic)
-- **Discover**: Summarize goals, top priorities, blockers (no writes).
-- **Capture**: Append a dated note (write).
-- **Plan**: Add/update items in worklist or backlog (write).
-- **Focus**: Set an item active and mark `in_progress` (write).
-- **Promote**: Create per-file doc and annotate the list entry (write).
-- **Decide**: Create ADR and index entry (write).
-- **Handoff**: Append session summary (write).
-- **Iterate**: Bootstrap or archive iteration (write).
+- Discover: summarize goals, priorities, blockers (read only).
+- Capture: append a dated note OR append a new inbox bullet (write).
+- Route: move an inbox bullet into backlog/worklist OR create a spike + worklist entry (write). Remove the original inbox bullet after routing.
+- Plan: add/update items in worklist or backlog (write).
+- Focus: set an item active and mark in_progress (write).
+- Promote: create per-file doc and annotate list entry (write).
+- Decide: create ADR + index entry (write).
+- Handoff: append session summary (write).
+- Iterate: bootstrap or archive iteration (write).
+
+## Conflict Resolution
+If worklist and a per-item file disagree, the worklist wins; sync the per-item file to match.
+
+## Priorities When Summarizing
+1) iterations/current/index.md
+2) iterations/current/features.md
+3) active/focus.md
+4) active/session.md
+5) per-item files if promoted: true
+6) ADRs only if needed for decision context
 
 ## Response Contract
-**Success**
-- One sentence summary
-- Paths touched (bulleted, relative)
-- Next actions (1–3 bullets)
-
-**Failure**
-- What failed (one sentence)
-- Likely cause(s) (1–2 bullets)
-- Exact next step
+Success: short summary, paths touched, next 1–3 actions
+Failure: what failed, likely cause(s), exact next step
 
 ## Safety
-- Only touch files in Scope.
-- Do not introduce new statuses/fields without ADR.
+- Only touch files in workflow scope.
+- Do not introduce new statuses/fields without an ADR.
 - If a required file is missing, create the minimal valid file per schema; never silently skip.
+

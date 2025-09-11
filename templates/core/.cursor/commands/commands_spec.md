@@ -1,12 +1,12 @@
 schema: guide.v1
-title: “Docflow Commands — Draft Spec”
-project: “{{PROJECT_NAME}}”
-owner: “{{OWNER}}”
+title: "Docflow Commands - Draft Spec"
+project: "{{PROJECT_NAME}}"
+owner: "{{OWNER}}"
 version: 1
 
-Docflow Commands — Draft Spec
+Docflow Commands - Draft Spec
 
-This doc defines candidate commands to align with the Docflow operations and the future CLI/agent plan. It does not enforce behavior in rules; it’s a design surface we will finalize together.
+This doc defines candidate commands to align with the Docflow operations and the future CLI/agent plan. It does not enforce behavior in rules; it's a design surface we will finalize together.
 
 Operations ↔ Command Candidates
 - Discover → df:start (summary of goal, priorities, blockers)
@@ -20,7 +20,7 @@ Operations ↔ Command Candidates
 
 CLI Parity (planned)
 
-docflow init  –pack nextjs-convex
+docflow init  --pack nextjs-convex
 docflow scan 
 docflow promote 
 docflow status

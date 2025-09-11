@@ -44,3 +44,9 @@ checks:
     applies_to: [docflow/inbox/capture.md]
     description: Inbox should show recent activity; consider triage if stale.
     fix: false
+  - id: worklist-peritem-sync
+    title: Per-item files mirror worklist status
+    severity: warn
+    applies_to: [docflow/items/**, docflow/bugs/**, docflow/spikes/**]
+    description: If a per-item file status differs from the worklist entry, sync to the worklist (source of truth).
+    fix: false
