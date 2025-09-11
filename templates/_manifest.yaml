@@ -10,6 +10,8 @@ shared:
   ignore:
     - "**/.DS_Store"
     - "**/*.mdfrag"
+    - "templates/core/.cursor/rules/docflow.mdc"
+    - "templates/core/.cursor/rules/docflow.builder.mdc"
 template_extensions: [".md", ".mdx", ".yml", ".yaml", ".json", ".mdc", ".ts", ".tsx", ".js"]
 tokens:
   required: ["PROJECT_NAME","PROJECT_SLUG"]

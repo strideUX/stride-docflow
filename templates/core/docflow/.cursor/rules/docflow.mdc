@@ -1,0 +1,111 @@
+---
+description: "Docflow — Workflow Rules (runtime projects)"
+globs:
+  include:
+    - "docflow/**"
+    - ".cursor/**"
+alwaysApply: true
+---
+# Docflow Workflow Rules (Runtime)
+
+Modifying this ruleset requires an accepted ADR recorded under docflow/decisions/.
+
+## Workflow Scope
+Read/write rules in this document apply only to workflow artifacts:
+- docflow/**
+- .cursor/**
+This ruleset governs how we capture/plan/handoff and how those files are edited. It does not prohibit normal application code edits outside these paths.
+
+## Code Edits Outside Scope
+Code changes outside the workflow paths are allowed during development (e.g., src/**, app/**, convex/**). Follow the applicable stack's pack standards (see docflow/project/architecture.md → Stack Standards). Do not apply the workflow edit constraints (promotion policy, status machine) to code files.
+
+## Vocabulary & IDs
+- Status: pending → in_progress → in_review → completed
+- Types: feature (F###), chore (C###), bug (B###), spike (S###)
+- ADR: ADR-YYYY-MM-DD-NN-slug
+- Iterations: `docflow/iterations/current/` then archived as `docflow/iterations/NN/` (zero-padded)
+
+## File Topology (authoritative locations)
+- Router:            `docflow/iterations/current/index.md`
+- Worklist (truth):  `docflow/iterations/current/features.md`
+- Backlog:           `docflow/backlog/features.md`
+- Inbox:             `docflow/inbox/capture.md`
+- Active focus:      `docflow/active/focus.md`
+- Session handoff:   `docflow/active/session.md`
+- Items (promoted):  `docflow/items/<ID>-<slug>.md`
+- Bugs:              `docflow/bugs/<ID>-<slug>.md`
+- Spikes:            `docflow/spikes/<ID>-<slug>.md`
+- Notes:             `docflow/notes/YYYY-MM-DD.md`
+- ADR index/docs:    `docflow/decisions/README.md` + `docflow/decisions/<ADR-ID>.md`
+
+> **Invariant**: An item exists either in the backlog or in the current worklist—never both.
+
+## Tokens & Front-matter
+- Preserve tokens: `{{PROJECT_NAME}} {{PROJECT_SLUG}} {{OWNER}} {{DATE}} {{ITER_NUM}} {{ID}} {{SLUG}}`
+- All docflow files must start with valid YAML front-matter; ASCII quotes only.
+
+## Status Machine (allowed transitions)
+- `pending → in_progress`
+- `in_progress → in_review`
+- `in_review → completed`
+- `in_review → in_progress`
+- `in_progress → pending`
+> Spike state in its own file: `pending ↔ in_progress ↔ concluded` (worklist status still uses the statuses above as needed).
+
+## Iteration Lifecycle
+- **Bootstrap**: if `iterations/current/` is missing, create:
+  - `index.md` (iteration.index.v1) with goal/outcomes/acceptance
+  - `features.md` (worklist.v1) with empty list
+  - `active/focus.md` and `active/session.md` (focus.v1 / session.v1)
+- **Work-in-progress**: keep the worklist small; prioritize P0; mark dependencies `[IDs]`.
+- **Archive**: move `current/` to `iterations/NN/` and create a fresh `current/`.
+
+## ID Allocation
+- Next ID per type = max(existing) + 1, zero-padded to 3 digits; never reuse.
+- IDs are **immutable**. Slugs may change, but if the slug changes you must update the file path to match (keep the same ID).
+
+## Promotion Policy
+- Start inline in worklist/backlog.
+- Promote to per-file when:
+  - body > ~80–120 lines, or
+  - needs deep context / multiple contributors, or
+  - needs acceptance criteria beyond a short inline block.
+- On promotion:
+  - create `docflow/items|bugs|spikes/<ID>-<slug>.md`,
+  - set `promoted: true` + `file: <relative path>` in the list entry.
+
+## Minimal Spike Policy
+- Purpose: container for exploration; no timebox required.
+- Creation: create `docflow/spikes/S###-<slug>.md` and add a worklist entry `{ id, type: spike, status, promoted: true, file }`.
+- Front-matter: `id, title, state (pending|in_progress|concluded), owner, links: []`.
+- Body: `# Title`, `## Notes`, `## Recommendation`, `## Follow-ups`.
+- Wrap: set `state: concluded`, and if applicable, create follow-up items (F###/C###) or an ADR.
+
+## Allowed Operations (command-agnostic)
+- **Discover**: summarize goals, top priorities, blockers (no writes).
+- **Capture**: append a dated note OR append an inbox line item (write).
+- **Route**: move an inbox line into backlog/worklist OR create a spike + worklist entry (write). Routing **removes** the original bullet from `docflow/inbox/capture.md` after it is moved/created.
+- **Plan**: add/update items in worklist or backlog (write).
+- **Focus**: set an item active and mark `in_progress` (write).
+- **Promote**: create per-file doc and annotate the list entry (write).
+- **Decide**: create ADR + index entry (write).
+- **Handoff**: append session summary (write).
+- **Iterate**: bootstrap or archive iteration (write).
+
+## Priorities When Summarizing ("Where are we?")
+1) `iterations/current/index.md`
+2) `iterations/current/features.md`
+3) `active/focus.md`
+4) `active/session.md`
+5) per-item files if `promoted: true`
+6) ADRs only if needed for decision context
+
+## Response Contract
+**Success**: short summary, paths touched, next 1–3 actions  
+**Failure**: what failed, likely cause(s), exact next step
+
+## Safety
+- Only touch files in workflow scope.
+- Do not introduce new statuses/fields without ADR.
+- If a required file is missing, create the minimal valid file per schema; never silently skip.
+- **Conflict resolution**: if the worklist entry and the per-item file disagree about status or metadata, treat the **worklist** as the source of truth and update the per-item file to match.
