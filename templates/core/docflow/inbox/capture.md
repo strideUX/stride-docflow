@@ -11,6 +11,7 @@ date: {{DATE}}
 - Promote to items/bugs/spikes/notes/ADRs as clarity emerges.
 
 ## New
+> When an item is routed to backlog/worklist/spike, **remove the original bullet** from this file.
 - [ ] TODO: …
 
 ## Triaged

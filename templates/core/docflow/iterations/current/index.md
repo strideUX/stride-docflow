@@ -5,6 +5,7 @@ project: {{PROJECT_NAME}}
 owner: {{OWNER}}
 status: in_progress
 iter: {{ITER_NUM}}
+docflow_template_version: "v0.1.0"
 ---
 
 # Current Iteration: {{PROJECT_NAME}}
