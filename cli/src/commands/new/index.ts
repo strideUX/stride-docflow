@@ -11,6 +11,8 @@ import {
 import { ensureEnv } from "../../core/env.js";
 import type { Complexity, Priority, ProjectSpec, SeedItem } from "../../core/types.js";
 import { inferSeedPlan, type InferSeedPlanInput } from "../../ai/client.js";
+import { detectEditor } from "../../ui/editor.js";
+import { printPlanSummary } from "../../ui/preview.js";
 
 type DeploymentChoice = "vercel" | "none" | "spike";
 
@@ -93,9 +95,15 @@ async function promptComplexity(current?: Complexity): Promise<Complexity | null
   return res as Complexity;
 }
 
-function openInEditorStub(_path?: string) {
+function previewOpenInEditor(): void {
+  const detected = detectEditor();
+  if (!detected) {
+    // eslint-disable-next-line no-console
+    console.log(pc.yellow("No editor detected. Set $VISUAL or $EDITOR."));
+    return;
+  }
   // eslint-disable-next-line no-console
-  console.log(pc.gray("(stub) Would open in editor"));
+  console.log(pc.gray(`(preview) Would run: ${detected} <tmpfile>`));
 }
 
 function reflowPlanStub(items: SeedItem[]): SeedItem[] {
@@ -310,14 +318,14 @@ export async function runNew(): Promise<NewPlanResult | void> {
         { value: "delete", label: "Delete item" },
         { value: "prio", label: "Change priority" },
         { value: "cx", label: "Change complexity" },
-        { value: "open", label: "Open in editor (stub)" },
+        { value: "open", label: "Open in editor" },
         { value: "done", label: "Done" },
       ],
     });
     if (isCancel(action) || action === "done") break;
 
     if (action === "open") {
-      openInEditorStub();
+      previewOpenInEditor();
     } else if (action === "rename") {
       const idx = await chooseItem(items, "Choose item to rename");
       if (idx == null) continue;
@@ -375,10 +383,10 @@ export async function runNew(): Promise<NewPlanResult | void> {
   const result: NewPlanResult = { spec, items, deps, packVersion };
 
   // Summarize and return to menu
+  printPlanSummary(spec);
   // eslint-disable-next-line no-console
   console.log(pc.green("\nPreview complete. Returning to menu..."));
   outro("");
 
   return result;
 }
-
