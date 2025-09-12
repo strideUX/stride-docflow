@@ -13,6 +13,9 @@ import type { Complexity, Priority, ProjectSpec, SeedItem } from "../../core/typ
 import { inferSeedPlan, type InferSeedPlanInput } from "../../ai/client.js";
 import { detectEditor } from "../../ui/editor.js";
 import { printPlanSummary } from "../../ui/preview.js";
+import { planFileWrites } from "../../generator/plan.js";
+import { buildTokens } from "../../generator/renderer.js";
+import { writeProject } from "../../generator/write.js";
 
 type DeploymentChoice = "vercel" | "none" | "spike";
 
@@ -382,11 +385,34 @@ export async function runNew(): Promise<NewPlanResult | void> {
 
   const result: NewPlanResult = { spec, items, deps, packVersion };
 
-  // Summarize and return to menu
+  // Summarize
   printPlanSummary(spec);
-  // eslint-disable-next-line no-console
-  console.log(pc.green("\nPreview complete. Returning to menu..."));
-  outro("");
 
+  // Plan writes (dry run)
+  const tokens = buildTokens({
+    projectName: spec.meta.projectName,
+    projectSlug: spec.meta.projectSlug,
+    owner: spec.meta.owner,
+    platform: spec.meta.platform,
+    packName: spec.meta.packName,
+    packVersion: spec.meta.packVersion,
+    iterNum: spec.iteration.iterNum,
+  });
+  const dstRoot = `${env.DOCFLOW_ROOT}/${spec.meta.projectSlug}`;
+  const planned = await planFileWrites(tokens, { dstRoot, packName });
+  // eslint-disable-next-line no-console
+  console.log(pc.bold("\nPlanned writes (dry run):"));
+  planned.forEach((p) => console.log(pc.dim("  "), p));
+
+  // Stubbed confirm — set to false to avoid mutating filesystem by default
+  const shouldWrite = await confirm({ message: "Write files now?", initialValue: false });
+  if (!isCancel(shouldWrite) && shouldWrite) {
+    await writeProject({ env, spec, items, deps });
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(pc.yellow("\nSkipped write (preview only)."));
+  }
+
+  outro("");
   return result;
 }
