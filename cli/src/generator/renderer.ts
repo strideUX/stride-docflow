@@ -51,6 +51,7 @@ export function renderPath(p: string, tokens: TokenMap): string {
 export async function copyAndRenderDir(srcDir: string, dstDir: string, tokens: TokenMap): Promise<string[]> {
   const written: string[] = [];
   const exTokens = extendTokens(tokens);
+  const dstRoot = path.resolve(dstDir);
 
   async function walk(rel: string) {
     const abs = path.join(srcDir, rel);
@@ -59,7 +60,14 @@ export async function copyAndRenderDir(srcDir: string, dstDir: string, tokens: T
       const srcRel = path.join(rel, ent.name);
       const renderedRel = renderString(srcRel, exTokens);
       const srcAbs = path.join(srcDir, srcRel);
-      const dstAbs = path.join(dstDir, renderedRel);
+      const dstAbs = path.resolve(dstDir, renderedRel);
+
+      // Ensure we never write outside the dstRoot
+      const relToRoot = path.relative(dstRoot, dstAbs);
+      if (relToRoot.startsWith("..") || path.isAbsolute(relToRoot)) {
+        // Skip any path that would escape the destination root
+        continue;
+      }
 
       if (ent.isDirectory()) {
         await fsp.mkdir(dstAbs, { recursive: true });
@@ -69,6 +77,14 @@ export async function copyAndRenderDir(srcDir: string, dstDir: string, tokens: T
         const data = await fsp.readFile(srcAbs, "utf8");
         const rendered = renderString(data, exTokens);
         await fsp.mkdir(path.dirname(dstAbs), { recursive: true });
+        // Never overwrite existing files
+        try {
+          await fsp.access(dstAbs);
+          // File exists; skip writing
+          continue;
+        } catch {
+          // Does not exist; safe to write
+        }
         await fsp.writeFile(dstAbs, rendered, { mode: st.mode });
         try {
           await fsp.chmod(dstAbs, st.mode);
@@ -96,4 +112,3 @@ export function resolveAssetsSubdir(sub: string): string {
   // Fallback to cwd resolve
   return path.resolve(process.cwd(), "cli/assets", sub);
 }
-
