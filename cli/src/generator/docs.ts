@@ -35,8 +35,8 @@ export async function writeCheatSheetReadme(dstRoot: string, tokens: TokenMap): 
     "Quick actions for humans and agents. Keep docs small and up to date.",
     "",
     "## Slash Commands",
-    "- /cap: capture to inbox (docflow/inbox/capture.md)",
-    "- /route: move from inbox → items | bugs | spikes | backlog",
+    "- /note: capture to inbox (docflow/inbox/capture.md)",
+    "- /review: route inbox → backlog | worklist | spike",
     "- /promote: create per-item file (items/F###-slug.md, bugs/B###-slug.md, spikes/S###-slug.md)",
     "- /status <id> <state>: set status (pending|in_progress|in_review|completed)",
     "- /focus: open today's focus (docflow/active/focus.md)",
@@ -398,4 +398,3 @@ export async function writeAgentsDocs(dstRoot: string, tokens: TokenMap): Promis
   out.push(mem);
   return out;
 }
-

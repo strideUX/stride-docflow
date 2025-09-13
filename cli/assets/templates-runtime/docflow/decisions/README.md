@@ -3,7 +3,6 @@ schema: adr.index.v1
 id: decisions-index
 project: {{PROJECT_NAME}}
 owner: {{OWNER}}
-status: in_progress
 ---
 
 # Architecture Decision Records (ADRs)
@@ -20,4 +19,3 @@ status: in_progress
 Notes:
 - Keep ADRs concise and vendor-neutral where possible.
 - Link to `project/specs.md`, `project/architecture.md`, and relevant iteration items.
-

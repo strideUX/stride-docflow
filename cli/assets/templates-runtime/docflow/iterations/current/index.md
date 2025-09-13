@@ -3,7 +3,6 @@ schema: iteration.index.v1
 id: iteration-current
 project: {{PROJECT_NAME}}
 owner: {{OWNER}}
-status: in_progress
 iter: {{ITER_NUM}}
 docflow_template_version: "v0.1.0"
 ---
@@ -30,4 +29,3 @@ One or two sentences describing the primary outcome.
 - Criterion 1 (testable)
 - Criterion 2 (testable)
 - Criterion 3 (testable)
-

@@ -3,7 +3,6 @@ schema: session.v1
 id: session-{{DATE}}
 project: {{PROJECT_NAME}}
 owner: {{OWNER}}
-status: in_progress
 date: {{DATE}}
 ---
 
@@ -25,4 +24,3 @@ date: {{DATE}}
 
 ## Notes
 - Status flow: pending → in_progress → in_review → completed
-

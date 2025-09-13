@@ -41,7 +41,7 @@ Code changes outside workflow paths are allowed (e.g., src/**, app/**, convex/**
 > Invariant: An item lives either in the backlog or in the current worklist—never both.
 
 ## Tokens & Front-matter
-- Preserve tokens: {{PROJECT_NAME}} {{PROJECT_SLUG}} {{OWNER}} {{DATE}} {{ITER_NUM}} {{ID}} {{SLUG}}
+- Preserve tokens: {{PROJECT_NAME}} {{PROJECT_SLUG}} {{OWNER}} {{DATE}} {{ITER_NUM}} {{ID}} {{SLUG}} {{PLATFORM}} {{PACK_NAME}} {{PACK_VERSION}}
 - All docflow files start with valid YAML front-matter; ASCII quotes only.
 
 ## Status Machine
@@ -107,4 +107,3 @@ Failure: what failed, likely cause(s), exact next step
 - Only touch files in workflow scope.
 - Do not introduce new statuses/fields without an ADR.
 - If a required file is missing, create the minimal valid file per schema; never silently skip.
-

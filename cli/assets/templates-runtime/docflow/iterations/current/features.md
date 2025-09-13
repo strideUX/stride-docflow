@@ -3,7 +3,6 @@ schema: worklist.v1
 id: iteration-{{ITER_NUM}}-features
 project: {{PROJECT_NAME}}
 owner: {{OWNER}}
-status: in_progress
 statuses: [pending, in_progress, in_review, completed]
 summary:
   total: 0
@@ -25,4 +24,3 @@ This is the living worklist. Keep items scoped, statused, and linked to ADRs/not
 ## Guidance
 - Status flow: pending → in_progress → in_review → completed
 - Link ADRs in item body and/or `links` field.
-
