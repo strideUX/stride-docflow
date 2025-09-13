@@ -1,14 +1,6 @@
 import pc from "picocolors";
 import path from "node:path";
-import {
-  intro,
-  outro,
-  select,
-  text,
-  confirm,
-  isCancel,
-  cancel,
-} from "clack";
+import { intro, outro, select, text, confirm, isCancel, cancel } from "@clack/prompts";
 import { ensureEnv } from "../../core/env.js";
 import type { Complexity, Priority, ProjectSpec, SeedItem } from "../../core/types.js";
 import { inferSeedPlan, type InferSeedPlanInput } from "../../ai/client.js";

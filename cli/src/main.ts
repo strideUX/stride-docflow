@@ -5,7 +5,7 @@ import { runNew } from "./commands/new/index.ts";
 import { runStatus } from "./commands/status/index.ts";
 import { runHelp } from "./commands/help/index.ts";
 
-export async function main(_args: string[] = []) {
+export async function main(_args: string[] = []): Promise<void> {
   // Ensure environment before starting interactive loop
   try {
     ensureEnv();
@@ -45,4 +45,3 @@ export async function main(_args: string[] = []) {
     }
   }
 }
-

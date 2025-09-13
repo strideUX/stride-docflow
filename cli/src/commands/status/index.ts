@@ -2,7 +2,7 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import pc from "picocolors";
 import matter from "gray-matter";
-import { isCancel, text, cancel } from "clack";
+import { isCancel, text, cancel } from "@clack/prompts";
 
 type WorkItem = {
   id?: string;
@@ -358,4 +358,3 @@ export async function runStatus(): Promise<void> {
   // eslint-disable-next-line no-console
   console.log(lines.join("\n"));
 }
-

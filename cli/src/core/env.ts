@@ -1,6 +1,11 @@
 import process from "node:process";
 import pc from "picocolors";
 
+function truthyEnv(name: string): boolean {
+  const v = String(process.env[name] ?? "").trim().toLowerCase();
+  return v === "1" || v === "true" || v === "yes" || v === "y";
+}
+
 export type Provider = "openai" | "anthropic";
 
 export interface Env {
@@ -105,8 +110,20 @@ export function validateEnv(env: Env):
  */
 export function ensureEnv(): Env {
   const env = loadEnv();
+  // In smoke/dry-run mode, allow minimal env and provide sensible defaults.
+  if (truthyEnv("AI_DRY_RUN")) {
+    return {
+      DOCFLOW_ROOT: env.DOCFLOW_ROOT || `${process.cwd()}/docflow`,
+      AI_PROVIDER: (env.AI_PROVIDER || ("openai" as Provider)) as Provider,
+      AI_MODEL: env.AI_MODEL || "gpt-4o-mini",
+      AI_TEMPERATURE: env.AI_TEMPERATURE,
+      DOCFLOW_OWNER: env.DOCFLOW_OWNER,
+      OPENAI_API_KEY: env.OPENAI_API_KEY,
+      ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY,
+    };
+  }
+
   const res = validateEnv(env);
   if (res.ok) return env;
   throw new Error(res.message);
 }
-

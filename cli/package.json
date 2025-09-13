@@ -9,13 +9,14 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/bin/docflow.ts",
-    "lint": "eslint . --ext .ts,.tsx,.mts,.cts",
-    "format": "prettier --write ."
+    "lint": "node ./node_modules/eslint/bin/eslint.js . --ext .ts,.tsx,.mts,.cts",
+    "format": "prettier --write .",
+    "smoke": "npm run build && DOCFLOW_SMOKE=1 AI_DRY_RUN=true DOCFLOW_ROOT=\"$PWD/../docflow\" AI_PROVIDER=openai AI_MODEL=gpt-4o-mini node dist/bin/docflow.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
     "ai": "latest",
-    "clack": "latest",
+    "@clack/prompts": "latest",
     "fs-extra": "latest",
     "gray-matter": "latest",
     "openai": "latest",
@@ -29,6 +30,8 @@
     "prettier": "latest",
     "tsup": "latest",
     "tsx": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest"
   }
 }

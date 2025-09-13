@@ -17,7 +17,7 @@ import {
   writeProjectDocs,
 } from "./docs.js";
 import { writePromotedItem } from "./items.js";
-import { cancel, isCancel, select, text } from "clack";
+import { cancel, isCancel, select, text } from "@clack/prompts";
 
 export interface WriteProjectArgs {
   env: Env;
