@@ -5,6 +5,18 @@ import pc from "picocolors";
 import type { Env } from "../core/env.js";
 import type { ProjectSpec, SeedItem } from "../core/types.js";
 import { buildTokens, copyAndRenderDir, resolveAssetsSubdir } from "./renderer.js";
+import {
+  writeActiveSeeds,
+  writeAgentsDocs,
+  writeBacklogEmpty,
+  writeCheatSheetReadme,
+  writeDecisions,
+  writeInboxCapture,
+  writeIterationCurrent,
+  writePackSnapshot,
+  writeProjectDocs,
+} from "./docs.js";
+import { writePromotedItem } from "./items.js";
 import { cancel, isCancel, select, text } from "clack";
 
 export interface WriteProjectArgs {
@@ -123,6 +135,28 @@ export async function writeProject({ env, spec }: WriteProjectArgs): Promise<Wri
   const written = await copyAndRenderDir(templatesRoot, dstRoot, tokens);
   wrote.push(...written);
 
+  // Override / seed specific docs per request
+  {
+    const p = await writeCheatSheetReadme(dstRoot, tokens);
+    wrote.push(p);
+    const a = await writeActiveSeeds(dstRoot, tokens);
+    wrote.push(...a);
+    const i = await writeInboxCapture(dstRoot, tokens);
+    wrote.push(i);
+    const it = await writeIterationCurrent(dstRoot, tokens);
+    wrote.push(...it);
+    const b = await writeBacklogEmpty(dstRoot);
+    wrote.push(b);
+    const d = await writeDecisions(dstRoot, tokens);
+    wrote.push(...d);
+    const pj = await writeProjectDocs(dstRoot, tokens);
+    wrote.push(...pj);
+    const as = await writeAgentsDocs(dstRoot, tokens);
+    wrote.push(...as);
+    const snap = await writePackSnapshot(dstRoot, tokens);
+    wrote.push(snap);
+  }
+
   // Write pack stack.md → docflow/project/stack.md
   const stackSrc = path.join(resolveAssetsSubdir("packs"), spec.meta.packName, "stack.md");
   try {
@@ -140,6 +174,17 @@ export async function writeProject({ env, spec }: WriteProjectArgs): Promise<Wri
     }
   } catch {
     // optional
+  }
+
+  // Write per-item docs (promoted files)
+  try {
+    const items = spec.iteration.seedItems;
+    for (let i = 0; i < items.length; i++) {
+      const f = await writePromotedItem(dstRoot, tokens, items[i], i);
+      wrote.push(f);
+    }
+  } catch {
+    // non-fatal
   }
 
   // Write env example (pack/auth specific – simplified by platform)
