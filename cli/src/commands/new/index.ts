@@ -1,4 +1,5 @@
 import pc from "picocolors";
+import path from "node:path";
 import {
   intro,
   outro,
@@ -400,17 +401,40 @@ export async function runNew(): Promise<NewPlanResult | void> {
   });
   const dstRoot = `${env.DOCFLOW_ROOT}/${spec.meta.projectSlug}`;
   const planned = await planFileWrites(tokens, { dstRoot, packName });
+  // Final diff preview: planned count and top-level tree
   // eslint-disable-next-line no-console
-  console.log(pc.bold("\nPlanned writes (dry run):"));
-  planned.forEach((p) => console.log(pc.dim("  "), p));
+  console.log(pc.bold("\nFinal diff"));
+  // eslint-disable-next-line no-console
+  console.log(`${pc.bold("Planned writes:")} ${planned.length} files`);
+  // Build top-level entries from planned paths
+  const relPlanned = planned.map((p) => p.replaceAll(path.sep, "/").replace(`${dstRoot.replaceAll(path.sep, "/")}/`, ""));
+  const topMap = new Map<string, { dir: boolean }>();
+  for (const r of relPlanned) {
+    const slash = r.indexOf("/");
+    const top = slash === -1 ? r : r.slice(0, slash);
+    const isDir = slash !== -1;
+    const prev = topMap.get(top);
+    topMap.set(top, { dir: prev?.dir || isDir });
+  }
+  const topEntries = Array.from(topMap.entries())
+    .map(([name, info]) => (info.dir ? `${name}/` : name))
+    .sort((a, b) => a.localeCompare(b));
+  // eslint-disable-next-line no-console
+  console.log(pc.bold("Top-level tree:"));
+  // eslint-disable-next-line no-console
+  console.log(pc.cyan(`${spec.meta.projectSlug}/`));
+  topEntries.forEach((e) => {
+    // eslint-disable-next-line no-console
+    console.log(pc.dim("  "), e);
+  });
 
-  // Stubbed confirm — set to false to avoid mutating filesystem by default
-  const shouldWrite = await confirm({ message: "Write files now?", initialValue: false });
+  // Confirm generation
+  const shouldWrite = await confirm({ message: "Generate now?", initialValue: true });
   if (!isCancel(shouldWrite) && shouldWrite) {
     await writeProject({ env, spec, items, deps });
   } else {
-    // eslint-disable-next-line no-console
-    console.log(pc.yellow("\nSkipped write (preview only)."));
+    cancel("Cancelled");
+    return;
   }
 
   outro("");
