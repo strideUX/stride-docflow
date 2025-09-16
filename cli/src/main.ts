@@ -1,7 +1,7 @@
 import process from "node:process";
 import { ensureEnv } from "./core/env.ts";
 import { showMainMenu } from "./ui/menu.ts";
-import { runNew } from "./commands/new/index.ts";
+import { newProjectFlow } from "./program/newProject.ts";
 import { runStatus } from "./commands/status/index.ts";
 import { runHelp } from "./commands/help/index.ts";
 
@@ -32,7 +32,7 @@ export async function main(_args: string[] = []): Promise<void> {
 
     try {
       if (choice === "new") {
-        await runNew();
+        await newProjectFlow();
       } else if (choice === "status") {
         await runStatus();
       } else if (choice === "help") {
