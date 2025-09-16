@@ -12,6 +12,7 @@ export default defineConfig({
   shims: true,
   splitting: false,
   outDir: "dist",
+  banner: { js: "#!/usr/bin/env node" }, // add shebang so binary is executable
   outExtension({ format }) {
     return {
       js: format === "esm" ? ".mjs" : ".cjs",

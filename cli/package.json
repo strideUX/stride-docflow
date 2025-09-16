@@ -11,12 +11,15 @@
     "dev": "tsx src/bin/docflow.ts",
     "lint": "node ./node_modules/eslint/bin/eslint.js . --ext .ts,.tsx,.mts,.cts",
     "format": "prettier --write .",
-    "smoke": "npm run build && DOCFLOW_SMOKE=1 AI_DRY_RUN=true DOCFLOW_ROOT=\"$PWD/../docflow\" AI_PROVIDER=openai AI_MODEL=gpt-4o-mini node dist/bin/docflow.mjs"
+    "smoke": "npm run build && AI_DRY_RUN=true node dist/bin/docflow.mjs",
+    "postbuild": "chmod +x dist/bin/docflow.mjs || true"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
-    "ai": "latest",
     "@clack/prompts": "latest",
+    "ai": "latest",
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^10.0.0",
     "fs-extra": "latest",
     "gray-matter": "latest",
     "openai": "latest",
@@ -26,12 +29,12 @@
   },
   "devDependencies": {
     "@types/node": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
     "eslint": "latest",
     "prettier": "latest",
     "tsup": "latest",
     "tsx": "latest",
-    "typescript": "latest",
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest"
+    "typescript": "latest"
   }
 }
