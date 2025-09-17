@@ -1,8 +1,10 @@
 import * as clack from '@clack/prompts';
+import { showSplash } from '../ui/splash.js';
 
 export type MainChoice = 'new' | 'help' | 'exit';
 
 export async function showMainMenu(): Promise<MainChoice> {
+  await showSplash();
   clack.intro('🧭 DocFlow');
   const choice = await clack.select<{ value: MainChoice }>({
     message: 'What would you like to do?',

@@ -21,7 +21,9 @@
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
-    "picocolors": "^1.0.0"
+    "picocolors": "^1.0.0",
+    "figlet": "^1.7.0",
+    "gradient-string": "^2.0.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
