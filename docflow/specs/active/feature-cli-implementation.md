@@ -259,3 +259,4 @@ confirmation → generation (when user approves)
 - 2024-12-28: Using streaming for natural conversation feel
 - 2024-12-28: JSON structure for AI to generate specs programmatically
 - 2024-12-28: Separate prompts for different phases for better control
+- 2025-09-17: Initialized CLI scaffolding (entrypoint, config, conversation stub, types, prompts); removed invalid `@vercel/ai` dep in favor of `ai` SDK.

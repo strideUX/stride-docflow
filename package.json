@@ -1,0 +1,34 @@
+{
+  "name": "docflow-cli",
+  "version": "0.1.0",
+  "description": "AI-powered DocFlow project generator (conversational CLI)",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "docflow": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "prepare": "echo \"Ready\""
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "latest",
+    "@ai-sdk/openai": "latest",
+    "@clack/prompts": "^0.7.0",
+    "ai": "latest",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "fs-extra": "^11.2.0",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.5.4",
+    "tsup": "^8.1.0",
+    "tsx": "^4.15.7",
+    "typescript": "^5.6.2"
+  }
+}
+
