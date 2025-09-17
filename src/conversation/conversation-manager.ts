@@ -2,8 +2,8 @@ import { streamText } from 'ai';
 import * as clack from '@clack/prompts';
 import type { Config } from '../config/config.js';
 import { getModel } from '../ai/client.js';
-import type { ConversationState, ProjectContext } from '../types/conversation.js';
-import { SYSTEM_PROMPT } from '../prompts/system-prompts.js';
+import type { ConversationState, ProjectContext, GeneratedBundle } from '../types/conversation.js';
+import { SYSTEM_PROMPT, SPEC_GENERATION_PROMPT, buildSpecGenerationUserPrompt } from '../prompts/system-prompts.js';
 
 export class ConversationManager {
   private state: ConversationState;
@@ -54,6 +54,20 @@ export class ConversationManager {
     const stream = await streamText({ model: this.model, messages: [...this.state.messages, { role: 'user', content: prompt }] });
     const text = await stream.text;
     return text.trim().split(/\s+/)[0].replace(/[^a-z0-9-]/g, '').toLowerCase();
+  }
+
+  async generateSpecsBundle(): Promise<GeneratedBundle> {
+    const contextJson = JSON.stringify(this.state.context);
+    const user = buildSpecGenerationUserPrompt(contextJson);
+    const stream = await streamText({
+      model: this.model,
+      system: SPEC_GENERATION_PROMPT,
+      messages: [...this.state.messages, { role: 'user', content: user }],
+    });
+    const raw = await stream.text;
+    const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '');
+    const parsed = JSON.parse(cleaned) as GeneratedBundle;
+    return parsed;
   }
 }
 

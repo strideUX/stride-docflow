@@ -31,4 +31,13 @@ Format as JSON with the structure:
 }
 `;
 
+export function buildSpecGenerationUserPrompt(contextJson: string): string {
+  return [
+    'Using the conversation so far, produce a JSON payload strictly matching the schema in the system prompt.',
+    'Only output JSON. No preface, no backticks.',
+    'Context:',
+    contextJson,
+  ].join('\n');
+}
+
 

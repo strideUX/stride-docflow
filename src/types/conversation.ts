@@ -42,4 +42,11 @@ export interface ConversationState {
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
 }
 
+export interface GeneratedBundle {
+  overview: ProjectOverview;
+  stack: ProjectStack;
+  standards: string;
+  specs: ProjectSpecItem[];
+}
+
 

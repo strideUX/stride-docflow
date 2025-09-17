@@ -62,6 +62,22 @@ export async function startConversation(config: Config): Promise<void> {
     const generator = new ProjectGenerator();
     await generator.generate(context, projectPath, config.templateDir);
 
+    // Generate spec/context bundle via AI and confirm
+    const bundle = await manager.generateSpecsBundle();
+    const summary = [
+      `Name: ${name}`,
+      `Path: ${projectPath}`,
+      `Specs: ${bundle.specs.length}`,
+    ].join('\n');
+    s.stop('Project base created');
+    const confirm = await clack.confirm({ message: 'Review generated plan:\n\n' + summary + '\n\nProceed to write files?' });
+    if (!confirm) {
+      throw new Error('Cancelled by user at summary step');
+    }
+    s.start('Writing generated files...');
+    await generator.writeGeneratedFiles(bundle, projectPath);
+    s.stop('Files written');
+
     s.stop('Project created');
     clack.outro(`✅ Created ${name} at ${projectPath}`);
   } catch (error) {
