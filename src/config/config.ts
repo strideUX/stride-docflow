@@ -24,6 +24,10 @@ export async function loadConfig(): Promise<Config> {
     process.env.DOCFLOW_TEMPLATE_DIR || path.join(process.cwd(), 'src', 'assets', 'template', 'docflow')
   );
 
+  if (!process.env.AI_API_KEY) {
+    throw new Error('AI_API_KEY is required but not set. Please export AI_API_KEY and try again.');
+  }
+
   return {
     aiProvider: (process.env.AI_PROVIDER as Config['aiProvider']) || 'openai',
     apiKey: process.env.AI_API_KEY,

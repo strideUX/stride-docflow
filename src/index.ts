@@ -4,6 +4,7 @@ import 'dotenv/config';
 import * as clack from '@clack/prompts';
 import { loadConfig } from './config/config.js';
 import { startConversation } from './conversation/start-conversation.js';
+import { showHelp, showMainMenu } from './menu/main-menu.js';
 
 async function runNew(): Promise<void> {
   const config = await loadConfig();
@@ -22,14 +23,20 @@ program
     await runNew();
   });
 
-// If no command is provided, default to `new`
+// If no command is provided, show clack menu
 const args = process.argv.slice(2);
 if (args.length === 0) {
   (async () => {
     try {
-      await runNew();
+      const choice = await showMainMenu();
+      if (choice === 'new') {
+        await runNew();
+      } else if (choice === 'help') {
+        await showHelp();
+      }
+      // exit otherwise
     } catch (error) {
-      clack.outro('An error occurred starting the conversation.');
+      clack.outro('An error occurred.');
       process.exitCode = 1;
     }
   })();

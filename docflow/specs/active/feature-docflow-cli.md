@@ -9,17 +9,20 @@ I want to describe my project idea conversationally
 So that I can quickly scaffold a DocFlow project with well-thought-out specs
 
 ## Acceptance Criteria
-- [ ] Running `docflow` or `docflow new` starts an interactive AI session
-- [ ] AI engages in natural conversation to understand the project
+- [x] Running `docflow` with no args shows a Clack menu (New, Help, Exit)
+- [x] Running `docflow new` starts an interactive AI session
+- [ ] AI engages in natural conversation to understand the project (beyond intro)
 - [ ] AI asks clarifying questions based on the conversation context
 - [ ] AI helps refine vague ideas into concrete specs
-- [ ] AI generates all DocFlow structure files from templates
+- [ ] AI generates all DocFlow context/spec files from conversation
 - [ ] AI creates initial backlog items based on conversation
-- [ ] AI suggests project name based on discussion
-- [ ] User can override suggested name
-- [ ] Project folder created in configurable location
+- [x] AI suggests project name based on discussion
+- [x] User can override suggested name
+- [x] Project folder created in configurable location
 - [ ] Summary displayed before creation with confirm/edit option
-- [ ] Generated project ready to open in Cursor
+- [ ] Generated project ready to open in Cursor (including conversation-derived context/specs)
+- [x] Fail-fast if `AI_API_KEY` is missing (no manual fallback)
+- [x] Help option shows quick usage and environment variables
 
 ## Technical Notes
 
@@ -92,6 +95,10 @@ interface ConversationState {
 - Model: Configurable (default: gpt-4o or claude-3-opus)
 - Temperature: 0.7 for creative conversation
 - System prompt: Expert at software architecture and project planning
+
+## Progress
+- Implemented: default Clack menu; fail-fast on missing API key; intro conversation with streaming; project name suggestion; configurable paths; template copy with initialized tracking files.
+- Next: exploration/refinement phases; generate overview/stack/standards/specs from conversation; pre-generation summary/confirm.
 
 ### Environment Variables
 ```bash

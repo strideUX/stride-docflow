@@ -3,6 +3,17 @@
 ## Context
 Technical implementation details for the DocFlow CLI conversational interface.
 
+## Acceptance Criteria
+- [x] Default run shows Clack menu: New, Help, Exit
+- [x] `docflow new` initializes AI intro with streaming
+- [x] Fail-fast if `AI_API_KEY` is missing (no fallback)
+- [x] Model suggests kebab-case project name; user can override
+- [x] Project generation copies template and initializes tracking files
+- [ ] Exploration/refinement phases collect context and specs
+- [ ] Pre-generation summary with confirm/edit
+- [ ] Generate `docflow/context/*` and initial specs from conversation
+- [x] Help screen shows usage and environment variables
+
 ## Core Modules
 
 ### 1. Main Entry Point (`index.ts`)
@@ -27,11 +38,11 @@ program
   });
 ```
 
-### 2. Conversation Manager (`conversation.ts`)
+### 2. Conversation Manager (`conversation-manager.ts`)
 ```typescript
-import { createAI } from '@vercel/ai';
 import { streamText } from 'ai';
 import * as clack from '@clack/prompts';
+import { getModel } from '../ai/client';
 
 class ConversationManager {
   private context: ProjectContext;
@@ -152,7 +163,7 @@ export async function loadConfig(): Promise<Config> {
     apiKey: process.env.AI_API_KEY!,
     model: process.env.AI_MODEL || 'gpt-4o',
     projectsDir: process.env.DOCFLOW_PROJECTS_DIR || '~/Documents/Projects',
-    templateDir: process.env.DOCFLOW_TEMPLATE_DIR || path.join(__dirname, '../template')
+    templateDir: process.env.DOCFLOW_TEMPLATE_DIR || 'src/assets/template/docflow'
   };
 }
 ```
@@ -175,22 +186,30 @@ export async function loadConfig(): Promise<Config> {
     "@ai-sdk/anthropic": "latest",
     "@ai-sdk/openai": "latest", 
     "@clack/prompts": "^0.7.0",
-    "@vercel/ai": "latest",
     "ai": "latest",
-    "commander": "^11.0.0",
+    "commander": "^12.1.0",
     "dotenv": "^16.0.0",
     "fs-extra": "^11.0.0",
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.0.0",
     "tsup": "^8.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   }
 }
 ```
+
+## Dependencies
+- Runtime: Node.js (ESM), TypeScript (strict)
+- Libraries: `ai`, `@ai-sdk/openai`, `@ai-sdk/anthropic`, `@clack/prompts`, `commander`, `fs-extra`, `picocolors`, `dotenv`
+- Env: `AI_PROVIDER`, `AI_API_KEY` (required), `AI_MODEL`, `DOCFLOW_PROJECTS_DIR`, `DOCFLOW_TEMPLATE_DIR`
+
+## Progress
+- Implemented: menu, fail-fast, intro streaming, name suggestion, template copy, tracking file init, Help
+- Pending: exploration/refinement, spec/context file generation, summary confirm/edit
 
 ## Conversation Flow States
 
@@ -254,9 +273,17 @@ confirmation → generation (when user approves)
 5. **Flexible Override**: User can override any suggestion
 6. **Complete Generation**: Creates full DocFlow structure ready for Cursor
 
+## CLI UX
+
+- Running `docflow` with no arguments opens a Clack-powered menu:
+  - New: Start a new project conversation
+  - Help: Show quick usage and environment variables
+  - Exit: Quit
+
 ## Decision Log
 - 2024-12-28: Spec created for implementation
 - 2024-12-28: Using streaming for natural conversation feel
 - 2024-12-28: JSON structure for AI to generate specs programmatically
 - 2024-12-28: Separate prompts for different phases for better control
 - 2025-09-17: Initialized CLI scaffolding (entrypoint, config, conversation stub, types, prompts); removed invalid `@vercel/ai` dep in favor of `ai` SDK.
+- 2025-09-17: Enforce fail-fast: missing `AI_API_KEY` causes immediate error; no manual fallback workflow.
