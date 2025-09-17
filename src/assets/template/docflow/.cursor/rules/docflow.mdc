@@ -1,0 +1,175 @@
+---
+description: Outline of Docflow workflow and rules to follow.
+globs:
+alwaysApply: true
+---
+# DocFlow Workflow Rules
+
+## Context Loading Priority
+1. Always load: /docflow/context/overview.md
+2. Always load: /docflow/ACTIVE.md
+3. For current work: Load active spec from /docflow/specs/active/
+4. For technical details: Load /docflow/context/stack.md and standards.md
+5. For shared code: Load /docflow/shared/dependencies.md
+
+## Workflow Commands
+The following commands are available in `.cursor/commands/`:
+- `/start-session` - Begin work session, check status, start new work
+- `/wrap-session` - Save progress and checkpoint current work
+- `/capture` - Quickly capture new ideas/features/bugs to backlog
+- `/review` - Review and refine backlog items for active work
+
+Type `/` in chat to see and use these commands.
+
+## Conversational Command Triggers
+
+### Start Session Triggers
+When user says any of these, run `/start-session`:
+- "let's start" / "let's get started" / "let's begin"
+- "start a session" / "start my session" / "start work"
+- "what should I work on" / "what's next"
+- "begin work" / "begin my day"
+- "let's code" / "ready to code"
+- "what am I working on"
+- "resume work" / "continue working"
+- Opening a new conversation (suggest: "Would you like to /start-session?")
+
+### Wrap Session Triggers  
+When user says any of these, run `/wrap-session`:
+- "let's wrap" / "wrap it up" / "wrap up"
+- "I'm done" / "done for now" / "done for the day"
+- "stopping" / "taking a break" / "heading out"
+- "save progress" / "checkpoint"
+- "end session" / "close session"
+- "let's stop" / "time to stop"
+- "call it a day" / "that's it for now"
+- "pause work" / "pause here"
+
+### Capture Triggers
+When user says any of these, run `/capture`:
+- "capture that" / "let's capture" / "we should capture"
+- "add to backlog" / "save that idea"
+- "I have an idea" / "new idea"
+- "found a bug" / "there's a bug"
+- "we should add" / "let's add a feature"
+- "make a note" / "note this"
+- "remember to" / "don't forget"
+- "TODO" / "FIXME" (in conversation)
+- When user describes something that sounds like a feature/bug/idea, ask: "Should I /capture this?"
+
+### Review Triggers
+When user says any of these, run `/review`:
+- "review [item]" / "let's review"
+- "refine [item]" / "prepare [item]"
+- "is [item] ready" / "check [item]"
+- "look at backlog" / "check backlog"
+- "what needs work" / "what needs refinement"
+- "get [item] ready" / "prep [item]"
+- "audit backlog" / "clean up backlog"
+
+## Automatic Command Suggestions
+
+### Contextual Suggestions
+- **Empty ACTIVE.md + Items in backlog** → "I see you have items in backlog. Shall we /review one?"
+- **Completed all acceptance criteria** → "Looks like you've finished! Ready to /wrap-session?"
+- **Switching context** → "Before we switch, should we /wrap-session on current work?"
+- **Vague feature description** → "Interesting idea! Should I /capture this for later?"
+- **Multiple specs in active** → "You have multiple active items. Let's /start-session to focus on one?"
+
+### Natural Language Recognition
+When detecting these patterns in conversation:
+- **"That would be cool if..."** → Suggest /capture as idea
+- **"It's broken when..."** → Suggest /capture as bug  
+- **"We need to..."** → Suggest /capture as feature
+- **"The problem is..."** → Could be bug or feature, ask which to /capture
+- **"What if we..."** → Suggest /capture as idea
+
+## Before Creating ANY New Code
+
+### Check Existing Code
+1. Review /docflow/shared/dependencies.md for existing functionality
+2. For database: Check existing queries/mutations in codebase
+3. For Components: Check if similar component exists in /components
+4. For Utils: Check if utility function exists in /lib
+
+### If Creating New Shared Code
+1. Add entry to /docflow/shared/dependencies.md immediately
+2. Note which feature/bug created it
+3. Document who uses it
+
+## When Working on Specs
+
+### Starting New Work
+1. Spec must exist in /docflow/specs/active/
+2. Update ACTIVE.md with current focus
+3. Review dependencies in the spec
+4. Create feature/bug branch matching spec name
+
+### During Implementation
+1. Update spec's Decision Log with key decisions and pivots
+2. Update Dependencies if new connections found
+3. Keep Acceptance Criteria current
+4. If blocked, note in spec and ACTIVE.md
+
+### Completing Work
+1. Verify all Acceptance Criteria met
+2. Update INDEX.md with completion
+3. Add final Decision Log entry with outcomes
+4. Move spec to /docflow/specs/complete/[YYYY-QQ]/
+5. Update ACTIVE.md to remove completed item
+
+## Code Principles
+- No duplicate database functions - expensive operations
+- No duplicate components - maintenance burden
+- Shared code goes in appropriate shared directories
+- Every shared item tracked in dependencies.md
+- Follow standards.md for all code conventions
+
+## Decision Documentation
+When making technical decisions, always update the Decision Log:
+- Architecture choices (why X over Y)
+- Scope changes (what was cut and why)
+- Performance trade-offs
+- Security considerations
+- Breaking changes
+- External dependencies added
+
+## Natural Capture During Work
+If user mentions something that could be a bug, feature, or idea during active work:
+1. Recognize it based on context clues
+2. Ask: "That sounds like a [type]. Should I /capture this?"
+3. If yes, run capture command with quick capture format
+4. Continue with current work without context switching
+
+## Status Awareness
+Always be aware of:
+- What's currently active (ACTIVE.md)
+- What's in the backlog (INDEX.md)
+- What's blocking progress (check specs)
+- What decisions need to be made (check Decision Logs)
+
+## Response Patterns
+Before creating code, always state:
+"Let me check dependencies.md for existing [functionality]..."
+
+When finding existing code:
+"Found existing [component/function] in dependencies.md that handles this"
+
+When creating new shared code:
+"Creating new [component/function]. I'll add this to dependencies.md"
+
+## Command Execution Patterns
+When recognizing a trigger phrase:
+1. Acknowledge the intent: "Let me help you [start/wrap/capture/review]..."
+2. Execute the appropriate command
+3. Follow the command's checklist completely
+4. Confirm completion
+
+Never say "you should run /command" - instead, recognize the intent and run it directly.
+
+## Maintain Consistency
+- Always follow patterns in stack.md
+- Always follow conventions in standards.md
+- Always update decision logs with reasoning
+- Always keep ACTIVE.md current
+- Recognize natural language and execute commands accordingly
