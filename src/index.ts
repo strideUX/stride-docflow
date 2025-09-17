@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander';
 import 'dotenv/config';
+import { reportError } from './utils/errors.js';
 import * as clack from '@clack/prompts';
 import { loadConfig } from './config/config.js';
 import { startConversation } from './conversation/start-conversation.js';
@@ -20,7 +21,11 @@ program
   .command('new')
   .description('Start a new project conversation')
   .action(async () => {
-    await runNew();
+    try {
+      await runNew();
+    } catch (error) {
+      reportError(error, 'CLI');
+    }
   });
 
 // If no command is provided, show clack menu

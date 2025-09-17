@@ -4,6 +4,7 @@ import type { Config } from '../config/config.js';
 import { getModel } from '../ai/client.js';
 import type { ConversationState, ProjectContext, GeneratedBundle } from '../types/conversation.js';
 import { SYSTEM_PROMPT, SPEC_GENERATION_PROMPT, buildSpecGenerationUserPrompt } from '../prompts/system-prompts.js';
+import { parseModelJson } from '../utils/json.js';
 
 export class ConversationManager {
   private state: ConversationState;
@@ -32,26 +33,18 @@ export class ConversationManager {
     if (clack.isCancel(userIdea)) throw new Error('Cancelled');
 
     this.state.messages.push({ role: 'user', content: userIdea });
-
-    const stream = await streamText({
-      model: this.model,
-      system: SYSTEM_PROMPT.replace('{context}', JSON.stringify(this.state.context)).replace('{phase}', this.state.phase),
-      messages: this.state.messages,
-    });
-
-    for await (const text of stream.textStream) {
-      process.stdout.write(text);
-    }
-
-    const result = await stream.response;
-    const content = await result.text();
-    this.state.messages.push({ role: 'assistant', content });
+    // Light summary only
+    const stream = await streamText({ model: this.model, messages: [...this.state.messages, { role: 'user', content: 'In one short paragraph, summarize my idea in plain language, then stop.' }] });
+    const summary = (await stream.text).trim();
+    // eslint-disable-next-line no-console
+    console.log('\n' + summary + '\n');
+    this.state.messages.push({ role: 'assistant', content: summary });
     this.state.phase = 'exploration';
   }
 
   async runExplorationLoop(rounds: number = 3): Promise<void> {
     for (let i = 0; i < rounds; i += 1) {
-      const prompt = 'Ask one clarifying question at a time. Keep it brief.';
+      const prompt = 'Ask ONE short clarifying question. No bullets, no extras.';
       const stream = await streamText({ model: this.model, messages: [...this.state.messages, { role: 'user', content: prompt }] });
       const question = (await stream.text).trim();
       // eslint-disable-next-line no-console
@@ -74,14 +67,9 @@ export class ConversationManager {
   async generateSpecsBundle(): Promise<GeneratedBundle> {
     const contextJson = JSON.stringify(this.state.context);
     const user = buildSpecGenerationUserPrompt(contextJson);
-    const stream = await streamText({
-      model: this.model,
-      system: SPEC_GENERATION_PROMPT,
-      messages: [...this.state.messages, { role: 'user', content: user }],
-    });
+    const stream = await streamText({ model: this.model, system: SPEC_GENERATION_PROMPT, messages: [...this.state.messages, { role: 'user', content: user }] });
     const raw = await stream.text;
-    const cleaned = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '');
-    const parsed = JSON.parse(cleaned) as GeneratedBundle;
+    const parsed = parseModelJson<GeneratedBundle>(raw);
     return parsed;
   }
 }
