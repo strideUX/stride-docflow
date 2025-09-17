@@ -6,6 +6,8 @@ import { Config } from '../config/config.js';
 import { ProjectGenerator } from '../generator/project-generator.js';
 import { ProjectContext } from '../types/conversation.js';
 import { ConversationManager } from './conversation-manager.js';
+import { reportError } from '../utils/errors.js';
+import { printAssistant } from '../ui/theme.js';
 
 export async function startConversation(config: Config): Promise<void> {
   clack.intro('🚀 DocFlow Project Creator');
@@ -13,6 +15,7 @@ export async function startConversation(config: Config): Promise<void> {
   // Conduct brief intro via AI and get suggested name
   const manager = new ConversationManager(config);
   await manager.runIntroduction();
+  await manager.runExplorationLoop(3);
   const suggested = await manager.suggestProjectName();
 
   const name = (await clack.text({
@@ -82,7 +85,8 @@ export async function startConversation(config: Config): Promise<void> {
     clack.outro(`✅ Created ${name} at ${projectPath}`);
   } catch (error) {
     s.stop('Failed');
-    throw error;
+    reportError(error, 'Project generation');
+    return;
   }
 }
 

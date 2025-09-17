@@ -49,6 +49,21 @@ export class ConversationManager {
     this.state.phase = 'exploration';
   }
 
+  async runExplorationLoop(rounds: number = 3): Promise<void> {
+    for (let i = 0; i < rounds; i += 1) {
+      const prompt = 'Ask one clarifying question at a time. Keep it brief.';
+      const stream = await streamText({ model: this.model, messages: [...this.state.messages, { role: 'user', content: prompt }] });
+      const question = (await stream.text).trim();
+      // eslint-disable-next-line no-console
+      console.log('\n' + question + '\n');
+      const answer = (await clack.text({ message: 'Your answer:' })) as unknown as string;
+      if (clack.isCancel(answer)) throw new Error('Cancelled');
+      this.state.messages.push({ role: 'assistant', content: question });
+      this.state.messages.push({ role: 'user', content: answer });
+    }
+    this.state.phase = 'refinement';
+  }
+
   async suggestProjectName(): Promise<string> {
     const prompt = 'Based on our conversation so far, suggest a concise kebab-case project name only.';
     const stream = await streamText({ model: this.model, messages: [...this.state.messages, { role: 'user', content: prompt }] });
