@@ -1,5 +1,18 @@
 # Coding Standards
 
+## Project Initialization Standards
+
+### Framework Setup Rules
+When initializing any project:
+1. **ALWAYS initialize in the current directory**
+2. **NEVER create nested project folders**
+3. **Use appropriate flags**:
+   - Next.js: `npx create-next-app@latest . --typescript`
+   - Expo: `npx create-expo-app . --template` or `--no-install`
+   - Vite: `npm create vite@latest . -- --template`
+4. **If framework creates subfolder, move contents up and delete folder**
+5. **Verify you're not nesting: pwd should show /projectname not /projectname/projectname**
+
 ## General Principles
 - **DRY**: Don't repeat yourself - check dependencies.md first
 - **Separation of Concerns**: UI, business logic, and data separate
