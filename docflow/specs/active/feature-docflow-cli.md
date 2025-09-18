@@ -11,11 +11,11 @@ So that I can quickly scaffold a DocFlow project with well-thought-out specs
 ## Acceptance Criteria
 - [x] Running `docflow` with no args shows a Clack menu (New, Help, Exit)
 - [x] Running `docflow new` starts an interactive AI session
-- [ ] AI engages in natural conversation to understand the project (beyond intro)
-- [ ] AI asks clarifying questions based on the conversation context
-- [ ] AI helps refine vague ideas into concrete specs
-- [ ] AI generates all DocFlow context/spec files from conversation
-- [ ] AI creates initial backlog items based on conversation
+- [x] AI engages in natural conversation to understand the project (enhanced prompts)
+- [x] AI asks clarifying questions based on the conversation context (phase-aware)
+- [x] AI helps refine vague ideas into concrete specs (validation system)
+- [x] AI generates all DocFlow context/spec files from conversation
+- [x] AI creates initial backlog items based on conversation
 - [x] AI suggests project name based on discussion
 - [x] User can override suggested name
 - [x] Project folder created in configurable location
