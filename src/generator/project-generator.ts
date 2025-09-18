@@ -34,23 +34,29 @@ export class ProjectGenerator {
     const ctxDir = path.join(projectPath, 'docflow', 'context');
     await fs.ensureDir(ctxDir);
 
+    const toStringArray = (value: unknown): string[] => {
+      if (Array.isArray(value)) return value.map((v) => String(v)).filter((s) => s.trim().length > 0);
+      if (typeof value === 'string') return [value];
+      return [];
+    };
+
     const overviewMd = [
       '# Project Overview',
       '',
       `## Name`,
-      bundle.overview.name || '',
+      (bundle.overview && bundle.overview.name) || '',
       '',
       '## Purpose',
-      bundle.overview.purpose,
+      (bundle.overview && bundle.overview.purpose) || '',
       '',
       '## Features',
-      ...(bundle.overview.features || []).map((f) => `- ${f}`),
+      ...toStringArray(bundle.overview && bundle.overview.features).map((f) => `- ${f}`),
       '',
       '## Users',
-      bundle.overview.users,
+      (bundle.overview && bundle.overview.users) || '',
       '',
       '## Success',
-      bundle.overview.success,
+      (bundle.overview && bundle.overview.success) || '',
       '',
     ].join('\n');
 
@@ -58,24 +64,26 @@ export class ProjectGenerator {
       '# Technology Stack',
       '',
       '## Frontend',
-      ...(bundle.stack.frontend || []).map((s) => `- ${s}`),
+      ...toStringArray(bundle.stack && bundle.stack.frontend).map((s) => `- ${s}`),
       '',
       '## Backend',
-      ...(bundle.stack.backend || []).map((s) => `- ${s}`),
+      ...toStringArray(bundle.stack && bundle.stack.backend).map((s) => `- ${s}`),
       '',
       '## Database',
-      ...(bundle.stack.database || []).map((s) => `- ${s}`),
+      ...toStringArray(bundle.stack && bundle.stack.database).map((s) => `- ${s}`),
       '',
       '## Infrastructure',
-      ...(bundle.stack.infrastructure || []).map((s) => `- ${s}`),
+      ...toStringArray(bundle.stack && bundle.stack.infrastructure).map((s) => `- ${s}`),
       '',
     ].join('\n');
 
-    const standardsMd = bundle.standards;
+    const standardsMd = typeof bundle.standards === 'string' ? bundle.standards : String(bundle.standards ?? '');
 
     const specsDir = path.join(projectPath, 'docflow', 'specs', 'backlog');
     await fs.ensureDir(specsDir);
-    for (const spec of bundle.specs) {
+    const specs = Array.isArray(bundle.specs) ? bundle.specs : [];
+    for (const spec of specs) {
+      const safeName = String(spec.name || 'unnamed').toLowerCase().replace(/[^a-z0-9-]/g, '-');
       const filename = `${spec.type}-${spec.name}.md`;
       const specMd = [
         `# ${spec.type === 'feature' ? 'Feature' : spec.type === 'bug' ? 'Bug' : 'Idea'}: ${spec.name}`,
@@ -84,13 +92,13 @@ export class ProjectGenerator {
         spec.description,
         '',
         '## Acceptance Criteria',
-        ...spec.acceptance.map((a) => `- [ ] ${a}`),
+        ...toStringArray(spec.acceptance).map((a) => `- [ ] ${a}`),
         '',
         '## Priority',
-        String(spec.priority),
+        String(spec.priority ?? ''),
         '',
       ].join('\n');
-      await fs.outputFile(path.join(specsDir, filename), specMd);
+      await fs.outputFile(path.join(specsDir, `${spec.type}-${safeName}.md`), specMd);
     }
 
     await fs.outputFile(path.join(ctxDir, 'overview.md'), overviewMd);

@@ -70,7 +70,7 @@ export async function startConversation(config: Config): Promise<void> {
     const summary = [
       `Name: ${name}`,
       `Path: ${projectPath}`,
-      `Specs: ${bundle.specs.length}`,
+      `Specs: ${Array.isArray(bundle.specs) ? bundle.specs.length : 0}`,
     ].join('\n');
     s.stop('Project base created');
     const confirm = await clack.confirm({ message: 'Review generated plan:\n\n' + summary + '\n\nProceed to write files?' });

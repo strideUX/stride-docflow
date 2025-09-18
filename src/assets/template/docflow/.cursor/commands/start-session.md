@@ -12,6 +12,8 @@ Begin your work session by checking current progress and determining what to wor
 
 2. **Check Backlog** (if no active work)
    - Review INDEX.md for backlog items
+   - Check if project setup is complete
+   - If not, prioritize feature-project-setup/scaffold
    - Identify top priority item
    - Ask: "Ready to start on [item]? Let's review it first."
 

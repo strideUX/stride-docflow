@@ -99,6 +99,16 @@ When detecting these patterns in conversation:
 
 ## When Working on Specs
 
+### Project Initialization Rule
+EVERY new project must have `feature-project-setup` or `feature-scaffold` as the first spec. This establishes:
+- Development environment
+- Core dependencies
+- Basic project structure
+- Database/backend connections
+- Initial configuration
+
+No other features should be started until project setup is complete.
+
 ### Starting New Work
 1. Spec must exist in /docflow/specs/active/
 2. Update ACTIVE.md with current focus
