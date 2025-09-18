@@ -9,9 +9,9 @@ Technical implementation details for the DocFlow CLI conversational interface.
 - [x] Fail-fast if `AI_API_KEY` is missing (no fallback)
 - [x] Model suggests kebab-case project name; user can override
 - [x] Project generation copies template and initializes tracking files
-- [ ] Exploration/refinement phases collect context and specs
-- [ ] Pre-generation summary with confirm/edit
-- [ ] Generate `docflow/context/*` and initial specs from conversation
+- [x] Exploration/refinement phases collect context and specs
+- [x] Pre-generation summary with confirm/edit
+- [x] Generate `docflow/context/*` and initial specs from conversation
 - [x] Help screen shows usage and environment variables
 
 ## Core Modules
@@ -209,7 +209,7 @@ export async function loadConfig(): Promise<Config> {
 
 ## Progress
 - Implemented: menu, fail-fast, intro streaming, name suggestion, template copy, tracking file init, Help
-- Pending: exploration/refinement, spec/context file generation, summary confirm/edit
+- Implemented: exploration/refinement prompts, generation and file writing, summary confirm/edit
 
 ## Conversation Flow States
 
@@ -293,3 +293,21 @@ confirmation → generation (when user approves)
 - 2024-12-29: **IMPLEMENTED** Removed budget/timeline constraints as requested
 - 2025-09-17: Initialized CLI scaffolding (entrypoint, config, conversation stub, types, prompts); removed invalid `@vercel/ai` dep in favor of `ai` SDK.
 - 2025-09-17: Enforce fail-fast: missing `AI_API_KEY` causes immediate error; no manual fallback workflow.
+- 2025-09-18: Session checkpoint: increased exploration rounds to 5; enriched markdown; fixed template copying; removed nested `.cursor`.
+
+## Session Checkpoint - 2025-09-18
+### Accomplished
+- Exploration loop to 5 questions
+- Robust markdown generators (overview/stack/standards/specs)
+- Template copy constrained to `.cursor` and `docflow`
+
+### Next Steps
+- Add optional transcript logging
+- Expose rounds/model via flags or env
+- Improve spec templating with example-aligned snippets
+
+### Blockers
+- None
+
+### Questions
+- Which exact example sections should be mirrored vs adapted?

@@ -15,7 +15,7 @@ export async function startConversation(config: Config): Promise<void> {
   // Conduct brief intro via AI and get suggested name
   const manager = new ConversationManager(config);
   await manager.runIntroduction();
-  await manager.runExplorationLoop(3);
+  await manager.runExplorationLoop(5);
   const suggested = await manager.suggestProjectName();
 
   const name = (await clack.text({

@@ -19,8 +19,8 @@ So that I can quickly scaffold a DocFlow project with well-thought-out specs
 - [x] AI suggests project name based on discussion
 - [x] User can override suggested name
 - [x] Project folder created in configurable location
-- [ ] Summary displayed before creation with confirm/edit option
-- [ ] Generated project ready to open in Cursor (including conversation-derived context/specs)
+- [x] Summary displayed before creation with confirm/edit option
+- [x] Generated project ready to open in Cursor (including conversation-derived context/specs)
 - [x] Fail-fast if `AI_API_KEY` is missing (no manual fallback)
 - [x] Help option shows quick usage and environment variables
 
@@ -97,8 +97,8 @@ interface ConversationState {
 - System prompt: Expert at software architecture and project planning
 
 ## Progress
-- Implemented: default Clack menu; fail-fast on missing API key; intro conversation with streaming; project name suggestion; configurable paths; template copy with initialized tracking files.
-- Next: exploration/refinement phases; generate overview/stack/standards/specs from conversation; pre-generation summary/confirm.
+- Implemented: default Clack menu; fail-fast on missing API key; intro conversation with streaming; 5-round exploration; project name suggestion; configurable paths; template copy; generated context/specs; active `feature-project-setup`.
+- Next: enrich content templates further to match example; add "edit before confirm" UI; transcript logging.
 
 ### Environment Variables
 ```bash
@@ -196,3 +196,21 @@ Happy building! 🎉
 - 2024-12-28: Vercel AI SDK for provider flexibility (OpenAI, Anthropic, etc.)
 - 2024-12-28: Clack for minimal UI (spinners, confirms) while keeping focus on conversation
 - 2024-12-28: TypeScript for type safety with AI responses and project structure
+- 2025-09-18: Session checkpoint created; increased exploration rounds to 5; improved generated markdown depth; ensured only `.cursor` and `docflow` at project root.
+
+## Session Checkpoint - 2025-09-18
+### Accomplished
+- Implemented menu, conversation flow, generation, and file writing
+- Ensured `feature-project-setup` is first active spec
+- Improved markdown sections (overview/stack/standards/specs)
+
+### Next Steps
+- Align generated content closer to example template wording
+- Add summary edit step before writing files
+- Optional: save conversation transcript in `docflow/logs/`
+
+### Blockers
+- None currently
+
+### Questions
+- Any additional sections from the example you want mirrored verbatim?

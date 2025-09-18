@@ -1,10 +1,9 @@
 # Currently Active
 
 ## Primary Focus
-- feature-docflow-cli.md - Main conversational CLI feature
-- feature-cli-implementation.md - Technical implementation details
+- [None]
 
 ## Status
-Starting development of the DocFlow CLI tool that will generate DocFlow projects through AI conversation.
+Session wrapped. Current work completed and moved to `specs/complete/2025-Q3/`. Ready to start new work next session.
 
-Last Updated: 2024-12-28
+Last Updated: 2025-09-18

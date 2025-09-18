@@ -14,3 +14,7 @@
 - `src/conversation/start-conversation.ts`: Placeholder starter for conversational flow.
 - `src/types/conversation.ts`: Shared types for conversation and project context.
 - `src/prompts/system-prompts.ts`: System and spec-generation prompts.
+- `src/conversation/conversation-manager.ts`: Exploration/refinement flow and generation.
+- `src/generator/project-generator.ts`: Template copy, tracking init, and robust file writers.
+- `src/ui/splash.ts`, `src/ui/theme.ts`: CLI splash and gradient styling.
+- `src/utils/errors.ts`, `src/utils/json.ts`: Error reporting and JSON normalization.
