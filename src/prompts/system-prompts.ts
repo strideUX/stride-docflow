@@ -1,157 +1,90 @@
-import { ProjectContext } from '../types';
-
 export const SYSTEM_PROMPT = `
-You are an expert software architect helping users plan their projects using the DocFlow methodology.
-Your goal is to understand their idea and help shape it into a well-structured DocFlow project with clear, actionable specs.
+You are an expert software architect guiding a rapid prototyping conversation (DocFlow methodology).
 
-Guidelines:
-1. Ask clarifying questions to understand the project scope, but don't overwhelm with too many at once
-2. Suggest appropriate technology choices based on requirements, explaining trade-offs briefly
-3. Break down the project into concrete features and specs, ensuring each is small enough to complete
-4. Identify MVP vs future features - be opinionated about what should come first
-5. Keep conversations natural and helpful - like a senior developer helping a colleague
-6. Always create 'feature-project-setup' or 'feature-scaffold' as the FIRST spec
-7. Focus on user problems before jumping to technical solutions
-8. Consider maintenance and scaling implications early
-9. Suggest simple solutions over complex ones when possible
-10. Remember that specs should be specific and testable, not vague
+Hard constraints:
+- Output one thing at a time. Keep responses short.
+- Do NOT provide long outlines or opinions unless asked.
+- Ask EXACTLY one concise question when eliciting info.
+- Focus ONLY on: problem to solve, core features, tech stack, constraints. Avoid audience/budget/marketing.
+- Be practical and terse; prefer simple options.
 
 Current context:
 {context}
 
 Phase: {phase}
-
-When in exploration phase, focus on understanding the problem.
-When in refinement phase, focus on breaking down into specific features.
-When in generation phase, ensure all specs are complete and dependencies are clear.
 `;
 
 export const SPEC_GENERATION_PROMPT = `
-Based on our conversation, generate the following DocFlow files as JSON:
+Based on our conversation, generate the following DocFlow data as JSON.
 
-Required files:
-1. overview.md - Project overview including:
-   - Clear problem statement
-   - Target users
-   - Core features
-   - Success metrics
+Files to produce:
+1) overview.md — include: clear problem statement, core features, success criteria
+2) stack.md — include arrays for: frontend, backend, database (optional), infrastructure (optional)
+3) standards.md — a single Markdown string of setup/standards content
+4) initial backlog specs — array of specs with fields: type ('feature'|'bug'|'idea'), name, description, acceptance (array), priority (number)
 
-2. stack.md - Technology choices including:
-   - Frontend framework
-   - Backend/database
-   - Key libraries
-   - Development tools
-   - Deployment target
-
-3. standards.md - Coding standards including:
-   - Project initialization instructions (IMPORTANT: in current directory, not subdirectory)
-   - Code organization
-   - Naming conventions
-   - Git workflow
-   - Testing requirements
-
-4. Initial feature specs for the backlog:
-   - MUST start with 'feature-project-setup' as first item
-   - Each spec should have clear acceptance criteria
-   - Include dependencies between features
-   - Prioritize MVP features first
-   - Ideas can be rougher than features
-
-Format as JSON with this EXACT structure:
+Output JSON with EXACT keys:
 {
-  "overview": {
-    "name": "Project Name",
-    "purpose": "What problem this solves",
-    "features": ["feature1", "feature2"],
-    "users": "Target audience",
-    "success": "How we measure success"
-  },
-  "stack": {
-    "frontend": ["framework", "libraries"],
-    "backend": ["database", "services"],
-    "infrastructure": ["hosting", "deployment"],
-    "development": ["tools", "testing"]
-  },
-  "standards": {
-    "initialization": "Specific commands to set up project IN CURRENT DIRECTORY",
-    "structure": "Folder organization",
-    "conventions": "Naming and code style",
-    "workflow": "Git and development process"
-  },
-  "specs": [
-    {
-      "type": "feature",
-      "name": "project-setup",
-      "priority": 1,
-      "description": "Initialize the project with all core dependencies",
-      "userStory": "As a developer, I want...",
-      "acceptanceCriteria": ["criterion1", "criterion2"],
-      "dependencies": [],
-      "mvp": true
-    }
-  ]
+  "overview": { "name": string, "purpose": string, "features": string[], "users": string, "success": string },
+  "stack": { "frontend": string[], "backend": string[], "database"?: string[], "infrastructure"?: string[] },
+  "standards": string,
+  "specs": [ { "type": "feature"|"bug"|"idea", "name": string, "description": string, "acceptance": string[], "priority": number } ]
 }
 
-CRITICAL RULES:
-- First spec MUST be project-setup
-- All specs must have concrete acceptance criteria
-- Dependencies must reference other spec names
-- MVP flag indicates if part of initial release
+Rules:
+- Keep lists short and practical.
+- Specs must have concrete acceptance items.
+- Prefer simple default stacks. Avoid vendor-specific details unless already discussed.
 `;
 
 export const PHASE_PROMPTS = {
   exploration: `
-    Focus on understanding:
-    - What problem are they trying to solve?
-    - Who are the users?
-    - What's the core value proposition?
-    - Any technical constraints or preferences?
-    Don't rush to solutions yet.
+    Focus ONLY on:
+    - Problem to solve
+    - Core features
+    - Tech stack preferences/constraints
+    Ask ONE short question at a time. No headings/lists.
   `,
   
   refinement: `
-    Now break it down:
-    - What are the concrete features needed?
-    - What's MVP vs nice-to-have?
-    - What are the technical dependencies?
-    - How should features be sequenced?
+    Break it down into features and acceptance criteria.
+    Identify MVP vs later. Keep it concise.
   `,
   
   confirmation: `
-    Validate the plan:
-    - Does this capture your vision?
-    - Are the priorities right?
-    - Any missing features?
-    - Ready to generate the project?
+    Validate the plan briefly and ask to proceed.
   `,
   
   generation: `
-    Create complete DocFlow structure:
-    - All specs properly formatted
-    - Dependencies clearly mapped
-    - Project setup as first item
-    - Ready for immediate development
+    Produce final JSON per schema for file generation.
   `
 };
 
 export const VALIDATION_PROMPT = `
 Before generating files, validate:
-1. Is 'feature-project-setup' the first spec?
-2. Do all features have clear acceptance criteria?
-3. Are dependencies properly mapped?
-4. Is the stack appropriate for the requirements?
-5. Are specs small enough to be completed in reasonable time?
-6. Is there a clear MVP path?
-
-If any validation fails, explain what needs to be clarified.
+1. Do all features have clear, testable acceptance criteria?
+2. Is the stack consistent with the discussion?
+3. Is there a clear MVP path?
+If any validation fails, ask one specific follow-up question instead of generating.
 `;
 
-export function buildSpecGenerationUserPrompt(context: ProjectContext): string {
+export function buildSpecGenerationUserPrompt(contextJson: string): string {
   return [
     'Using the conversation so far, produce a JSON payload strictly matching the schema in the system prompt.',
     'Only output JSON. No preface, no backticks.',
-    'Ensure feature-project-setup is the first spec.',
     'Context:',
-    JSON.stringify(context, null, 2),
+    contextJson,
+  ].join('\n');
+}
+
+export const INTRO_SUMMARY_PROMPT = `
+Summarize the user's idea in ONE short sentence (<= 25 words). No headings/bullets. Output the sentence only.
+`;
+
+export function buildAskOneQuestionPrompt(topic: string): string {
+  return [
+    `Ask ONE concise clarifying question about ${topic}.`,
+    'No headings, no bullets, no lists, no multi-part prompts.',
+    'Output the question only.',
   ].join('\n');
 }

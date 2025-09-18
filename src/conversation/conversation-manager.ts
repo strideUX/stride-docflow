@@ -13,7 +13,9 @@ import {
   SPEC_GENERATION_PROMPT, 
   PHASE_PROMPTS,
   VALIDATION_PROMPT,
-  buildSpecGenerationUserPrompt 
+  buildSpecGenerationUserPrompt,
+  INTRO_SUMMARY_PROMPT,
+  buildAskOneQuestionPrompt,
 } from '../prompts/system-prompts.js';
 import { parseModelJson } from '../utils/json.js';
 
@@ -58,47 +60,38 @@ export class ConversationManager {
     if (clack.isCancel(userIdea)) throw new Error('Cancelled');
 
     this.state.messages.push({ role: 'user', content: userIdea });
-    
-    // Extract initial context from the idea
     this.state.context.problem = userIdea;
-    
-    // Get AI's understanding with phase-aware prompt
-    const systemPrompt = this.buildSystemPrompt('exploration');
+
+    // Short, single-sentence summary only
     const stream = await streamText({ 
-      model: this.model, 
-      system: systemPrompt,
-      messages: this.state.messages,
-      temperature: 0.7
+      model: this.model,
+      system: this.buildSystemPrompt('introduction'),
+      messages: [...this.state.messages, { role: 'user', content: INTRO_SUMMARY_PROMPT }],
+      temperature: 0.3,
     });
-    
-    const response = (await stream.text).trim();
-    console.log('\n' + response + '\n');
-    this.state.messages.push({ role: 'assistant', content: response });
+    const summary = (await stream.text).trim();
+    console.log('\n' + summary + '\n');
+    this.state.messages.push({ role: 'assistant', content: summary });
     this.state.phase = 'exploration';
   }
 
   async runExplorationLoop(rounds: number = 3): Promise<void> {
     const systemPrompt = this.buildSystemPrompt('exploration');
-    
     for (let i = 0; i < rounds; i += 1) {
-      const prompt = PHASE_PROMPTS.exploration + '\nAsk ONE focused question to understand the project better.';
+      const topic = i === 0 ? 'the core problem to solve' : i === 1 ? 'the core features' : 'the preferred tech stack';
+      const askOne = buildAskOneQuestionPrompt(topic);
       const stream = await streamText({ 
         model: this.model, 
         system: systemPrompt,
-        messages: [...this.state.messages, { role: 'user', content: prompt }],
-        temperature: 0.7
+        messages: [...this.state.messages, { role: 'user', content: askOne }],
+        temperature: 0.3,
       });
-      
       const question = (await stream.text).trim();
       console.log('\n' + question + '\n');
-      
       const answer = (await clack.text({ message: 'Your answer:' })) as unknown as string;
       if (clack.isCancel(answer)) throw new Error('Cancelled');
-      
       this.state.messages.push({ role: 'assistant', content: question });
       this.state.messages.push({ role: 'user', content: answer });
-      
-      // Update context based on conversation
       this.extractContextFromMessages();
     }
     
