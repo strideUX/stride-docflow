@@ -8,6 +8,7 @@ Save your progress and prepare for a clean resumption of work later.
 1. **Review Current Work**
    - Check all specs in /specs/active/
    - Identify what was accomplished this session
+   - If spec is complete, prepare to move to /specs/complete/[YYYY-QQ]/
 
 2. **Update Acceptance Criteria**
    - Mark any completed criteria with [x]
@@ -43,6 +44,14 @@ Save your progress and prepare for a clean resumption of work later.
 6. **Update Dependencies**
    - If new shared code was created, ensure it's in dependencies.md
    - Document any new connections discovered
+
+## Completion Process (if all criteria met)
+1. Verify all Acceptance Criteria checked
+2. Add final Decision Log entry
+3. Create quarter folder if needed (e.g., /specs/complete/2024-Q4/)
+4. PHYSICALLY MOVE spec from /specs/active/ to /specs/complete/[YYYY-QQ]/
+5. Update INDEX.md to show completion
+6. Clear from ACTIVE.md
 
 ## Confirmation
 "Session wrapped. Progress saved in [spec]. Ready to resume next time."

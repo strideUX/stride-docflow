@@ -24,7 +24,9 @@ Begin your work session by checking current progress and determining what to wor
    - Ask clarifying questions if needed
 
 4. **Activate Work**
-   - Move spec to /specs/active/
+   - PHYSICALLY MOVE spec file from /specs/backlog/ to /specs/active/
+   - Do NOT delete the original - use move/rename operation
+   - Verify file exists in /specs/active/ after move
    - Update ACTIVE.md with current focus
    - Update INDEX.md to reflect active status
    - Create feature/bug branch if needed

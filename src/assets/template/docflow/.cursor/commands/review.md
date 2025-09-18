@@ -50,7 +50,9 @@ Review and refine backlog items to prepare them for active development.
    Ask: "This looks ready for active work. Move to active? (Y/N)"
    
    If Yes:
-   - Move spec from /specs/backlog/ to /specs/active/
+   - PHYSICALLY MOVE spec file from /specs/backlog/ to /specs/active/
+   - Use file system move/rename operation (not copy+delete)
+   - Verify file exists in /specs/active/ after move
    - Update ACTIVE.md
    - Update INDEX.md
    - Confirm: "Moved [spec] to active. Ready to start implementation."

@@ -109,6 +109,14 @@ EVERY new project must have `feature-project-setup` or `feature-scaffold` as the
 
 No other features should be started until project setup is complete.
 
+### File Movement Operations
+When moving specs between folders (backlog → active → complete):
+1. **ALWAYS use file system move/rename operations**
+2. **NEVER delete and recreate files**
+3. **VERIFY file exists in new location after move**
+4. Example: Move `/specs/backlog/feature-x.md` to `/specs/active/feature-x.md`
+5. Preserve all content including decision logs
+
 ### Starting New Work
 1. Spec must exist in /docflow/specs/active/
 2. Update ACTIVE.md with current focus
@@ -116,10 +124,13 @@ No other features should be started until project setup is complete.
 4. Create feature/bug branch matching spec name
 
 ### During Implementation
-1. Update spec's Decision Log with key decisions and pivots
-2. Update Dependencies if new connections found
-3. Keep Acceptance Criteria current
-4. If blocked, note in spec and ACTIVE.md
+1. **Update spec's Acceptance Criteria as you complete each item**
+   - Mark completed items with [x] immediately after completion
+   - Add notes if any criteria was modified or skipped
+2. Update spec's Decision Log with key decisions and pivots
+3. Update Dependencies if new connections found
+4. Keep Acceptance Criteria current
+5. If blocked, note in spec and ACTIVE.md
 
 ### Completing Work
 1. Verify all Acceptance Criteria met
@@ -127,6 +138,23 @@ No other features should be started until project setup is complete.
 3. Add final Decision Log entry with outcomes
 4. Move spec to /docflow/specs/complete/[YYYY-QQ]/
 5. Update ACTIVE.md to remove completed item
+
+## Progress Tracking
+
+### Real-time Updates Required
+As you implement features, you MUST:
+1. **Check off Acceptance Criteria** - Mark with [x] as soon as completed
+2. **Update Decision Log** - Document choices as you make them
+3. **Note blockers immediately** - Don't wait until end of session
+4. **Keep specs live** - They're living documents, not static plans
+
+Example:
+```markdown
+## Acceptance Criteria
+- [x] Expo project created with TypeScript ✓ Done 12:30pm
+- [x] Convex backend initialized ✓ Done 12:45pm
+- [ ] React Navigation configured <- Currently working on this
+```
 
 ## Code Principles
 - No duplicate database functions - expensive operations

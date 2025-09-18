@@ -9,7 +9,8 @@ I want a properly configured development environment
 So that I can build features efficiently with all necessary tools in place
 
 ## Acceptance Criteria
-- [ ] Project initialized with [FRAMEWORK] and TypeScript
+- [ ] Project initialized IN CURRENT DIRECTORY (use . or --no-install flags)
+- [ ] DO NOT create nested project folder
 - [ ] [BACKEND/DATABASE] configured and connected
 - [ ] Basic folder structure created per standards.md
 - [ ] Environment variables configured (.env.local or similar)
