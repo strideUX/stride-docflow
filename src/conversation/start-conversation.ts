@@ -71,6 +71,12 @@ export async function startConversation(config: Config): Promise<void> {
       `Name: ${name}`,
       `Path: ${projectPath}`,
       `Specs: ${Array.isArray(bundle.specs) ? bundle.specs.length : 0}`,
+      '',
+      'Files to update:',
+      '- docflow/context/overview.md',
+      '- docflow/context/stack.md',
+      '- docflow/context/standards.md',
+      '- docflow/specs/backlog/*',
     ].join('\n');
     s.stop('Project base created');
     const confirm = await clack.confirm({ message: 'Review generated plan:\n\n' + summary + '\n\nProceed to write files?' });

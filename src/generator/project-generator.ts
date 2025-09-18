@@ -15,7 +15,28 @@ export class ProjectGenerator {
   }
 
   private async copyTemplates(projectPath: string, templateRoot: string): Promise<void> {
-    await fs.copy(templateRoot, projectPath, { overwrite: true, recursive: true });
+    const docflowSrc = path.join(templateRoot, 'docflow');
+    const cursorSrc = path.join(templateRoot, '.cursor');
+    const docflowDest = path.join(projectPath, 'docflow');
+    const cursorDest = path.join(projectPath, '.cursor');
+
+    // Only copy the intended directories
+    if (await fs.pathExists(docflowSrc)) {
+      await fs.copy(docflowSrc, docflowDest, { overwrite: true, recursive: true });
+    }
+    if (await fs.pathExists(cursorSrc)) {
+      await fs.copy(cursorSrc, cursorDest, { overwrite: true, recursive: true });
+    }
+
+    // Cleanup: remove any accidentally copied root-level folders from older templates
+    const strayContext = path.join(projectPath, 'context');
+    const straySpecs = path.join(projectPath, 'specs');
+    if (await fs.pathExists(strayContext)) {
+      await fs.remove(strayContext);
+    }
+    if (await fs.pathExists(straySpecs)) {
+      await fs.remove(straySpecs);
+    }
   }
 
   private async initializeTrackingFiles(context: ProjectContext, projectPath: string): Promise<void> {
