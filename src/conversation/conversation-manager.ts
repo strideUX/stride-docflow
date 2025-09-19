@@ -171,9 +171,10 @@ export class ConversationManager {
     }
     
     const user = buildSpecGenerationUserPrompt(this.state.context);
+    const generationSystem = this.buildSpecGenerationSystem();
     const stream = await streamText({ 
       model: this.model, 
-      system: SPEC_GENERATION_PROMPT, 
+      system: generationSystem, 
       messages: [...this.state.messages, { role: 'user', content: user }],
       temperature: 0.3 // Lower for structured output
     });
@@ -193,6 +194,21 @@ export class ConversationManager {
     }
     
     return parsed;
+  }
+
+  private buildSpecGenerationSystem(): string {
+    if (this.config.outputVerbosity === 'verbose') {
+      return [
+        SPEC_GENERATION_PROMPT,
+        '\nVerbosity mode: VERBOSE',
+        '- Write detailed, thorough content for all fields.',
+        '- For overview: include a richer purpose, 5-8 core features, and clearer success criteria.',
+        '- For standards: provide step-by-step setup, linting/formatting rules, testing strategy, and git workflow.',
+        '- For specs: provide 6-10 items of concrete acceptance criteria per spec, covering edge cases and negative paths.',
+        '- Prefer explicit steps, examples, and rationale where helpful.',
+      ].join('\n');
+    }
+    return SPEC_GENERATION_PROMPT;
   }
 
   private buildSystemPrompt(phase: string): string {

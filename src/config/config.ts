@@ -7,6 +7,8 @@ export interface Config {
   model: string;
   projectsDir: string;
   templateDir: string;
+  baseURL?: string;
+  outputVerbosity: 'concise' | 'verbose';
 }
 
 function expandHomeDirDir(inputPath: string): string {
@@ -34,6 +36,8 @@ export async function loadConfig(): Promise<Config> {
     model: process.env.AI_MODEL || 'gpt-4o',
     projectsDir,
     templateDir,
+    baseURL: process.env.AI_BASE_URL,
+    outputVerbosity: (process.env.AI_OUTPUT_VERBOSITY as 'concise' | 'verbose') || 'concise',
   };
 }
 

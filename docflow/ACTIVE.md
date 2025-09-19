@@ -1,9 +1,9 @@
 # Currently Active
 
 ## Primary Focus
-- [None]
+- Add env-based AI Gateway support and verbosity controls
 
 ## Status
-Session wrapped. Current work completed and moved to `specs/complete/2025-Q3/`. Ready to start new work next session.
+Gateway option added via `AI_BASE_URL` with namespaced models; Anthropic switching supported. Verbose generation mode added via `AI_OUTPUT_VERBOSITY`.
 
-Last Updated: 2025-09-18
+Last Updated: 2025-09-19

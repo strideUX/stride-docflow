@@ -18,6 +18,15 @@ AI_PROVIDER=openai         # openai | anthropic | groq (default: openai)
 AI_MODEL=gpt-4o            # model id for provider
 DOCFLOW_PROJECTS_DIR=~/Documents/Projects
 DOCFLOW_TEMPLATE_DIR=./src/assets/template/docflow
+# Verbosity (affects generated files detail level)
+AI_OUTPUT_VERBOSITY=verbose   # concise | verbose (default: concise)
+# If using Vercel AI Gateway as a central router, set a base URL and use namespaced models
+# Examples: openai/gpt-4o, anthropic/claude-3-5-sonnet-20240620, groq/llama-3.1-70b-versatile
+# When AI_BASE_URL is set, requests go through the Gateway via OpenAI-compatible transport.
+# You can switch providers by only changing AI_MODEL.
+AI_BASE_URL=https://api.ai-gateway.vercel.com/api/v1
+AI_MODEL=anthropic/claude-3-5-sonnet-20240620
+AI_API_KEY=vgw_xxx
 ```
 
 2) Install locally and link a `docflow` command
