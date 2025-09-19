@@ -12,6 +12,56 @@ alwaysApply: true
 4. For technical details: Load /docflow/context/stack.md and standards.md
 5. For shared code: Load /docflow/shared/dependencies.md
 
+## CRITICAL: File Movement Rules (MUST FOLLOW)
+
+### Rule 1: Always Move Files Atomically
+When moving specs between folders, ALWAYS:
+1. **Delete the source file FIRST**
+2. **Then create the destination file** 
+3. **NEVER copy without deleting** (this creates duplicates)
+
+### Rule 2: Update INDEX.md IMMEDIATELY
+Every time you move a spec file, update INDEX.md in the SAME operation:
+- Remove from old section (Active/Backlog/Completed)
+- Add to new section with status and date
+- Update priority order if needed
+
+### Rule 3: Update ACTIVE.md IMMEDIATELY  
+Every time you move a spec file, update ACTIVE.md in the SAME operation:
+- Remove completed items from Primary Focus/Secondary
+- Add new active items to Primary Focus/Secondary
+- Update Last Updated timestamp
+
+### Rule 4: Automatic File Movement Triggers
+Move specs automatically when these conditions are met:
+
+**Backlog → Active:**
+- When user says "start working on [spec]" or "activate [spec]"
+- When spec is referenced as current focus
+- When `/start-session` moves item to active
+
+**Active → Complete:**
+- When ALL acceptance criteria are marked complete [x]
+- When user says "done with [spec]" or "complete [spec]"
+- When `/wrap-session` completes an item
+- When user moves to different work
+
+**Complete Archiving:**
+- Move to /complete/YYYY-QQ/ at end of each quarter
+- Or immediately if explicitly requested
+
+### Rule 5: Prevent Duplicates
+- Before creating any spec file, check if it exists in ANY folder
+- If found, update existing file instead of creating new one
+- If moving, delete source before creating destination
+
+### Rule 6: Incremental Updates
+Update INDEX.md and ACTIVE.md immediately when:
+- Adding new specs to backlog
+- Moving specs between folders
+- Completing acceptance criteria
+- Starting/stopping work on items
+
 ## Workflow Commands
 The following commands are available in `.cursor/commands/`:
 - `/start-session` - Begin work session, check status, start new work
@@ -88,9 +138,8 @@ When detecting these patterns in conversation:
 
 ### Check Existing Code
 1. Review /docflow/shared/dependencies.md for existing functionality
-2. For database: Check existing queries/mutations in codebase
-3. For Components: Check if similar component exists in /components
-4. For Utils: Check if utility function exists in /lib
+2. For TypeScript: Check existing modules in /src
+3. For Utils: Check if utility function exists in /src/utils
 
 ### If Creating New Shared Code
 1. Add entry to /docflow/shared/dependencies.md immediately
@@ -99,24 +148,6 @@ When detecting these patterns in conversation:
 
 ## When Working on Specs
 
-### Project Initialization Rule
-EVERY new project must have `feature-project-setup` or `feature-scaffold` as the first spec. This establishes:
-- Development environment
-- Core dependencies
-- Basic project structure
-- Database/backend connections
-- Initial configuration
-
-No other features should be started until project setup is complete.
-
-### File Movement Operations
-When moving specs between folders (backlog → active → complete):
-1. **ALWAYS use file system move/rename operations**
-2. **NEVER delete and recreate files**
-3. **VERIFY file exists in new location after move**
-4. Example: Move `/specs/backlog/feature-x.md` to `/specs/active/feature-x.md`
-5. Preserve all content including decision logs
-
 ### Starting New Work
 1. Spec must exist in /docflow/specs/active/
 2. Update ACTIVE.md with current focus
@@ -124,43 +155,24 @@ When moving specs between folders (backlog → active → complete):
 4. Create feature/bug branch matching spec name
 
 ### During Implementation
-1. **Update spec's Acceptance Criteria as you complete each item**
-   - Mark completed items with [x] immediately after completion
-   - Add notes if any criteria was modified or skipped
-2. Update spec's Decision Log with key decisions and pivots
-3. Update Dependencies if new connections found
-4. Keep Acceptance Criteria current
-5. If blocked, note in spec and ACTIVE.md
+1. Update spec's Decision Log with key decisions and pivots
+2. Update Dependencies if new connections found
+3. Keep Acceptance Criteria current
+4. If blocked, note in spec and ACTIVE.md
 
 ### Completing Work
 1. Verify all Acceptance Criteria met
-2. Update INDEX.md with completion
+2. Update INDEX.md with completion date
 3. Add final Decision Log entry with outcomes
-4. Move spec to /docflow/specs/complete/[YYYY-QQ]/
-5. Update ACTIVE.md to remove completed item
-
-## Progress Tracking
-
-### Real-time Updates Required
-As you implement features, you MUST:
-1. **Check off Acceptance Criteria** - Mark with [x] as soon as completed
-2. **Update Decision Log** - Document choices as you make them
-3. **Note blockers immediately** - Don't wait until end of session
-4. **Keep specs live** - They're living documents, not static plans
-
-Example:
-```markdown
-## Acceptance Criteria
-- [x] Expo project created with TypeScript ✓ Done 12:30pm
-- [x] Convex backend initialized ✓ Done 12:45pm
-- [ ] React Navigation configured <- Currently working on this
-```
+4. **DELETE original file from /specs/active/**
+5. **CREATE new file in /specs/complete/[YYYY-QQ]/**
+6. Update ACTIVE.md to remove completed item
 
 ## Code Principles
-- No duplicate database functions - expensive operations
-- No duplicate components - maintenance burden
-- Shared code goes in appropriate shared directories
-- Every shared item tracked in dependencies.md
+- TypeScript strict mode always
+- No duplicate functions - use shared utilities
+- Modular architecture - small, focused modules
+- Every shared module tracked in dependencies.md
 - Follow standards.md for all code conventions
 
 ## Decision Documentation
@@ -191,10 +203,10 @@ Before creating code, always state:
 "Let me check dependencies.md for existing [functionality]..."
 
 When finding existing code:
-"Found existing [component/function] in dependencies.md that handles this"
+"Found existing [module/function] in dependencies.md that handles this"
 
 When creating new shared code:
-"Creating new [component/function]. I'll add this to dependencies.md"
+"Creating new [module/function]. I'll add this to dependencies.md"
 
 ## Command Execution Patterns
 When recognizing a trigger phrase:
@@ -210,4 +222,6 @@ Never say "you should run /command" - instead, recognize the intent and run it d
 - Always follow conventions in standards.md
 - Always update decision logs with reasoning
 - Always keep ACTIVE.md current
+- Always keep INDEX.md current
+- Always move files atomically (delete source, create destination)
 - Recognize natural language and execute commands accordingly

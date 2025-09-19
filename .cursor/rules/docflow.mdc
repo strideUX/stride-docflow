@@ -12,6 +12,56 @@ alwaysApply: true
 4. For technical details: Load /docflow/context/stack.md and standards.md
 5. For shared code: Load /docflow/shared/dependencies.md
 
+## CRITICAL: File Movement Rules (MUST FOLLOW)
+
+### Rule 1: Always Move Files Atomically
+When moving specs between folders, ALWAYS:
+1. **Delete the source file FIRST**
+2. **Then create the destination file** 
+3. **NEVER copy without deleting** (this creates duplicates)
+
+### Rule 2: Update INDEX.md IMMEDIATELY
+Every time you move a spec file, update INDEX.md in the SAME operation:
+- Remove from old section (Active/Backlog/Completed)
+- Add to new section with status and date
+- Update priority order if needed
+
+### Rule 3: Update ACTIVE.md IMMEDIATELY  
+Every time you move a spec file, update ACTIVE.md in the SAME operation:
+- Remove completed items from Primary Focus/Secondary
+- Add new active items to Primary Focus/Secondary
+- Update Last Updated timestamp
+
+### Rule 4: Automatic File Movement Triggers
+Move specs automatically when these conditions are met:
+
+**Backlog → Active:**
+- When user says "start working on [spec]" or "activate [spec]"
+- When spec is referenced as current focus
+- When `/start-session` moves item to active
+
+**Active → Complete:**
+- When ALL acceptance criteria are marked complete [x]
+- When user says "done with [spec]" or "complete [spec]"
+- When `/wrap-session` completes an item
+- When user moves to different work
+
+**Complete Archiving:**
+- Move to /complete/YYYY-QQ/ at end of each quarter
+- Or immediately if explicitly requested
+
+### Rule 5: Prevent Duplicates
+- Before creating any spec file, check if it exists in ANY folder
+- If found, update existing file instead of creating new one
+- If moving, delete source before creating destination
+
+### Rule 6: Incremental Updates
+Update INDEX.md and ACTIVE.md immediately when:
+- Adding new specs to backlog
+- Moving specs between folders
+- Completing acceptance criteria
+- Starting/stopping work on items
+
 ## Workflow Commands
 The following commands are available in `.cursor/commands/`:
 - `/start-session` - Begin work session, check status, start new work
@@ -112,10 +162,11 @@ When detecting these patterns in conversation:
 
 ### Completing Work
 1. Verify all Acceptance Criteria met
-2. Update INDEX.md with completion
+2. Update INDEX.md with completion date
 3. Add final Decision Log entry with outcomes
-4. Move spec to /docflow/specs/complete/[YYYY-QQ]/
-5. Update ACTIVE.md to remove completed item
+4. **DELETE original file from /specs/active/**
+5. **CREATE new file in /specs/complete/[YYYY-QQ]/**
+6. Update ACTIVE.md to remove completed item
 
 ## Code Principles
 - TypeScript strict mode always
@@ -171,4 +222,6 @@ Never say "you should run /command" - instead, recognize the intent and run it d
 - Always follow conventions in standards.md
 - Always update decision logs with reasoning
 - Always keep ACTIVE.md current
+- Always keep INDEX.md current
+- Always move files atomically (delete source, create destination)
 - Recognize natural language and execute commands accordingly
