@@ -8,16 +8,167 @@ alwaysApply: true
 ## Context Loading Priority
 1. Always load: /docflow/context/overview.md
 2. Always load: /docflow/ACTIVE.md
-3. For current work: Load active spec from /docflow/specs/active/
-4. For technical details: Load /docflow/context/stack.md and standards.md
-5. For shared code: Load /docflow/shared/dependencies.md
+3. **Check for status=REVIEW specs in /docflow/specs/active/ (for DocFlow agent)**
+4. For current work: Load active spec from /docflow/specs/active/
+5. For technical details: Load /docflow/context/stack.md and standards.md
+6. For shared code: Load /docflow/shared/dependencies.md
+
+## Status-Based Implementation Workflow
+
+### Status States
+Specs progress through these states:
+- **BACKLOG**: Spec exists but not yet ready for implementation
+- **READY**: DocFlow has prepared spec, ready for implementation agent
+- **IMPLEMENTING**: Implementation agent is actively working
+- **REVIEW**: Implementation complete, needs DocFlow review
+- **COMPLETE**: DocFlow approved, ready to archive
+
+### DocFlow Agent Responsibilities
+
+**When Creating/Preparing Specs:**
+1. Create specs with status=BACKLOG, AssignedTo=Unassigned initially
+2. When activating work (via /start-session), set status=READY
+3. Get developer username and set AssignedTo=@username:
+   - First try: `git config github.user`
+   - Fallback: `git config user.name`
+   - If neither available: use "Developer"
+4. If spec already assigned to someone else, warn user before proceeding
+5. Ensure all acceptance criteria are clear and testable
+6. Document patterns to follow in Technical Notes
+7. Set owner=Implementation
+8. Update ACTIVE.md and INDEX.md
+
+**When Reviewing Implementations (status=REVIEW):**
+1. Check for specs with status=REVIEW regularly (prioritize on session start)
+2. Load the spec and read Implementation Notes section
+3. Verify each acceptance criterion is met
+4. Check for unauthorized scope changes
+5. Verify compliance with /docflow/context/standards.md
+6. Fill out DocFlow Review section
+7. If approved:
+   - Set status=COMPLETE
+   - Update Decision Log with completion date
+   - Move to /specs/complete/YYYY-QQ/ (atomic: delete then create)
+   - Update ACTIVE.md and INDEX.md
+8. If changes needed:
+   - Add detailed notes in Review section
+   - Keep status=REVIEW
+   - Set owner=Implementation
+
+### Implementation Agent Responsibilities
+
+**On Startup:**
+1. Check /specs/active/ for any spec with status=READY
+2. **Filter by assignment:**
+   - Get current developer username (git config github.user || git config user.name || "Developer")
+   - If spec.AssignedTo = Unassigned: Available to work on
+   - If spec.AssignedTo = @currentUser: Available to work on
+   - If spec.AssignedTo = @otherUser: Skip, show as "Assigned to @otherUser"
+3. If multiple available, ask user which to work on or take highest priority
+4. If none available, report: "No work available. [X] specs assigned to others: [list with names]"
+5. Load spec completely into context
+6. Set status=IMPLEMENTING, owner=Implementation, update Last Updated
+
+**During Implementation:**
+1. Fill Implementation Notes section progressively
+2. Update acceptance criteria as completed: [ ] → [x]
+3. Document key decisions and why
+4. Note any deviations from original spec with justification
+5. Update Last Updated timestamp
+
+**On Completion:**
+1. Verify all acceptance criteria checked off
+2. Complete Implementation Notes section:
+   - All files changed
+   - Key implementation decisions
+   - Any deviations with justification
+   - Blockers encountered
+3. Run validation (TypeScript, tests, manual checks)
+4. Set status=REVIEW, owner=DocFlow
+5. Provide brief summary to user
+
+**On Blocker:**
+1. Document blocker in Implementation Notes
+2. Set status=REVIEW, owner=DocFlow (requires input)
+3. Explain what's blocking and what's needed
+
+### Workflow State Checks
+
+**For DocFlow Agent:**
+- On every interaction, check for status=REVIEW specs
+- Prioritize reviews before starting new work
+- When activating work, set status=READY
+
+**For Implementation Agent:**
+- On startup, check for status=READY specs
+- If none found, report "No work in queue"
+- Set status=IMPLEMENTING when starting
+- Set status=REVIEW when complete
 
 ## CRITICAL: File Movement Rules (MUST FOLLOW)
+
+### Rule 0: NEVER Create Root-Level Status Files
+**FORBIDDEN - These patterns are BANNED:**
+- ❌ Creating status files in project root (PHASE_*_STATUS.md, STATUS.md, PROGRESS.md)
+- ❌ Creating checklist files in project root (PHASE_*_CHECKLIST.md, CHECKLIST.md, TODO.md)
+- ❌ Creating any tracking files outside /docflow/ directory
+- ❌ Creating summary files in root (SUMMARY.md, NOTES.md, UPDATES.md)
+- ❌ Creating implementation summaries in root (*_SUMMARY.md, *_IMPLEMENTATION.md, *_REFACTOR.md)
+
+**REQUIRED - Always use DocFlow structure:**
+- ✅ All status updates → /docflow/ACTIVE.md
+- ✅ All spec details → /docflow/specs/[active|backlog|complete]/[spec-name].md
+- ✅ All decisions → spec's Decision Log section
+- ✅ All checklists → spec's Acceptance Criteria or Testing section
+- ✅ All notes → spec's Notes section or Decision Log
+
+**If you create a root-level status file, you are violating the DocFlow system.**
+
+**✨ WHEN COMPLETING WORK - YOU MUST DO ONE OF THESE:**
+
+**Option A: Small Changes/Fixes/Refactors**
+→ Add "Recently Completed" section to `/docflow/ACTIVE.md`
+
+Example format:
+```markdown
+## ✅ Recently Completed: [Name] (YYYY-MM-DD)
+
+**What Changed**: Brief description
+**Files Modified**: List of key files
+**Impact**: What improved
+**Decision Log**: Key decisions made
+
+### Implementation Details
+- Decision 1: Why we chose X
+- Decision 2: How we handled Y
+```
+
+**Option B: Large Features/Enhancements**
+→ Create spec in `/docflow/specs/active/[name].md`, work on it, move to `/complete/YYYY-QQ/`
+
+Required spec sections:
+- Problem statement
+- Solution approach
+- Implementation details
+- Decision Log (with dates)
+- Testing checklist
+- Success metrics
+
+**Option C: NEVER ALLOWED**
+→ ❌ Create SUMMARY.md, STATUS.md, NOTES.md, or any .md file in project root
+
+**Work Completion Checklist (BEFORE you say "done"):**
+- [ ] Updated `/docflow/ACTIVE.md` with completion entry OR
+- [ ] Created/moved spec in `/docflow/specs/complete/YYYY-QQ/` OR
+- [ ] Updated existing active spec's Decision Log
+- [ ] Updated `/docflow/INDEX.md` if spec was moved (same operation)
+- [ ] Deleted source spec file if moved (atomic move)
+- [ ] Did NOT create ANY .md files in project root
 
 ### Rule 1: Always Move Files Atomically
 When moving specs between folders, ALWAYS:
 1. **Delete the source file FIRST**
-2. **Then create the destination file** 
+2. **Then create the destination file**
 3. **NEVER copy without deleting** (this creates duplicates)
 
 ### Rule 2: Update INDEX.md IMMEDIATELY
@@ -26,7 +177,7 @@ Every time you move a spec file, update INDEX.md in the SAME operation:
 - Add to new section with status and date
 - Update priority order if needed
 
-### Rule 3: Update ACTIVE.md IMMEDIATELY  
+### Rule 3: Update ACTIVE.md IMMEDIATELY
 Every time you move a spec file, update ACTIVE.md in the SAME operation:
 - Remove completed items from Primary Focus/Secondary
 - Add new active items to Primary Focus/Secondary
@@ -84,7 +235,7 @@ When user says any of these, run `/start-session`:
 - "resume work" / "continue working"
 - Opening a new conversation (suggest: "Would you like to /start-session?")
 
-### Wrap Session Triggers  
+### Wrap Session Triggers
 When user says any of these, run `/wrap-session`:
 - "let's wrap" / "wrap it up" / "wrap up"
 - "I'm done" / "done for now" / "done for the day"
@@ -129,7 +280,7 @@ When user says any of these, run `/review`:
 ### Natural Language Recognition
 When detecting these patterns in conversation:
 - **"That would be cool if..."** → Suggest /capture as idea
-- **"It's broken when..."** → Suggest /capture as bug  
+- **"It's broken when..."** → Suggest /capture as bug
 - **"We need to..."** → Suggest /capture as feature
 - **"The problem is..."** → Could be bug or feature, ask which to /capture
 - **"What if we..."** → Suggest /capture as idea
@@ -138,12 +289,12 @@ When detecting these patterns in conversation:
 
 ### Check Existing Code
 1. Review /docflow/shared/dependencies.md for existing functionality
-2. For TypeScript: Check existing modules in /src
-3. For Utils: Check if utility function exists in /src/utils
+2. Check existing modules and utilities in the codebase
+3. Check if similar component or function exists
 
 ### If Creating New Shared Code
 1. Add entry to /docflow/shared/dependencies.md immediately
-2. Note which feature/bug created it
+2. Note which feature/spec created it
 3. Document who uses it
 
 ## When Working on Specs
@@ -152,7 +303,7 @@ When detecting these patterns in conversation:
 1. Spec must exist in /docflow/specs/active/
 2. Update ACTIVE.md with current focus
 3. Review dependencies in the spec
-4. Create feature/bug branch matching spec name
+4. Create feature branch matching spec name
 
 ### During Implementation
 1. Update spec's Decision Log with key decisions and pivots
@@ -170,8 +321,9 @@ When detecting these patterns in conversation:
 
 ## Code Principles
 - TypeScript strict mode always
-- No duplicate functions - use shared utilities
-- Modular architecture - small, focused modules
+- Follow existing patterns defined in /docflow/context/stack.md
+- No duplicate functions - check dependencies.md first
+- No duplicate components - check existing code first
 - Every shared module tracked in dependencies.md
 - Follow standards.md for all code conventions
 
